@@ -40,5 +40,7 @@ pub mod table;  // Public for Phase 3c
 pub mod table_detector;  // Public for Phase 3c
 pub mod image;  // Public for Phase 3d
 pub mod image_extractor;  // Public for Phase 3d
+pub mod ocr;  // Public for Phase 3e
+pub mod ocr_engine;  // Public for Phase 3e
 // mod text_extractor;  // TODO: Fix pdfium API compatibility issues
 pub mod types;  // Public for Phase 3b (BoundingBox, FontInfo, etc.)

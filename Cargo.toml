@@ -26,9 +26,15 @@ unicode-segmentation = "1.11"
 # Phase 3: PDF processing dependencies
 pdfium-render = "0.8"
 image = "0.24"
+# Phase 3e: OCR dependencies (optional, requires tesseract installation)
+rusty-tesseract = { version = "1.1", optional = true }
 
 [dev-dependencies]
 tempfile = "3.8"
+
+[features]
+default = []
+ocr = ["rusty-tesseract"]
 
 [lib]
 name = "docling_rs"

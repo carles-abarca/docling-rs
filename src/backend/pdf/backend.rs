@@ -8,6 +8,10 @@ use crate::error::ConversionError;
 use crate::InputFormat;
 use pdfium_render::prelude::*;
 
+// OCR engine imports (conditional on feature flag)
+#[cfg(feature = "ocr")]
+use super::ocr_engine::{OcrEngine, TesseractOcr};
+
 // Note: text_extractor with detailed position tracking is available but not used in basic implementation
 // It will be integrated in future iterations for advanced layout analysis
 
@@ -101,6 +105,14 @@ impl PdfBackend {
             None
         };
 
+        // Initialize OCR engine if enabled
+        #[cfg(feature = "ocr")]
+        let ocr_engine = if self.config.enable_ocr {
+            Some(TesseractOcr::new())
+        } else {
+            None
+        };
+
         // Determine page range
         let range = self.config.page_range.clone().unwrap_or(0..page_count);
 
@@ -118,7 +130,22 @@ impl PdfBackend {
                 ConversionError::ParseError(format!("Failed to get text from page {}: {}", page_index, e))
             })?;
 
-            let page_text = text_page.all();
+            let mut page_text = text_page.all();
+
+            // If no text and OCR is enabled, try OCR (indicates scanned PDF)
+            #[cfg(feature = "ocr")]
+            if page_text.trim().is_empty() && self.config.enable_ocr {
+                if let Some(ref _ocr) = ocr_engine {
+                    // TODO: Implement actual OCR here
+                    // This requires:
+                    // 1. Rendering the page to an image
+                    // 2. Passing image to OCR engine
+                    // 3. Extracting text from OCR result
+                    // For now, we just log that OCR would be attempted
+                    // page_text = perform_ocr(&page, ocr)?;
+                }
+            }
+
             if !page_text.is_empty() {
                 full_text.push_str(&page_text);
                 full_text.push('\n');
