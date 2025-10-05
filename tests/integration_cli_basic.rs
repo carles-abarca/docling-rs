@@ -40,7 +40,11 @@ fn test_cli_html_to_markdown() {
     let input = temp.path().join("input.html");
     let output_dir = temp.path().join("output");
 
-    fs::write(&input, "<html><body><h1>Title</h1><p>Content</p></body></html>").unwrap();
+    fs::write(
+        &input,
+        "<html><body><h1>Title</h1><p>Content</p></body></html>",
+    )
+    .unwrap();
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
     cmd.arg(&input)
@@ -52,7 +56,10 @@ fn test_cli_html_to_markdown() {
         .success();
 
     let output_file = output_dir.join("input.md");
-    assert!(output_file.exists(), "Markdown output file should be created");
+    assert!(
+        output_file.exists(),
+        "Markdown output file should be created"
+    );
 }
 
 #[test]

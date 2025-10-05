@@ -142,10 +142,7 @@ impl Converter {
                 if !self.args.quiet {
                     // Print input filename in error message
                     if let Some(filename) = job.input_path.file_name() {
-                        eprintln!(
-                            "{}",
-                            filename.to_string_lossy()
-                        );
+                        eprintln!("{}", filename.to_string_lossy());
                     }
                 }
 
@@ -211,7 +208,10 @@ impl Converter {
                     // Unsupported format - report to stderr if not quiet
                     if !self.args.quiet {
                         if let Some(filename) = path.file_name() {
-                            eprintln!("Unsupported format, skipping: {}", filename.to_string_lossy());
+                            eprintln!(
+                                "Unsupported format, skipping: {}",
+                                filename.to_string_lossy()
+                            );
                         }
                     }
                 }

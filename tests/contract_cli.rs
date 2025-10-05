@@ -39,19 +39,11 @@ fn test_ct002_multiple_output_formats() {
 
     // Test JSON output
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
-    cmd.arg(&input)
-        .arg("--to")
-        .arg("json")
-        .assert()
-        .success();
+    cmd.arg(&input).arg("--to").arg("json").assert().success();
 
     // Test text output
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
-    cmd.arg(&input)
-        .arg("--to")
-        .arg("text")
-        .assert()
-        .success();
+    cmd.arg(&input).arg("--to").arg("text").assert().success();
 }
 
 /// CT-003: Custom output directory (--output-dir)
@@ -128,11 +120,9 @@ fn test_ct007_unsupported_format() {
     fs::write(&input, "content").unwrap();
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
-    cmd.arg(&input)
-        .assert()
-        .failure()
-        .code(1)
-        .stderr(predicate::str::contains("Unsupported").or(predicate::str::contains("unsupported")));
+    cmd.arg(&input).assert().failure().code(1).stderr(
+        predicate::str::contains("Unsupported").or(predicate::str::contains("unsupported")),
+    );
 }
 
 /// CT-008: PDF with OCR feature (--ocr-enabled)
@@ -145,10 +135,7 @@ fn test_ct008_pdf_with_ocr() {
     fs::write(&input, b"%PDF-1.4\n").unwrap();
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
-    cmd.arg(&input)
-        .arg("--ocr-enabled")
-        .assert()
-        .success();
+    cmd.arg(&input).arg("--ocr-enabled").assert().success();
 }
 
 /// CT-009: PDF options (tables, images)

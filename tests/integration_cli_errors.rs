@@ -20,7 +20,9 @@ fn test_conflicting_flags_quiet_verbose() {
         .assert()
         .failure()
         .code(1)
-        .stderr(predicate::str::contains("conflict").or(predicate::str::contains("cannot be used")));
+        .stderr(
+            predicate::str::contains("conflict").or(predicate::str::contains("cannot be used")),
+        );
 }
 
 #[test]
@@ -37,7 +39,9 @@ fn test_conflicting_error_handling_flags() {
         .assert()
         .failure()
         .code(1)
-        .stderr(predicate::str::contains("conflict").or(predicate::str::contains("cannot be used")));
+        .stderr(
+            predicate::str::contains("conflict").or(predicate::str::contains("cannot be used")),
+        );
 }
 
 #[test]
@@ -112,9 +116,7 @@ fn test_malformed_input_file() {
     fs::write(&input, "<html><body><unclosed>").unwrap();
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
-    cmd.arg(&input)
-        .assert()
-        .success(); // Should still succeed with best-effort parsing
+    cmd.arg(&input).assert().success(); // Should still succeed with best-effort parsing
 }
 
 #[test]
@@ -133,8 +135,5 @@ fn test_chunk_without_size() {
     fs::write(&input, "# Test").unwrap();
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
-    cmd.arg(&input)
-        .arg("--chunk")
-        .assert()
-        .success(); // Should use default chunk size
+    cmd.arg(&input).arg("--chunk").assert().success(); // Should use default chunk size
 }

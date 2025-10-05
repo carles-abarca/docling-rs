@@ -42,5 +42,5 @@ pub mod ocr_engine;
 pub mod page; // Public for Phase 3b (TextBlock, etc.)
 pub mod table; // Public for Phase 3c
 pub mod table_detector; // Public for Phase 3c // Public for Phase 3e
-                                               // mod text_extractor;  // TODO: Fix pdfium API compatibility issues
+                        // mod text_extractor;  // TODO: Fix pdfium API compatibility issues
 pub mod types; // Public for Phase 3b (BoundingBox, FontInfo, etc.)

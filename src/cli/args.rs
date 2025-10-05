@@ -25,7 +25,12 @@ pub struct CliArgs {
     pub input: PathBuf,
 
     /// Output format (markdown, json, text)
-    #[arg(short = 't', long = "to", value_name = "FORMAT", default_value = "markdown")]
+    #[arg(
+        short = 't',
+        long = "to",
+        value_name = "FORMAT",
+        default_value = "markdown"
+    )]
     pub output_format: OutputFormat,
 
     /// Output directory (default: current directory)
