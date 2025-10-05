@@ -1,9 +1,8 @@
 //! Markdown backend tests
 
 use docling_rs::backend::{Backend, MarkdownBackend};
-use docling_rs::datamodel::{InputDocument, NodeType};
+use docling_rs::datamodel::InputDocument;
 use docling_rs::InputFormat;
-use std::path::PathBuf;
 
 #[test]
 fn test_markdown_backend_supports_format() {

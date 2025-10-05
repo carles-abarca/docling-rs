@@ -6,8 +6,6 @@
 #[cfg(feature = "ocr")]
 use docling_rs::backend::pdf::ocr::{OcrResult, OcrWord};
 #[cfg(feature = "ocr")]
-use docling_rs::backend::pdf::ocr_engine::OcrEngine;
-#[cfg(feature = "ocr")]
 use docling_rs::backend::pdf::types::BoundingBox;
 
 #[test]
@@ -34,7 +32,7 @@ fn test_ocr_word_structure() {
     // Contract: OcrWord must contain text, confidence, and bounding box
 
     let bbox = BoundingBox::new(10.0, 20.0, 100.0, 30.0);
-    let word = OcrWord::new("hello".to_string(), 92.5, bbox.clone());
+    let word = OcrWord::new("hello".to_string(), 92.5, bbox);
 
     assert_eq!(word.text, "hello");
     assert_eq!(word.confidence, 92.5);

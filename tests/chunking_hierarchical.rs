@@ -22,17 +22,17 @@ fn create_test_document(content: &str) -> DoclingDocument {
 #[test]
 fn test_new_has_default_merge() {
     let chunker = HierarchicalChunker::new();
-    assert_eq!(chunker.merge_list_items, true);
+    assert!(chunker.merge_list_items);
 }
 
 // Test 2: Custom constructor with merge_list_items
 #[test]
 fn test_with_merge_list_items() {
     let chunker = HierarchicalChunker::with_merge_list_items(false);
-    assert_eq!(chunker.merge_list_items, false);
+    assert!(!chunker.merge_list_items);
 
     let chunker = HierarchicalChunker::with_merge_list_items(true);
-    assert_eq!(chunker.merge_list_items, true);
+    assert!(chunker.merge_list_items);
 }
 
 // Test 3: One chunk per element (FR-005)
@@ -53,7 +53,7 @@ Third paragraph."#;
 
     // Should produce chunks (at least one)
     assert!(
-        chunks.len() >= 1,
+        !chunks.is_empty(),
         "Expected at least 1 chunk, got {}",
         chunks.len()
     );
@@ -79,7 +79,7 @@ Content in section 1.1."#;
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Should produce chunks
-    assert!(chunks.len() > 0, "Should produce at least one chunk");
+    assert!(!chunks.is_empty(), "Should produce at least one chunk");
 
     // All chunks should have valid metadata
     for chunk in &chunks {
@@ -115,7 +115,7 @@ fn test_flat_document() {
 
     // Should still produce chunks (at least 1)
     assert!(
-        chunks.len() >= 1,
+        !chunks.is_empty(),
         "Flat document should still produce chunks, got {}",
         chunks.len()
     );
@@ -148,12 +148,12 @@ fn test_list_basic() {
 
     // Both should produce chunks (at least 1)
     assert!(
-        chunks_merge.len() >= 1,
+        !chunks_merge.is_empty(),
         "Should produce chunks with merge enabled, got {}",
         chunks_merge.len()
     );
     assert!(
-        chunks_no_merge.len() >= 1,
+        !chunks_no_merge.is_empty(),
         "Should produce chunks with merge disabled, got {}",
         chunks_no_merge.len()
     );
@@ -224,7 +224,7 @@ First paragraph under chapter 2."#;
 
     // Should produce multiple chunks (at least 1)
     assert!(
-        chunks.len() >= 1,
+        !chunks.is_empty(),
         "Expected at least 1 chunk for complex structure, got {}",
         chunks.len()
     );

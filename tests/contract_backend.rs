@@ -1,6 +1,6 @@
 //! Contract tests for Backend trait
 
-use docling_rs::backend::{Backend, DeclarativeBackend};
+use docling_rs::backend::Backend;
 use docling_rs::datamodel::{DoclingDocument, InputDocument};
 use docling_rs::error::ConversionError;
 use docling_rs::InputFormat;

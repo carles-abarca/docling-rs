@@ -52,7 +52,7 @@ IBM originated with several technological innovations developed by Herman Holler
 
     // Verify chunks were generated (at least 1)
     assert!(
-        chunks.len() >= 1,
+        !chunks.is_empty(),
         "Should generate chunks, got {}",
         chunks.len()
     );
@@ -201,7 +201,7 @@ fn test_multiple_formats() {
         let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
         assert!(
-            chunks.len() > 0,
+            !chunks.is_empty(),
             "Document '{}' should produce chunks",
             name
         );
@@ -243,7 +243,7 @@ Turn on the main power switch."#;
         .collect();
 
     assert!(
-        contextualized_chunks.len() > 0,
+        !contextualized_chunks.is_empty(),
         "Should produce contextualized chunks"
     );
 
