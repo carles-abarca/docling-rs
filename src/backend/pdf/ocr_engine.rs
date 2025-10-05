@@ -3,6 +3,12 @@
 use super::ocr::OcrResult;
 use crate::error::ConversionError;
 
+#[cfg(feature = "ocr")]
+use super::ocr::OcrWord;
+
+#[cfg(feature = "ocr")]
+use super::types::BoundingBox;
+
 /// Trait for OCR engine implementations.
 pub trait OcrEngine {
     /// Recognize text from an image.
