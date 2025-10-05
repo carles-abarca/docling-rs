@@ -1,7 +1,7 @@
 //! Integration tests for document chunking
 
 use docling_rs::chunking::{BaseChunk, BaseChunker, HierarchicalChunker};
-use docling_rs::{DocumentConverter, DoclingDocument};
+use docling_rs::{DoclingDocument, DocumentConverter};
 use std::fs;
 
 // Helper to create test document
@@ -18,7 +18,9 @@ fn create_test_document(content: &str) -> DoclingDocument {
     fs::write(&temp_file, content).expect("Failed to write test file");
 
     let converter = DocumentConverter::new();
-    let result = converter.convert_file(&temp_file).expect("Failed to convert");
+    let result = converter
+        .convert_file(&temp_file)
+        .expect("Failed to convert");
 
     // Clean up
     let _ = fs::remove_file(&temp_file);
@@ -49,19 +51,32 @@ IBM originated with several technological innovations developed by Herman Holler
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Verify chunks were generated (at least 1)
-    assert!(chunks.len() >= 1, "Should generate chunks, got {}", chunks.len());
+    assert!(
+        chunks.len() >= 1,
+        "Should generate chunks, got {}",
+        chunks.len()
+    );
 
     // Verify all chunks have metadata
     for chunk in &chunks {
         assert!(!chunk.meta.doc_name.is_empty(), "Should have document name");
-        assert!(chunk.meta.end_offset >= chunk.meta.start_offset, "Should have valid offsets");
+        assert!(
+            chunk.meta.end_offset >= chunk.meta.start_offset,
+            "Should have valid offsets"
+        );
     }
 
     // Step 4: Test contextualize
     for chunk in &chunks {
         let contextualized = chunker.contextualize(chunk);
-        assert!(!contextualized.is_empty(), "Contextualized output should not be empty");
-        assert!(contextualized.contains(&chunk.text), "Should contain chunk text");
+        assert!(
+            !contextualized.is_empty(),
+            "Contextualized output should not be empty"
+        );
+        assert!(
+            contextualized.contains(&chunk.text),
+            "Should contain chunk text"
+        );
     }
 }
 
@@ -95,7 +110,10 @@ The system is deployed on AWS."#;
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Should produce multiple chunks
-    assert!(chunks.len() >= 5, "Complex document should produce multiple chunks");
+    assert!(
+        chunks.len() >= 5,
+        "Complex document should produce multiple chunks"
+    );
 
     // All chunks should be sequential
     for i in 1..chunks.len() {
@@ -141,10 +159,18 @@ This is a test paragraph."#;
         serde_json::from_str(&json).expect("Should deserialize chunks");
 
     // Verify round-trip
-    assert_eq!(deserialized.len(), chunks.len(), "Should have same number of chunks");
+    assert_eq!(
+        deserialized.len(),
+        chunks.len(),
+        "Should have same number of chunks"
+    );
 
     for (i, (original, restored)) in chunks.iter().zip(deserialized.iter()).enumerate() {
-        assert_eq!(original.text, restored.text, "Chunk {} text should match", i);
+        assert_eq!(
+            original.text, restored.text,
+            "Chunk {} text should match",
+            i
+        );
         assert_eq!(
             original.meta.doc_name, restored.meta.doc_name,
             "Chunk {} doc_name should match",
@@ -224,10 +250,7 @@ Turn on the main power switch."#;
     // Verify contextualized text is usable
     for (text, meta) in &contextualized_chunks {
         assert!(!text.is_empty(), "Contextualized text should not be empty");
-        assert!(
-            !meta.doc_name.is_empty(),
-            "Metadata should be preserved"
-        );
+        assert!(!meta.doc_name.is_empty(), "Metadata should be preserved");
     }
 }
 
@@ -248,7 +271,11 @@ fn test_large_document() {
     let chunk_count = chunker.chunk(&doc).count();
 
     // Should produce at least some chunks (exact count depends on backend implementation)
-    assert!(chunk_count >= 1, "Should produce chunks for large document, got {}", chunk_count);
+    assert!(
+        chunk_count >= 1,
+        "Should produce chunks for large document, got {}",
+        chunk_count
+    );
 }
 
 // Test 7: Metadata preservation
@@ -267,7 +294,10 @@ Content here."#;
 
     assert!(json.contains("doc_name"), "Should preserve doc_name");
     assert!(json.contains("headings"), "Should preserve headings");
-    assert!(json.contains("start_offset"), "Should preserve start_offset");
+    assert!(
+        json.contains("start_offset"),
+        "Should preserve start_offset"
+    );
     assert!(json.contains("end_offset"), "Should preserve end_offset");
     assert!(json.contains("index"), "Should preserve index");
 }

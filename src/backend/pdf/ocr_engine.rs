@@ -113,18 +113,17 @@ impl OcrEngine for TesseractOcr {
         // Convert image data to tesseract Image
         // Note: This is a simplified version - real implementation would need
         // proper image format handling
-        let image = Image::from_dynamic_image(
-            &image::load_from_memory(image_data).map_err(|e| {
+        let image =
+            Image::from_dynamic_image(&image::load_from_memory(image_data).map_err(|e| {
                 ConversionError::ParseError(format!("Failed to load image for OCR: {}", e))
-            })?,
-        ).map_err(|e| {
-            ConversionError::ParseError(format!("Failed to create tesseract image: {}", e))
-        })?;
+            })?)
+            .map_err(|e| {
+                ConversionError::ParseError(format!("Failed to create tesseract image: {}", e))
+            })?;
 
         // Perform OCR
-        let ocr_output = rusty_tesseract::image_to_string(&image, &args).map_err(|e| {
-            ConversionError::ParseError(format!("Tesseract OCR failed: {}", e))
-        })?;
+        let ocr_output = rusty_tesseract::image_to_string(&image, &args)
+            .map_err(|e| ConversionError::ParseError(format!("Tesseract OCR failed: {}", e)))?;
 
         // Calculate basic confidence (tesseract doesn't always provide this easily)
         // In a full implementation, we'd use tesseract's confidence APIs

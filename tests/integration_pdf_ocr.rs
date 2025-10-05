@@ -57,11 +57,17 @@ fn test_ocr_with_word_level_confidence() {
     assert!(result.is_ok());
 
     let ocr_result = result.unwrap();
-    assert!(!ocr_result.words.is_empty(), "Should extract individual words");
+    assert!(
+        !ocr_result.words.is_empty(),
+        "Should extract individual words"
+    );
 
     for word in &ocr_result.words {
         assert!(!word.text.is_empty(), "Word should have text");
-        assert!(word.confidence >= 0.0 && word.confidence <= 100.0, "Confidence should be 0-100");
+        assert!(
+            word.confidence >= 0.0 && word.confidence <= 100.0,
+            "Confidence should be 0-100"
+        );
     }
 }
 
@@ -102,11 +108,7 @@ fn test_ocr_result_creation() {
         BoundingBox::new(65.0, 20.0, 55.0, 15.0),
     );
 
-    let result = OcrResult::new(
-        "Hello World".to_string(),
-        93.9,
-        vec![word1, word2],
-    );
+    let result = OcrResult::new("Hello World".to_string(), 93.9, vec![word1, word2]);
 
     // Assert
     assert_eq!(result.text, "Hello World");

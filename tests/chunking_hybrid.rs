@@ -1,7 +1,7 @@
 //! HybridChunker tests
 
-use docling_rs::chunking::HybridChunker;
 use docling_rs::chunking::tokenizer::Tokenizer;
+use docling_rs::chunking::HybridChunker;
 
 // Mock tokenizer for testing
 struct MockTokenizer {
@@ -65,9 +65,7 @@ fn test_max_tokens_validation() {
 // Test 4: Builder requires tokenizer
 #[test]
 fn test_builder_requires_tokenizer() {
-    let result = HybridChunker::builder()
-        .max_tokens(256)
-        .build();
+    let result = HybridChunker::builder().max_tokens(256).build();
 
     assert!(result.is_err(), "Should fail without tokenizer");
 }
@@ -97,9 +95,7 @@ fn test_builder_merge_peers() {
 fn test_default_merge_peers() {
     let tokenizer = Box::new(MockTokenizer::new(512));
 
-    let chunker = HybridChunker::builder()
-        .tokenizer(tokenizer)
-        .build();
+    let chunker = HybridChunker::builder().tokenizer(tokenizer).build();
 
     assert!(chunker.is_ok(), "Default merge_peers should be valid");
 }
@@ -117,7 +113,11 @@ fn test_different_max_tokens_values() {
             .max_tokens(max_tokens)
             .build();
 
-        assert!(chunker.is_ok(), "Should succeed with max_tokens = {}", max_tokens);
+        assert!(
+            chunker.is_ok(),
+            "Should succeed with max_tokens = {}",
+            max_tokens
+        );
     }
 }
 

@@ -73,7 +73,9 @@ impl HuggingFaceTokenizer {
         // Sanitize model_id for filesystem
         let model_path = model_id.replace('/', "--");
         let potential_paths = vec![
-            cache_dir.join(format!("models--{}", model_path)).join("tokenizer.json"),
+            cache_dir
+                .join(format!("models--{}", model_path))
+                .join("tokenizer.json"),
             std::path::PathBuf::from(format!("./models/{}/tokenizer.json", model_id)),
             std::path::PathBuf::from(format!("./{}/tokenizer.json", model_id)),
         ];
@@ -88,17 +90,15 @@ impl HuggingFaceTokenizer {
         }
 
         // If not found, provide helpful error message
-        Err(ChunkingError::TokenizerLoad(
-            format!(
-                "Tokenizer for '{}' not found in cache. \
+        Err(ChunkingError::TokenizerLoad(format!(
+            "Tokenizer for '{}' not found in cache. \
                 Please download tokenizer.json from https://huggingface.co/{}/tree/main \
                 and either:\n\
                 1. Place it in ~/.cache/huggingface/hub/models--{}/\n\
                 2. Place it in ./models/{}/\n\
                 3. Use from_file() with the path to tokenizer.json",
-                model_id, model_id, model_path, model_id
-            )
-        ))
+            model_id, model_id, model_path, model_id
+        )))
     }
 
     /// Load tokenizer from file path

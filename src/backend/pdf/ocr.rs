@@ -103,8 +103,8 @@ mod tests {
 
     #[test]
     fn test_ocr_result_with_language() {
-        let result = OcrResult::new("hello".to_string(), 85.0, vec![])
-            .with_language("eng".to_string());
+        let result =
+            OcrResult::new("hello".to_string(), 85.0, vec![]).with_language("eng".to_string());
 
         assert_eq!(result.language, Some("eng".to_string()));
     }

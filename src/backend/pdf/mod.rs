@@ -33,14 +33,14 @@ pub use page::PdfPage;
 mod backend;
 mod config;
 mod document;
-pub mod layout;  // Public for Phase 3b
-pub mod layout_analyzer;  // Public for Phase 3b
-pub mod page;  // Public for Phase 3b (TextBlock, etc.)
-pub mod table;  // Public for Phase 3c
-pub mod table_detector;  // Public for Phase 3c
-pub mod image;  // Public for Phase 3d
-pub mod image_extractor;  // Public for Phase 3d
-pub mod ocr;  // Public for Phase 3e
-pub mod ocr_engine;  // Public for Phase 3e
-// mod text_extractor;  // TODO: Fix pdfium API compatibility issues
-pub mod types;  // Public for Phase 3b (BoundingBox, FontInfo, etc.)
+pub mod image; // Public for Phase 3d
+pub mod image_extractor; // Public for Phase 3d
+pub mod layout; // Public for Phase 3b
+pub mod layout_analyzer; // Public for Phase 3b
+pub mod ocr; // Public for Phase 3e
+pub mod ocr_engine;
+pub mod page; // Public for Phase 3b (TextBlock, etc.)
+pub mod table; // Public for Phase 3c
+pub mod table_detector; // Public for Phase 3c // Public for Phase 3e
+                                               // mod text_extractor;  // TODO: Fix pdfium API compatibility issues
+pub mod types; // Public for Phase 3b (BoundingBox, FontInfo, etc.)

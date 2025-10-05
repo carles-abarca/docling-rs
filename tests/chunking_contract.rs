@@ -3,7 +3,7 @@
 //! These tests verify the contract for all implementations of BaseChunker.
 
 use docling_rs::chunking::{BaseChunk, BaseChunker, ChunkMetadata, HierarchicalChunker};
-use docling_rs::{DocumentConverter, DoclingDocument};
+use docling_rs::{DoclingDocument, DocumentConverter};
 use std::fs;
 use std::io::Write;
 
@@ -25,7 +25,9 @@ Content in section 1.1."#;
 
     // Convert using DocumentConverter
     let converter = DocumentConverter::new();
-    let result = converter.convert_file(temp_file).expect("Failed to convert");
+    let result = converter
+        .convert_file(temp_file)
+        .expect("Failed to convert");
     result.document().clone()
 }
 
@@ -74,7 +76,11 @@ fn test_iterator_is_lazy() {
     fs::write(temp_file, &large_text).expect("Failed to write test file");
 
     let converter = DocumentConverter::new();
-    let doc = converter.convert_file(temp_file).expect("Failed to convert").document().clone();
+    let doc = converter
+        .convert_file(temp_file)
+        .expect("Failed to convert")
+        .document()
+        .clone();
 
     // Creating iterator should be fast (no processing yet)
     let start = Instant::now();
@@ -107,8 +113,14 @@ fn test_all_content_represented() {
 
     // All chunks should have valid metadata
     for chunk in &chunks {
-        assert!(!chunk.meta.doc_name.is_empty(), "Document name should not be empty");
-        assert!(chunk.meta.end_offset >= chunk.meta.start_offset, "End offset should be >= start offset");
+        assert!(
+            !chunk.meta.doc_name.is_empty(),
+            "Document name should not be empty"
+        );
+        assert!(
+            chunk.meta.end_offset >= chunk.meta.start_offset,
+            "End offset should be >= start offset"
+        );
     }
 }
 

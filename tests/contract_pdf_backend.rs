@@ -28,7 +28,10 @@ fn test_pdf_backend_supports_pdf_format() {
 
     // Assert
     assert!(supports_pdf, "PdfBackend should support PDF format");
-    assert!(!supports_md, "PdfBackend should not support Markdown format");
+    assert!(
+        !supports_md,
+        "PdfBackend should not support Markdown format"
+    );
 }
 
 #[test]

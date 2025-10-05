@@ -49,7 +49,10 @@ Nested content here.
     for chunk in chunker.chunk(&doc) {
         println!("Chunk {}: \"{}\"", chunk.meta.index, chunk.text);
         println!("  Headings: {:?}", chunk.meta.headings);
-        println!("  Offsets: {}-{}", chunk.meta.start_offset, chunk.meta.end_offset);
+        println!(
+            "  Offsets: {}-{}",
+            chunk.meta.start_offset, chunk.meta.end_offset
+        );
         println!();
     }
 

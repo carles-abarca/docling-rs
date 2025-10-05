@@ -19,8 +19,7 @@ fn test_extract_text_from_simple_pdf() {
     let pdf_path = create_simple_text_pdf(test_content);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act: Convert PDF
     let result = backend.convert(&input);
@@ -51,8 +50,7 @@ fn test_extract_text_with_positions() {
     let pdf_path = create_simple_text_pdf(test_content);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -83,8 +81,7 @@ fn test_extract_text_from_empty_pdf() {
     let pdf_path = create_empty_pdf();
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);

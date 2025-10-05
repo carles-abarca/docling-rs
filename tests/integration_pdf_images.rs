@@ -20,7 +20,10 @@ fn test_extract_images_from_pdf() {
     let result = backend.convert(&input);
 
     // Assert: Images are detected and extracted
-    assert!(result.is_ok(), "PDF with images should convert successfully");
+    assert!(
+        result.is_ok(),
+        "PDF with images should convert successfully"
+    );
 
     let doc = result.unwrap();
     // Verify images were detected

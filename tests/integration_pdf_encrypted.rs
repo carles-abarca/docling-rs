@@ -5,8 +5,8 @@
 //! - Encryption detection
 //! - Error handling for wrong passwords
 
-use docling_rs::backend::{Backend, PdfBackend};
 use docling_rs::backend::pdf::PdfConfig;
+use docling_rs::backend::{Backend, PdfBackend};
 use docling_rs::datamodel::InputDocument;
 use docling_rs::InputFormat;
 
@@ -22,8 +22,7 @@ fn test_encrypted_pdf_with_correct_password() {
     let config = PdfConfig::default().password(Some(password.to_string()));
     let backend = PdfBackend::with_config(config);
 
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -50,8 +49,7 @@ fn test_encrypted_pdf_without_password() {
 
     let backend = PdfBackend::new(); // No password configured
 
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -65,7 +63,10 @@ fn test_encrypted_pdf_without_password() {
     // Check error type
     let error = result.unwrap_err();
     assert!(
-        matches!(error, docling_rs::error::ConversionError::EncryptionError(_)),
+        matches!(
+            error,
+            docling_rs::error::ConversionError::EncryptionError(_)
+        ),
         "Should return EncryptionError"
     );
 }
@@ -81,8 +82,7 @@ fn test_encrypted_pdf_with_wrong_password() {
     let config = PdfConfig::default().password(Some("wrong_password".to_string()));
     let backend = PdfBackend::with_config(config);
 
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -105,8 +105,7 @@ fn test_unencrypted_pdf_with_password_provided() {
     let config = PdfConfig::default().password(Some("unnecessary_password".to_string()));
     let backend = PdfBackend::with_config(config);
 
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);

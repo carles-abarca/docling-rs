@@ -17,8 +17,12 @@ pub trait TableDetector {
     /// # Returns
     ///
     /// Vector of detected tables
-    fn detect_tables(&self, text_blocks: &[TextBlock], page_width: f64, page_height: f64)
-        -> Vec<Table>;
+    fn detect_tables(
+        &self,
+        text_blocks: &[TextBlock],
+        page_width: f64,
+        page_height: f64,
+    ) -> Vec<Table>;
 }
 
 /// Grid-based table detector.
@@ -119,7 +123,7 @@ impl GridBasedTableDetector {
     }
 
     /// Check if row groups form a consistent grid (table).
-    fn is_table_grid(&self, row_groups: &[Vec<usize>], blocks: &[TextBlock]) -> bool {
+    fn is_table_grid(&self, row_groups: &[Vec<usize>], _blocks: &[TextBlock]) -> bool {
         if row_groups.len() < self.min_rows {
             return false;
         }
@@ -147,14 +151,14 @@ impl GridBasedTableDetector {
 
         // Determine table dimensions
         let rows = row_groups.len();
-        let cols = row_groups
-            .iter()
-            .map(|row| row.len())
-            .max()
-            .unwrap_or(0);
+        let cols = row_groups.iter().map(|row| row.len()).max().unwrap_or(0);
 
         // Calculate table bounding box
-        let all_indices: Vec<usize> = row_groups.iter().flat_map(|row| row.iter()).copied().collect();
+        let all_indices: Vec<usize> = row_groups
+            .iter()
+            .flat_map(|row| row.iter())
+            .copied()
+            .collect();
 
         let min_x = all_indices
             .iter()
@@ -188,13 +192,8 @@ impl GridBasedTableDetector {
         for (row_idx, row_group) in row_groups.iter().enumerate() {
             for (col_idx, &block_idx) in row_group.iter().enumerate() {
                 let block = &blocks[block_idx];
-                let cell = TableCell::new(
-                    row_idx,
-                    col_idx,
-                    block.text.clone(),
-                    block.bbox.clone(),
-                )
-                .with_header(row_idx == 0);
+                let cell = TableCell::new(row_idx, col_idx, block.text.clone(), block.bbox.clone())
+                    .with_header(row_idx == 0);
 
                 table.add_cell(cell);
             }

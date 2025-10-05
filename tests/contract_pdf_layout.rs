@@ -104,8 +104,14 @@ fn test_column_bounds() {
     let left_col = &layout.columns[0];
     let right_col = &layout.columns[1];
 
-    assert!(left_col.bbox.x < 300.0, "Left column should be on left side");
-    assert!(right_col.bbox.x > 300.0, "Right column should be on right side");
+    assert!(
+        left_col.bbox.x < 300.0,
+        "Left column should be on left side"
+    );
+    assert!(
+        right_col.bbox.x > 300.0,
+        "Right column should be on right side"
+    );
 }
 
 #[test]
@@ -118,8 +124,16 @@ fn test_empty_input() {
     let layout = analyzer.analyze(&blocks, 600.0, 800.0);
 
     // Assert: Should handle gracefully
-    assert_eq!(layout.columns.len(), 0, "Should have no columns for empty input");
-    assert_eq!(layout.reading_order.len(), 0, "Should have empty reading order");
+    assert_eq!(
+        layout.columns.len(),
+        0,
+        "Should have no columns for empty input"
+    );
+    assert_eq!(
+        layout.reading_order.len(),
+        0,
+        "Should have empty reading order"
+    );
 }
 
 // Helper function

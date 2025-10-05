@@ -18,8 +18,7 @@ fn test_multipage_pdf_page_count() {
     let pdf_path = create_multipage_pdf(3);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -42,8 +41,7 @@ fn test_multipage_pdf_text_extraction() {
     let pdf_path = create_pdf_with_page_texts(&page_texts);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -73,8 +71,7 @@ fn test_multipage_pdf_reading_order() {
     let pdf_path = create_pdf_with_page_texts(&page_texts);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF)
-        ;
+    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);

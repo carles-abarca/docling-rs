@@ -269,10 +269,7 @@ impl HybridChunker {
 }
 
 impl BaseChunker for HybridChunker {
-    fn chunk<'a>(
-        &'a self,
-        doc: &'a DoclingDocument,
-    ) -> Box<dyn Iterator<Item = BaseChunk> + 'a> {
+    fn chunk<'a>(&'a self, doc: &'a DoclingDocument) -> Box<dyn Iterator<Item = BaseChunk> + 'a> {
         // Pass 1: Get hierarchical chunks
         let hierarchical_chunks: Vec<BaseChunk> = self.hierarchical.chunk(doc).collect();
 

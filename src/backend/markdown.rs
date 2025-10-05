@@ -57,7 +57,10 @@ impl Backend for MarkdownBackend {
                 // Determine node type based on markdown syntax
                 let node_type = if trimmed.starts_with('#') {
                     NodeType::Heading
-                } else if trimmed.starts_with('-') || trimmed.starts_with('*') || trimmed.starts_with('+') {
+                } else if trimmed.starts_with('-')
+                    || trimmed.starts_with('*')
+                    || trimmed.starts_with('+')
+                {
                     NodeType::ListItem
                 } else {
                     NodeType::Paragraph

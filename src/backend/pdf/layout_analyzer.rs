@@ -45,7 +45,7 @@ impl RuleBasedLayoutAnalyzer {
     /// Create a new rule-based layout analyzer with default settings.
     pub fn new() -> Self {
         Self {
-            column_gap_threshold: 0.05, // 5% of page width
+            column_gap_threshold: 0.05,         // 5% of page width
             vertical_alignment_tolerance: 10.0, // 10 points
         }
     }
@@ -65,8 +65,7 @@ impl RuleBasedLayoutAnalyzer {
         }
 
         // Sort blocks by x-position
-        let mut sorted_blocks: Vec<(usize, &TextBlock)> =
-            text_blocks.iter().enumerate().collect();
+        let mut sorted_blocks: Vec<(usize, &TextBlock)> = text_blocks.iter().enumerate().collect();
         sorted_blocks.sort_by(|a, b| {
             a.1.bbox
                 .x
@@ -88,11 +87,8 @@ impl RuleBasedLayoutAnalyzer {
 
             if gap > min_gap {
                 // Start new column
-                let column = self.create_column_from_blocks(
-                    column_id,
-                    &current_column_blocks,
-                    text_blocks,
-                );
+                let column =
+                    self.create_column_from_blocks(column_id, &current_column_blocks, text_blocks);
                 columns.push(column);
                 column_id += 1;
                 current_column_blocks = vec![sorted_blocks[i]];

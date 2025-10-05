@@ -21,11 +21,7 @@ fn test_ocr_result_structure() {
         BoundingBox::new(0.0, 0.0, 50.0, 20.0),
     );
 
-    let result = OcrResult::new(
-        "test".to_string(),
-        85.0,
-        vec![word],
-    );
+    let result = OcrResult::new("test".to_string(), 85.0, vec![word]);
 
     assert_eq!(result.text, "test");
     assert_eq!(result.confidence, 85.0);
@@ -79,9 +75,21 @@ fn test_multiple_words_in_result() {
     // Contract: OcrResult can contain multiple words
 
     let words = vec![
-        OcrWord::new("The".to_string(), 90.0, BoundingBox::new(0.0, 0.0, 30.0, 20.0)),
-        OcrWord::new("quick".to_string(), 88.0, BoundingBox::new(35.0, 0.0, 50.0, 20.0)),
-        OcrWord::new("brown".to_string(), 92.0, BoundingBox::new(90.0, 0.0, 50.0, 20.0)),
+        OcrWord::new(
+            "The".to_string(),
+            90.0,
+            BoundingBox::new(0.0, 0.0, 30.0, 20.0),
+        ),
+        OcrWord::new(
+            "quick".to_string(),
+            88.0,
+            BoundingBox::new(35.0, 0.0, 50.0, 20.0),
+        ),
+        OcrWord::new(
+            "brown".to_string(),
+            92.0,
+            BoundingBox::new(90.0, 0.0, 50.0, 20.0),
+        ),
     ];
 
     let result = OcrResult::new("The quick brown".to_string(), 90.0, words);

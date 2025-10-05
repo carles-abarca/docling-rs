@@ -46,7 +46,10 @@ fn test_complex_table_with_merged_cells() {
     let result = backend.convert(&input);
 
     // Assert
-    assert!(result.is_ok(), "Complex table PDF should convert successfully");
+    assert!(
+        result.is_ok(),
+        "Complex table PDF should convert successfully"
+    );
 
     let doc = result.unwrap();
     // Verify merged cells are handled correctly

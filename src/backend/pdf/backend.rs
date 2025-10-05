@@ -69,11 +69,9 @@ impl PdfBackend {
                             ConversionError::ParseError(format!("Failed to load PDF: {}", e))
                         })?
                 } else {
-                    pdfium
-                        .load_pdf_from_file(path, None)
-                        .map_err(|e| {
-                            ConversionError::ParseError(format!("Failed to load PDF: {}", e))
-                        })?
+                    pdfium.load_pdf_from_file(path, None).map_err(|e| {
+                        ConversionError::ParseError(format!("Failed to load PDF: {}", e))
+                    })?
                 }
             }
             DocumentSource::Bytes { data, name } => {
@@ -81,14 +79,15 @@ impl PdfBackend {
                     pdfium
                         .load_pdf_from_byte_slice(data, Some(password))
                         .map_err(|e| {
-                            ConversionError::ParseError(format!("Failed to load PDF ({}): {}", name, e))
+                            ConversionError::ParseError(format!(
+                                "Failed to load PDF ({}): {}",
+                                name, e
+                            ))
                         })?
                 } else {
-                    pdfium
-                        .load_pdf_from_byte_slice(data, None)
-                        .map_err(|e| {
-                            ConversionError::ParseError(format!("Failed to load PDF ({}): {}", name, e))
-                        })?
+                    pdfium.load_pdf_from_byte_slice(data, None).map_err(|e| {
+                        ConversionError::ParseError(format!("Failed to load PDF ({}): {}", name, e))
+                    })?
                 }
             }
         };
@@ -127,10 +126,13 @@ impl PdfBackend {
 
             // Extract text
             let text_page = page.text().map_err(|e| {
-                ConversionError::ParseError(format!("Failed to get text from page {}: {}", page_index, e))
+                ConversionError::ParseError(format!(
+                    "Failed to get text from page {}: {}",
+                    page_index, e
+                ))
             })?;
 
-            let mut page_text = text_page.all();
+            let page_text = text_page.all();
 
             // If no text and OCR is enabled, try OCR (indicates scanned PDF)
             #[cfg(feature = "ocr")]

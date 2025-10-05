@@ -3,7 +3,7 @@
 //! Tests for hierarchical (structure-based) chunking behavior.
 
 use docling_rs::chunking::{BaseChunker, HierarchicalChunker};
-use docling_rs::{DocumentConverter, DoclingDocument};
+use docling_rs::{DoclingDocument, DocumentConverter};
 use std::fs;
 
 // Helper function to create a test document
@@ -12,7 +12,9 @@ fn create_test_document(content: &str) -> DoclingDocument {
     fs::write(temp_file, content).expect("Failed to write test file");
 
     let converter = DocumentConverter::new();
-    let result = converter.convert_file(temp_file).expect("Failed to convert");
+    let result = converter
+        .convert_file(temp_file)
+        .expect("Failed to convert");
     result.document().clone()
 }
 
@@ -50,7 +52,11 @@ Third paragraph."#;
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Should produce chunks (at least one)
-    assert!(chunks.len() >= 1, "Expected at least 1 chunk, got {}", chunks.len());
+    assert!(
+        chunks.len() >= 1,
+        "Expected at least 1 chunk, got {}",
+        chunks.len()
+    );
 
     // Each chunk should have non-empty text
     for chunk in &chunks {
@@ -77,7 +83,10 @@ Content in section 1.1."#;
 
     // All chunks should have valid metadata
     for chunk in &chunks {
-        assert!(!chunk.meta.doc_name.is_empty(), "Document name should not be empty");
+        assert!(
+            !chunk.meta.doc_name.is_empty(),
+            "Document name should not be empty"
+        );
         // Note: Headings extraction will be enhanced when we parse markdown structure
     }
 }
@@ -105,11 +114,19 @@ fn test_flat_document() {
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Should still produce chunks (at least 1)
-    assert!(chunks.len() >= 1, "Flat document should still produce chunks, got {}", chunks.len());
+    assert!(
+        chunks.len() >= 1,
+        "Flat document should still produce chunks, got {}",
+        chunks.len()
+    );
 
     // Metadata should be minimal (no headings for flat text)
     for chunk in &chunks {
-        assert_eq!(chunk.meta.headings.len(), 0, "Flat document should have no headings");
+        assert_eq!(
+            chunk.meta.headings.len(),
+            0,
+            "Flat document should have no headings"
+        );
     }
 }
 
@@ -130,8 +147,16 @@ fn test_list_basic() {
     let chunks_no_merge: Vec<_> = chunker_no_merge.chunk(&doc).collect();
 
     // Both should produce chunks (at least 1)
-    assert!(chunks_merge.len() >= 1, "Should produce chunks with merge enabled, got {}", chunks_merge.len());
-    assert!(chunks_no_merge.len() >= 1, "Should produce chunks with merge disabled, got {}", chunks_no_merge.len());
+    assert!(
+        chunks_merge.len() >= 1,
+        "Should produce chunks with merge enabled, got {}",
+        chunks_merge.len()
+    );
+    assert!(
+        chunks_no_merge.len() >= 1,
+        "Should produce chunks with merge disabled, got {}",
+        chunks_no_merge.len()
+    );
 
     // Note: Actual list merging behavior will be tested once we implement proper list parsing
 }
@@ -155,14 +180,19 @@ Content here."#;
         let contextualized = chunker.contextualize(chunk);
 
         // Should contain the chunk text
-        assert!(contextualized.contains(&chunk.text),
-            "Contextualized output should contain chunk text");
+        assert!(
+            contextualized.contains(&chunk.text),
+            "Contextualized output should contain chunk text"
+        );
 
         // If there are headings, they should appear before the text
         if !chunk.meta.headings.is_empty() {
             for heading in &chunk.meta.headings {
-                assert!(contextualized.contains(heading),
-                    "Contextualized output should contain heading '{}'", heading);
+                assert!(
+                    contextualized.contains(heading),
+                    "Contextualized output should contain heading '{}'",
+                    heading
+                );
             }
         }
     }
@@ -193,11 +223,20 @@ First paragraph under chapter 2."#;
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Should produce multiple chunks (at least 1)
-    assert!(chunks.len() >= 1, "Expected at least 1 chunk for complex structure, got {}", chunks.len());
+    assert!(
+        chunks.len() >= 1,
+        "Expected at least 1 chunk for complex structure, got {}",
+        chunks.len()
+    );
 
     // All chunks should be sequential
     for i in 1..chunks.len() {
-        assert!(chunks[i].meta.index == i,
-            "Chunk {} should have index {}, got {}", i, i, chunks[i].meta.index);
+        assert!(
+            chunks[i].meta.index == i,
+            "Chunk {} should have index {}, got {}",
+            i,
+            i,
+            chunks[i].meta.index
+        );
     }
 }

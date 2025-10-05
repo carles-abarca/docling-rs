@@ -1,7 +1,7 @@
 //! Base chunking types and traits
 
-use crate::datamodel::DoclingDocument;
 use super::metadata::ChunkMetadata;
+use crate::datamodel::DoclingDocument;
 use serde::{Deserialize, Serialize};
 
 /// Error type for chunking operations
@@ -80,10 +80,7 @@ pub trait BaseChunker {
     /// # Returns
     ///
     /// A boxed iterator yielding [`BaseChunk`] instances
-    fn chunk<'a>(
-        &'a self,
-        doc: &'a DoclingDocument,
-    ) -> Box<dyn Iterator<Item = BaseChunk> + 'a>;
+    fn chunk<'a>(&'a self, doc: &'a DoclingDocument) -> Box<dyn Iterator<Item = BaseChunk> + 'a>;
 
     /// Contextualize a chunk by prefixing with hierarchical metadata
     ///

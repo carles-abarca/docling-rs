@@ -185,8 +185,8 @@ mod tests {
 
     #[test]
     fn test_column_type() {
-        let col = Column::new(0, BoundingBox::new(0.0, 0.0, 300.0, 800.0))
-            .with_type(ColumnType::Sidebar);
+        let col =
+            Column::new(0, BoundingBox::new(0.0, 0.0, 300.0, 800.0)).with_type(ColumnType::Sidebar);
 
         assert_eq!(col.column_type, ColumnType::Sidebar);
     }

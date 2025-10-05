@@ -60,10 +60,7 @@ impl Default for HierarchicalChunker {
 }
 
 impl BaseChunker for HierarchicalChunker {
-    fn chunk<'a>(
-        &'a self,
-        doc: &'a DoclingDocument,
-    ) -> Box<dyn Iterator<Item = BaseChunk> + 'a> {
+    fn chunk<'a>(&'a self, doc: &'a DoclingDocument) -> Box<dyn Iterator<Item = BaseChunk> + 'a> {
         let doc_name = doc.name().to_string();
         let nodes = doc.nodes().to_vec();
 
