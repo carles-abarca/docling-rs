@@ -1,6 +1,6 @@
 //! Text extraction from PDF pages.
 
-use super::page::{PdfPage, TextBlock, TextBlockType};
+use super::page::{TextBlock, TextBlockType};
 use super::types::{BoundingBox, FontInfo};
 use crate::error::ConversionError;
 use pdfium_render::prelude::*;
@@ -15,10 +15,10 @@ impl TextExtractor {
     }
 
     /// Extract text blocks from a pdfium page.
-    pub fn extract_from_page<'a>(
+    pub fn extract_from_page(
         &self,
-        page: &'a PdfPage<'a>,
-        page_number: usize,
+        page: &PdfPage,
+        _page_number: usize,
     ) -> Result<Vec<TextBlock>, ConversionError> {
         let mut text_blocks = Vec::new();
         let mut reading_order = 0;
@@ -42,7 +42,7 @@ impl TextExtractor {
         let mut current_font_size = 0.0;
 
         for char_index in 0..char_count {
-            if let Some(text_char) = text_page.chars().get(char_index) {
+            if let Ok(text_char) = text_page.chars().get(char_index) {
                 let char_str = text_char.text();
                 let bounds = text_char.loose_bounds();
 
@@ -103,8 +103,8 @@ impl TextExtractor {
         reading_order: usize,
     ) -> TextBlock {
         let bbox = BoundingBox::new(
-            bounds.left.value as f64,
-            bounds.top.value as f64,
+            bounds.left().value as f64,
+            bounds.top().value as f64,
             bounds.width().value as f64,
             bounds.height().value as f64,
         );
@@ -129,10 +129,10 @@ impl TextExtractor {
 
     /// Merge two bounding boxes.
     fn merge_bounds(&self, a: PdfRect, b: PdfRect) -> PdfRect {
-        let left = a.left.value.min(b.left.value);
-        let top = a.top.value.min(b.top.value);
-        let right = a.right.value.max(b.right.value);
-        let bottom = a.bottom.value.max(b.bottom.value);
+        let left = a.left().value.min(b.left().value);
+        let top = a.top().value.min(b.top().value);
+        let right = a.right().value.max(b.right().value);
+        let bottom = a.bottom().value.max(b.bottom().value);
 
         PdfRect::new(
             PdfPoints::new(left),

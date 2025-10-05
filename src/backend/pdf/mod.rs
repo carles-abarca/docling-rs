@@ -33,6 +33,8 @@ pub use page::PdfPage;
 mod backend;
 mod config;
 mod document;
-mod page;
-// mod text_extractor; // TODO: Re-enable for Phase 3b layout analysis
-mod types;
+pub mod layout;  // Public for Phase 3b
+pub mod layout_analyzer;  // Public for Phase 3b
+pub mod page;  // Public for Phase 3b (TextBlock, etc.)
+// mod text_extractor;  // TODO: Fix pdfium API compatibility issues
+pub mod types;  // Public for Phase 3b (BoundingBox, FontInfo, etc.)
