@@ -103,14 +103,13 @@ fn test_ct005_format_filtering() {
 
 /// CT-006: Input file not found error
 #[test]
-#[ignore = "CLI error messages need refinement"]
 fn test_ct006_file_not_found() {
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
     cmd.arg("nonexistent.md")
         .assert()
         .failure()
         .code(1)
-        .stderr(predicate::str::contains("not found").or(predicate::str::contains("No such file")));
+        .stderr(predicate::str::contains("does not exist"));
 }
 
 /// CT-007: Unsupported format error
@@ -174,7 +173,6 @@ fn test_ct010_enrichment_options() {
 
 /// CT-011: Batch error handling (continue on error)
 #[test]
-#[ignore = "Error message format needs refinement"]
 fn test_ct011_batch_continue_on_error() {
     let temp = TempDir::new().unwrap();
     let input_dir = temp.path().join("docs");
@@ -187,17 +185,17 @@ fn test_ct011_batch_continue_on_error() {
         .arg("--continue-on-error")
         .assert()
         .success()
-        .stderr(predicate::str::contains("error").or(predicate::str::contains("failed")));
+        .stderr(predicate::str::contains("skipping"));
 }
 
 /// CT-012: Batch error handling (abort on error)
 #[test]
-#[ignore = "Error handling behavior needs refinement"]
 fn test_ct012_batch_abort_on_error() {
     let temp = TempDir::new().unwrap();
     let input_dir = temp.path().join("docs");
     fs::create_dir(&input_dir).unwrap();
-    fs::write(input_dir.join("bad.xyz"), "bad").unwrap();
+    // Create a corrupted PDF (not a real PDF, will cause error)
+    fs::write(input_dir.join("bad.pdf"), "not a real pdf").unwrap();
     fs::write(input_dir.join("good.md"), "# Good").unwrap();
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();

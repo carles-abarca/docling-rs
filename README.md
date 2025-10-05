@@ -122,8 +122,14 @@ cargo build
 ### Testing
 
 ```bash
-cargo test
+# Run all tests (note: PDF tests require single-threaded execution due to pdfium)
+cargo test -- --test-threads=1
+
+# Run specific test suite
+cargo test --test integration_pdf_multipage -- --test-threads=1
 ```
+
+**Important**: PDF-related tests must be run with `--test-threads=1` due to pdfium's thread-safety requirements.
 
 ### Manual Testing with Real Documents
 
