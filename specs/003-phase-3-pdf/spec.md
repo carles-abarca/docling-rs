@@ -1,207 +1,238 @@
-# Feature Specification: Basic PDF Text Extraction (Phase 3)
+# Feature Specification: Advanced PDF Processing (Phase 3)
 
 **Feature Branch**: `003-phase-3-pdf`
-**Created**: 2025-10-04
+**Created**: 2025-10-05
 **Status**: Draft
-**Input**: User description: "Phase 3: PDF Básico - Backend PDF con pdfium-render - Extracción de texto simple (sin ML)"
+**Input**: "Phase 3: Advanced PDF Processing with layout analysis, table detection, and text extraction using native Rust libraries"
 
 ## User Scenarios & Testing
 
 ### Primary User Story
-As a Rust application developer, I need to extract text from PDF files in reading order so that I can process PDF documents alongside other formats without relying on machine learning models or Python dependencies.
+As a Rust application developer, I need to extract structured content from PDF files including text, tables, images, and layout information, so that I can process complex PDF documents with high accuracy comparable to docling Python while maintaining native Rust performance.
 
 ### Acceptance Scenarios
 
-1. **Given** a simple text-based PDF file, **When** the library converts it to a DoclingDocument, **Then** the document contains all extractable text in reading order
+1. **Given** a PDF with mixed content (text, tables, images), **When** the library processes it, **Then** it extracts all elements with their types, positions, and reading order
 
-2. **Given** a multi-page PDF document, **When** the library processes it, **Then** each page is represented in the DoclingDocument with correct page numbers and text content
+2. **Given** a multi-column PDF document, **When** the library analyzes layout, **Then** text is extracted in correct reading order respecting column flow
 
-3. **Given** a PDF with mixed text and images, **When** the library extracts text, **Then** text content is extracted and image regions are noted in metadata (without OCR)
+3. **Given** a PDF with tables, **When** the library detects table structures, **Then** tables are extracted with cell positions, content, and structure information
 
-4. **Given** a PDF with embedded fonts, **When** the library extracts text, **Then** text is decoded correctly using the embedded font information
+4. **Given** a PDF with embedded images, **When** the library processes it, **Then** images are detected with bounding boxes and can be extracted as bitmaps
 
-5. **Given** a PDF with simple table-like text arrangement, **When** the library extracts text, **Then** text is extracted in logical reading order (best effort without layout analysis)
+5. **Given** a scanned PDF, **When** OCR is enabled, **Then** text is extracted from images with position and confidence information
 
-6. **Given** a password-protected PDF with user password, **When** the library is provided the correct password, **Then** the PDF is unlocked and text is extracted successfully
+6. **Given** a PDF with formulas and code blocks, **When** enrichment is enabled, **Then** these elements are identified and classified separately
 
-7. **Given** a scanned PDF (image-only, no text layer), **When** the library attempts to extract text, **Then** the system returns an indication of no extractable text without errors
+7. **Given** a PDF with complex hierarchy (sections, headings, paragraphs), **When** the library processes it, **Then** document structure is preserved with correct nesting
 
 ### Edge Cases
 
-- What happens when a PDF is corrupted or invalid?
-  - System MUST return a descriptive error indicating the PDF cannot be parsed
+- What happens when layout analysis model fails?
+  - System MUST fall back to simple text extraction with warning
 
-- What happens when a PDF page has no text (blank page)?
-  - System MUST include the page in the document with empty text content
+- What happens when a table spans multiple pages?
+  - System MUST detect and link table fragments across pages
 
-- What happens when a PDF uses non-standard or custom fonts?
-  - System MUST make best effort to extract text, falling back to glyph mapping if available
+- What happens when OCR confidence is low?
+  - System MUST include confidence scores and allow threshold configuration
 
-- What happens when a PDF has complex multi-column layout?
-  - System MUST extract text in the order provided by PDF (may not match visual reading order without layout analysis)
+- What happens when reading order is ambiguous?
+  - System MUST use best-effort ordering with confidence indicators
 
-- What happens when a PDF contains forms with fillable fields?
-  - System MUST extract static text and field labels (field values extraction is optional)
-
-- What happens when a PDF is encrypted without permissions?
-  - System MUST return an error indicating decryption is required
+- What happens with encrypted PDFs?
+  - System MUST support password decryption for authorized access
 
 ## Requirements
 
 ### Functional Requirements
 
-#### PDF Backend Infrastructure
-- **FR-001**: Library MUST provide a `PdfBackend` implementing the Backend trait from Phase 1
-- **FR-002**: PdfBackend MUST use `pdfium-render` crate for PDF parsing and rendering
-- **FR-003**: PdfBackend MUST support loading PDFs from file paths
-- **FR-004**: PdfBackend MUST support loading PDFs from byte streams
-- **FR-005**: PdfBackend MUST validate PDF structure before processing
-- **FR-006**: PdfBackend MUST report PDF version and metadata (title, author, page count)
+#### PDF Backend Infrastructure (Phase 3a: Foundation)
+- **FR-001**: Library MUST provide `PdfBackend` implementing Backend trait
+- **FR-002**: Backend MUST use `pdfium-render` for PDF parsing and text extraction
+- **FR-003**: Backend MUST extract text with character positions and fonts
+- **FR-004**: Backend MUST extract page dimensions, rotation, and metadata
+- **FR-005**: Backend MUST support password-protected PDFs
+- **FR-006**: Backend MUST handle multi-page documents efficiently
 
-#### Page-Level Processing
-- **FR-007**: PdfBackend MUST process PDF documents page-by-page
-- **FR-008**: Each page MUST be represented as a distinct section in DoclingDocument
-- **FR-009**: PdfBackend MUST extract page dimensions (width, height) in points
-- **FR-010**: PdfBackend MUST preserve page numbers starting from 1
-- **FR-011**: PdfBackend MUST support selective page range processing (e.g., pages 1-10)
+#### Layout Analysis (Phase 3b: Structure Detection)
+- **FR-007**: System MUST detect document layout elements (headers, paragraphs, lists, etc.)
+- **FR-008**: System MUST determine reading order for multi-column layouts
+- **FR-009**: Layout analysis MUST work with both text-based and scanned PDFs
+- **FR-010**: System MUST detect page regions (margins, columns, zones)
+- **FR-011**: Layout model MUST be pluggable (allow different implementations)
+- **FR-012**: System MUST provide confidence scores for layout predictions
 
-#### Text Extraction
-- **FR-012**: PdfBackend MUST extract text content from each page using pdfium text extraction API
-- **FR-013**: Text extraction MUST preserve word boundaries and spaces
-- **FR-014**: Text extraction MUST handle multi-byte characters and Unicode correctly
-- **FR-015**: Text extraction MUST decode text using embedded font information when available
-- **FR-016**: Extracted text MUST be returned in the order provided by the PDF structure
-- **FR-017**: Text extraction MUST handle rotated text (0°, 90°, 180°, 270°)
+#### Table Detection & Extraction (Phase 3c: Tables)
+- **FR-013**: System MUST detect tables on PDF pages
+- **FR-014**: Table detection MUST identify cell boundaries and grid structure
+- **FR-015**: System MUST extract table content with row/column positions
+- **FR-016**: System MUST handle merged cells and complex table layouts
+- **FR-017**: System MUST detect table headers and structure
+- **FR-018**: Table extraction MUST preserve cell formatting hints
 
-#### Metadata Extraction
-- **FR-018**: PdfBackend MUST extract document metadata (title, author, subject, keywords, creator, producer)
-- **FR-019**: PdfBackend MUST extract creation and modification dates if available
-- **FR-020**: PdfBackend MUST detect if PDF contains only scanned images (no text layer)
-- **FR-021**: Metadata MUST be included in DoclingDocument origin information
+#### Image Processing (Phase 3d: Images)
+- **FR-019**: System MUST detect and extract images from PDFs
+- **FR-020**: Image extraction MUST include bounding boxes and page positions
+- **FR-021**: System MUST classify image types (photo, diagram, logo, etc.)
+- **FR-022**: System MUST extract image metadata (resolution, format, size)
+- **FR-023**: Image rendering MUST support configurable resolution/scaling
 
-#### Image Detection
-- **FR-022**: PdfBackend MUST detect presence of images on each page
-- **FR-023**: Image metadata (count, bounding boxes) MUST be recorded without extracting image data
-- **FR-024**: System MUST distinguish between text and image regions
-- **FR-025**: OCR is explicitly NOT performed in Phase 3 (deferred to future phases)
+#### OCR Integration (Phase 3e: Scanned PDFs)
+- **FR-024**: System MUST support OCR for scanned PDFs and image regions
+- **FR-025**: OCR MUST be optional and configurable
+- **FR-026**: OCR MUST use native Rust OCR engine (tesseract-rs or leptess)
+- **FR-027**: OCR results MUST include confidence scores
+- **FR-028**: System MUST detect if PDF requires OCR automatically
 
-#### Encryption & Security
-- **FR-026**: PdfBackend MUST detect if a PDF is encrypted
-- **FR-027**: PdfBackend MUST support opening password-protected PDFs with user password
-- **FR-028**: PdfBackend MUST respect PDF permissions (if extraction is disabled, return error)
-- **FR-029**: Encrypted PDFs without correct password MUST return a specific error type
+#### Content Enrichment (Phase 3f: Advanced Features)
+- **FR-029**: System MUST detect and classify code blocks
+- **FR-030**: System MUST identify mathematical formulas and equations
+- **FR-031**: System MUST detect lists (ordered, unordered) with structure
+- **FR-032**: System MUST preserve document hierarchy (sections, subsections)
 
-#### Error Handling
-- **FR-030**: PdfBackend MUST handle corrupted PDFs gracefully with descriptive errors
-- **FR-031**: PdfBackend MUST handle PDFs with missing or damaged fonts
-- **FR-032**: PdfBackend MUST return Result types for all PDF operations
-- **FR-033**: System MUST NOT panic when encountering malformed PDFs
-
-#### Integration with Phase 1
-- **FR-034**: PdfBackend MUST produce DoclingDocument compatible with Phase 1 data models
-- **FR-035**: PdfBackend MUST integrate with DocumentConverter for automatic format detection
-- **FR-036**: PDF documents MUST support all Phase 1 export formats (JSON, Markdown)
-
-#### Cross-Platform Support
-- **FR-037**: PdfBackend MUST work on both Windows and macOS
-- **FR-038**: pdfium-render binaries MUST be available for target platforms
-- **FR-039**: File paths MUST use platform-agnostic APIs
+#### Integration with Phases 1 & 2
+- **FR-033**: PDF content MUST map to DoclingDocument data model
+- **FR-034**: PDF documents MUST support Phase 2 chunking (hierarchical & hybrid)
+- **FR-035**: PDF elements MUST include position metadata for chunk context
+- **FR-036**: System MUST support all Phase 1 export formats
 
 ### Non-Functional Requirements
 
 #### Performance
-- **NFR-001**: Small PDFs (<10 pages, <1MB) MUST process in under 1 second
-- **NFR-002**: Text extraction MUST not load entire PDF into memory
-- **NFR-003**: Page-by-page processing MUST support lazy iteration for large PDFs
-- **NFR-004**: Memory usage MUST scale linearly with page count (not document size)
+- **NFR-001**: Simple PDFs (<10 pages) MUST process in <2 seconds
+- **NFR-002**: Layout analysis MUST NOT block text extraction
+- **NFR-003**: OCR MUST be parallel-processable per page
+- **NFR-004**: Memory usage MUST NOT exceed 2x PDF file size
 
 #### Quality
-- **NFR-005**: Text extraction accuracy MUST be >95% for standard PDFs with embedded fonts
-- **NFR-006**: Reading order MUST be correct for simple single-column text
-- **NFR-007**: Multi-column and complex layouts are best-effort (no guarantee of correct reading order without ML)
+- **NFR-005**: Text extraction accuracy MUST be >98% for standard PDFs
+- **NFR-006**: Layout reading order MUST be >90% correct for 2-column layouts
+- **NFR-007**: Table detection MUST have >85% precision and recall
+- **NFR-008**: OCR accuracy MUST be >92% for clear scanned documents
 
-#### API Design
-- **NFR-008**: PDF-specific configuration MUST follow Phase 1 backend configuration patterns
-- **NFR-009**: API MUST allow password specification for encrypted PDFs
-- **NFR-010**: API MUST allow page range specification for selective processing
-- **NFR-011**: All public APIs MUST have rustdoc documentation with examples
+#### Architecture
+- **NFR-009**: PDF processing MUST be modular (text, layout, tables, OCR as separate components)
+- **NFR-010**: Layout and table models MUST be swappable implementations
+- **NFR-011**: System MUST support pipeline configuration (enable/disable features)
+- **NFR-012**: All models MUST support CPU-only inference (no GPU requirement)
 
 #### Dependencies
-- **NFR-012**: MUST use `pdfium-render` crate (native Rust binding to Pdfium)
-- **NFR-013**: pdfium-render MUST NOT introduce Python dependencies
-- **NFR-014**: PDF processing MUST NOT require external services or ML models
+- **NFR-013**: MUST use native Rust libraries only (NO Python dependencies)
+- **NFR-014**: Layout analysis MUST use Rust ML inference (tract, candle, or burn)
+- **NFR-015**: OCR MUST use Rust bindings (tesseract-rs or rusty-tesseract)
+- **NFR-016**: Table detection MAY use rule-based or ML approach in Rust
 
 #### Testing
-- **NFR-015**: Tests MUST include various PDF types (simple text, multi-page, encrypted, scanned)
-- **NFR-016**: Tests MUST verify text extraction accuracy on sample PDFs
-- **NFR-017**: Tests MUST verify handling of corrupted/malformed PDFs
-- **NFR-018**: Integration tests MUST verify PDF documents work with Phase 2 chunking
-- **NFR-019**: Tests MUST run on both Windows and macOS
-
-#### Limitations (Explicit Non-Goals for Phase 3)
-- **NFR-020**: Layout analysis is NOT included (no advanced reading order detection)
-- **NFR-021**: OCR is NOT included (scanned PDFs return no text)
-- **NFR-022**: Table structure detection is NOT included (tables extracted as plain text)
-- **NFR-023**: Form field value extraction is optional (not required)
-- **NFR-024**: Image extraction/processing is NOT included (metadata only)
+- **NFR-017**: Test suite MUST include diverse PDF samples (academic, business, scanned)
+- **NFR-018**: Tests MUST verify layout accuracy on multi-column documents
+- **NFR-019**: Tests MUST verify table extraction on complex tables
+- **NFR-020**: Tests MUST verify OCR on scanned PDFs
+- **NFR-021**: Benchmark tests MUST compare with docling Python (quality & speed)
 
 ### Key Entities
 
-- **PdfBackend**: Backend implementation for PDF format using pdfium-render. Handles PDF loading, validation, text extraction, and conversion to DoclingDocument.
+- **PdfBackend**: Main backend implementing Backend trait, coordinates PDF processing pipeline
 
-- **PdfPage**: Represents a single page in a PDF with text content, dimensions, page number, and image metadata.
+- **PdfDocument**: Represents loaded PDF with pages, metadata, encryption status
 
-- **PdfDocument**: Internal representation of loaded PDF with metadata, page count, encryption status, and page iterator.
+- **PdfPage**: Individual page with text, layout, tables, images
 
-- **PdfTextExtractor**: Component responsible for extracting text from PDF pages using pdfium API, handling Unicode, fonts, and reading order.
+- **LayoutAnalyzer**: Component that detects document structure and reading order
 
-- **PdfMetadata**: Contains PDF document metadata including title, author, dates, version, encryption status, and page count.
+- **TableDetector**: Detects and extracts table structures from pages
 
-- **EncryptionInfo**: Information about PDF encryption status, required passwords, and permissions.
+- **ImageExtractor**: Extracts and classifies images from PDF
 
-- **PdfConfig**: Configuration for PDF processing including password, page range, and extraction options.
+- **OcrEngine**: Performs OCR on scanned pages or image regions
+
+- **ContentEnricher**: Identifies code blocks, formulas, and special elements
+
+- **PdfPipeline**: Orchestrates processing stages (text → layout → tables → OCR → enrichment)
+
+- **PdfElement**: Base type for all PDF elements (text block, table, image, formula)
+
+- **LayoutModel**: ML model interface for layout analysis
+
+- **TableModel**: ML model interface for table detection
+
+## Implementation Phases
+
+### Phase 3a: PDF Foundation (Week 1)
+- pdfium-render integration
+- Basic text extraction with positions
+- Page metadata extraction
+- Password handling
+- DoclingDocument mapping
+
+### Phase 3b: Layout Analysis (Week 2)
+- Implement LayoutAnalyzer with rule-based approach
+- Reading order detection for multi-column
+- Document structure hierarchy
+- Integration with chunking
+
+### Phase 3c: Table Detection (Week 3)
+- Rule-based table detection (grid lines, alignment)
+- Cell boundary detection
+- Table structure extraction
+- Table to DoclingDocument mapping
+
+### Phase 3d: Image Processing (Week 4)
+- Image detection and extraction
+- Bounding box calculation
+- Image classification (basic rules)
+- Bitmap rendering
+
+### Phase 3e: OCR Integration (Week 5)
+- tesseract-rs integration
+- Scanned PDF detection
+- OCR pipeline with confidence
+- Text positioning from OCR
+
+### Phase 3f: Content Enrichment (Week 6)
+- Code block detection (regex patterns)
+- Formula detection (symbol patterns)
+- List structure detection
+- Final integration and optimization
 
 ## Review & Acceptance Checklist
 
 ### Content Quality
-- [x] No implementation details (languages, frameworks, APIs)
-- [x] Focused on user value and business needs
-- [x] Written for non-technical stakeholders
+- [x] Requirements aligned with docling Python capabilities
+- [x] Native Rust implementation strategy defined
+- [x] Phased approach for complexity management
 - [x] All mandatory sections completed
 
 ### Requirement Completeness
-- [x] No [NEEDS CLARIFICATION] markers remain
-- [x] Requirements are testable and unambiguous
-- [x] Success criteria are measurable
-- [x] Scope is clearly bounded
-- [x] Dependencies and assumptions identified
+- [x] Functional requirements cover all docling PDF features
+- [x] Non-functional requirements include performance and quality targets
+- [x] Implementation phases provide clear roadmap
+- [x] Dependencies identified (Rust-native only)
 
 ### Assumptions
-- Phase 1 (Core + Simple Formats) is completed and available
-- pdfium-render crate provides sufficient text extraction capabilities
-- Basic text extraction without ML is valuable for many use cases
-- Advanced PDF features (layout analysis, OCR, tables) are deferred to Phase 4
-- Reading order for complex layouts is best-effort only
+- pdfium-render provides sufficient text extraction APIs
+- Rust ML inference libraries (tract/candle) can run layout models
+- tesseract-rs provides adequate OCR quality
+- Rule-based approaches can achieve acceptable quality for tables/layout
+- Incremental implementation is viable
 
 ### Explicit Limitations
-- NO layout analysis or advanced reading order detection
-- NO OCR for scanned PDFs (returns empty text)
-- NO table structure recognition (tables as plain text)
-- NO form field value extraction (optional if trivial)
-- NO image extraction (metadata only)
+- ML models will be simpler than Python (due to Rust ML ecosystem maturity)
+- Initial layout analysis may use rule-based before ML integration
+- OCR quality depends on tesseract quality
+- Performance may differ from Python initially
 
 ### Dependencies
-- Requires Phase 1 Backend trait and DoclingDocument
-- Requires `pdfium-render` crate with platform-specific binaries
-- Must comply with constitution principle VII (Native Rust Dependencies)
-- pdfium-render must support Windows and macOS
+- pdfium-render for PDF parsing
+- tract or candle for ML inference (if needed)
+- tesseract-rs for OCR
+- Phase 1 Backend trait and DoclingDocument
+- Phase 2 chunking integration
 
 ## Execution Status
 
-- [x] User description parsed
-- [x] Key concepts extracted
-- [x] Ambiguities marked
-- [x] User scenarios defined
-- [x] Requirements generated
-- [x] Entities identified
-- [x] Review checklist passed
+- [x] Research docling Python implementation
+- [x] Identify core PDF features
+- [x] Define phased implementation approach
+- [x] Specify requirements aligned with docling
+- [x] Plan Rust-native architecture
