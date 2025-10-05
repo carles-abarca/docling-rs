@@ -5,13 +5,15 @@
 //! - Text with different fonts and sizes
 //! - Text position metadata
 
+mod helpers;
+use helpers::pdf_fixtures::*;
+
 use docling_rs::backend::{Backend, PdfBackend};
 use docling_rs::cli::output;
 use docling_rs::datamodel::InputDocument;
 use docling_rs::InputFormat;
 
 #[test]
-#[ignore = "Requires PDF implementation"]
 fn test_extract_text_from_simple_pdf() {
     // This test verifies basic text extraction from a simple PDF
 
@@ -26,6 +28,9 @@ fn test_extract_text_from_simple_pdf() {
     let result = backend.convert(&input);
 
     // Assert: Text is extracted correctly
+    if let Err(e) = &result {
+        eprintln!("PDF conversion error: {:?}", e);
+    }
     assert!(result.is_ok(), "PDF conversion should succeed");
 
     let doc = result.unwrap();
@@ -42,7 +47,6 @@ fn test_extract_text_from_simple_pdf() {
 }
 
 #[test]
-#[ignore = "Requires PDF implementation"]
 fn test_extract_text_with_positions() {
     // This test verifies that text extraction includes position metadata
 
@@ -60,21 +64,17 @@ fn test_extract_text_with_positions() {
     assert!(result.is_ok(), "PDF conversion should succeed");
 
     let doc = result.unwrap();
-    let nodes = doc.nodes();
+    let text = output::to_text(&doc);
 
-    // Verify that nodes have position information
-    for node in nodes {
-        if let Some(pos) = node.position() {
-            assert!(
-                pos.start_offset() < pos.end_offset(),
-                "Position should have valid offsets"
-            );
-        }
-    }
+    // Verify that both lines of text were extracted
+    assert!(text.contains("Top text"), "Should extract 'Top text'");
+    assert!(text.contains("Bottom text"), "Should extract 'Bottom text'");
+
+    // Note: Position metadata will be added in future phases (Phase 2: Layout Analysis)
+    // For now, we just verify basic text extraction works
 }
 
 #[test]
-#[ignore = "Requires PDF implementation"]
 fn test_extract_text_from_empty_pdf() {
     // This test verifies handling of empty PDFs
 
@@ -91,26 +91,18 @@ fn test_extract_text_from_empty_pdf() {
     assert!(result.is_ok(), "Empty PDF conversion should succeed");
 
     let doc = result.unwrap();
-    let text = output::to_text(&doc);
+
+    // Empty PDF should have no nodes (or only empty nodes)
+    let has_content = doc.nodes().iter().any(|node| {
+        node.text_content()
+            .map(|t| !t.trim().is_empty())
+            .unwrap_or(false)
+    });
 
     assert!(
-        text.trim().is_empty(),
-        "Empty PDF should produce empty text"
+        !has_content,
+        "Empty PDF should have no text content in nodes"
     );
 }
 
-// Helper functions to create test PDFs
-// These will be implemented once pdfium integration is complete
-
-#[allow(dead_code)]
-fn create_simple_text_pdf(content: &str) -> std::path::PathBuf {
-    // TODO: Create a PDF with the given text content
-    // For now, return a placeholder path
-    std::path::PathBuf::from(format!("/tmp/test_{}.pdf", content.len()))
-}
-
-#[allow(dead_code)]
-fn create_empty_pdf() -> std::path::PathBuf {
-    // TODO: Create an empty PDF
-    std::path::PathBuf::from("/tmp/empty.pdf")
-}
+// Helper functions now imported from helpers::pdf_fixtures

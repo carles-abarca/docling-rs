@@ -4,12 +4,13 @@ Native Rust document processing library for extracting structured text and metad
 
 ## Features
 
-- **Multi-format Support**: Markdown, HTML, CSV, and DOCX
+- **Multi-format Support**: Markdown, HTML, CSV, DOCX, and PDF
 - **Unified Document Model**: All formats convert to a common `DoclingDocument` structure
 - **Pure Rust**: No Python dependencies, native performance
-- **Cross-platform**: Works on Windows and macOS
+- **Cross-platform**: Works on Windows and macOS (with bundled PDF libraries)
 - **Type-safe**: Leverages Rust's type system for reliability
 - **Serialization**: JSON serialization/deserialization via serde
+- **Batteries Included**: PDF support with bundled pdfium binaries (no external dependencies needed)
 
 ## Status
 
