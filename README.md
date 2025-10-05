@@ -162,3 +162,147 @@ MIT
 ## Contributing
 
 This project follows Test-Driven Development (TDD). See `CLAUDE.md` for development guidelines.
+
+## CLI Usage
+
+The `docling-rs` CLI provides powerful document conversion capabilities.
+
+### Installation
+
+```bash
+cargo install docling-rs
+```
+
+### Basic Conversion
+
+```bash
+# Convert single file
+docling-rs document.md
+
+# Convert to specific format
+docling-rs document.pdf --to json
+
+# Batch convert directory
+docling-rs docs/ --output-dir output/
+
+# With format filtering
+docling-rs docs/ --from markdown,html --to json
+```
+
+### Document Chunking
+
+Enable intelligent document chunking for RAG applications:
+
+```bash
+# Chunk document (default: hierarchical chunking)
+docling-rs document.md --chunk
+
+# Output as JSON for easy processing
+docling-rs document.pdf --chunk --to json
+
+# Batch chunking
+docling-rs docs/ --chunk --to json --output-dir chunks/
+```
+
+Chunking automatically:
+- Preserves document structure
+- Maintains heading hierarchy
+- Includes metadata (headings, offsets, indices)
+- Outputs semantically coherent chunks
+
+### CLI Options
+
+```
+Options:
+  -t, --to <FORMAT>          Output format (markdown, json, text) [default: markdown]
+  -o, --output-dir <DIR>     Output directory
+  -f, --from <FORMAT>        Filter input files by format (batch mode)
+      --chunk                Enable document chunking
+      --chunk-size <SIZE>    Chunk size in characters [default: 1000]
+      --ocr-enabled          Enable OCR for scanned PDFs
+      --continue-on-error    Continue processing on error (batch mode)
+      --abort-on-error       Abort on first error (batch mode)
+  -v, --verbose              Verbose output
+  -q, --quiet                Quiet mode
+  -h, --help                 Print help
+  -V, --version              Print version
+```
+
+## Document Chunking (Library)
+
+Intelligent chunking for RAG and embedding applications.
+
+### Basic Hierarchical Chunking
+
+```rust
+use docling_rs::{DocumentConverter, chunking::{HierarchicalChunker, BaseChunker}};
+
+let converter = DocumentConverter::new();
+let result = converter.convert_file("document.md")?;
+let doc = result.document();
+
+// Create hierarchical chunker
+let chunker = HierarchicalChunker::new();
+
+// Generate chunks
+for chunk in chunker.chunk(&doc) {
+    println!("Chunk {}: {}", chunk.meta.index, chunk.text);
+    println!("Context: {:?}", chunk.meta.headings);
+    println!("Position: {}-{}", chunk.meta.start_offset, chunk.meta.end_offset);
+}
+```
+
+### Advanced Hybrid Chunking
+
+For token-aware chunking (useful with embedding models):
+
+```rust
+use docling_rs::chunking::{HybridChunker, tokenizer::HuggingFaceTokenizer, BaseChunker};
+
+// Load tokenizer (compatible with HuggingFace tokenizers)
+let tokenizer = Box::new(HuggingFaceTokenizer::from_file("tokenizer.json")?);
+
+// Create hybrid chunker with token limit
+let chunker = HybridChunker::builder()
+    .tokenizer(tokenizer)
+    .max_tokens(512)          // Maximum tokens per chunk
+    .merge_peers(true)        // Merge small adjacent chunks
+    .build()?;
+
+// Chunk with token awareness
+let chunks: Vec<_> = chunker.chunk(&doc).collect();
+println!("Generated {} chunks", chunks.len());
+
+// Each chunk respects token limit
+for chunk in chunks {
+    // Use for embedding models
+    let contextualized = chunker.contextualize(&chunk);
+    println!("Embedding input: {}", contextualized);
+}
+```
+
+### Chunk Metadata
+
+Each chunk includes rich metadata:
+
+```rust
+pub struct BaseChunk {
+    pub text: String,           // Chunk text content
+    pub meta: ChunkMetadata,
+}
+
+pub struct ChunkMetadata {
+    pub doc_name: String,       // Source document name
+    pub headings: Vec<String>,  // Hierarchical heading context
+    pub caption: Option<String>, // Optional caption
+    pub start_offset: usize,    // Start position in document
+    pub end_offset: usize,      // End position in document
+    pub index: usize,           // Sequential chunk index
+}
+```
+
+### Chunking Strategies
+
+- **Hierarchical**: Structure-based chunking that respects document hierarchy (headings, paragraphs, lists)
+- **Hybrid**: Token-aware chunking with semantic boundaries and configurable merging
+

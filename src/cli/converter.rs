@@ -1,5 +1,6 @@
 //! Conversion orchestration logic.
 
+use crate::chunking::{BaseChunker, HierarchicalChunker};
 use crate::cli::args::{CliArgs, InputFormat, OutputFormat};
 use crate::cli::output;
 use crate::{DocumentConverter, InputDocument};
@@ -255,11 +256,16 @@ impl Converter {
         // Get document
         let doc = result.document();
 
-        // Generate output based on format
-        let output_content = match self.args.output_format {
-            OutputFormat::Markdown => output::to_markdown(doc),
-            OutputFormat::Json => output::to_json(doc)?,
-            OutputFormat::Text => output::to_text(doc),
+        // Apply chunking if enabled
+        let output_content = if self.args.chunk {
+            self.generate_chunked_output(doc)?
+        } else {
+            // Generate output based on format (no chunking)
+            match self.args.output_format {
+                OutputFormat::Markdown => output::to_markdown(doc),
+                OutputFormat::Json => output::to_json(doc)?,
+                OutputFormat::Text => output::to_text(doc),
+            }
         };
 
         // Ensure output directory exists
@@ -338,5 +344,41 @@ impl Converter {
         };
 
         Ok(output_path)
+    }
+
+    /// Generate chunked output from document
+    fn generate_chunked_output(&self, doc: &crate::datamodel::DoclingDocument) -> Result<String> {
+        // Create hierarchical chunker
+        let chunker = HierarchicalChunker::new();
+
+        // Collect all chunks
+        let chunks: Vec<_> = chunker.chunk(doc).collect();
+
+        // Format based on output format
+        match self.args.output_format {
+            OutputFormat::Json => {
+                // Output chunks as JSON array
+                Ok(serde_json::to_string_pretty(&chunks)?)
+            }
+            OutputFormat::Markdown | OutputFormat::Text => {
+                // Output chunks separated by newlines with metadata
+                let mut output = String::new();
+                for (i, chunk) in chunks.iter().enumerate() {
+                    if i > 0 {
+                        output.push_str("\n---\n\n");
+                    }
+                    // Add chunk metadata
+                    output.push_str(&format!("# Chunk {} of {}\n", i + 1, chunks.len()));
+                    if !chunk.meta.headings.is_empty() {
+                        output.push_str(&format!("Context: {}\n", chunk.meta.headings.join(" > ")));
+                    }
+                    output.push_str(&format!("Size: {} characters\n\n", chunk.text.len()));
+                    // Add chunk text
+                    output.push_str(&chunk.text);
+                    output.push('\n');
+                }
+                Ok(output)
+            }
+        }
     }
 }
