@@ -38,5 +38,7 @@ pub mod layout_analyzer;  // Public for Phase 3b
 pub mod page;  // Public for Phase 3b (TextBlock, etc.)
 pub mod table;  // Public for Phase 3c
 pub mod table_detector;  // Public for Phase 3c
+pub mod image;  // Public for Phase 3d
+pub mod image_extractor;  // Public for Phase 3d
 // mod text_extractor;  // TODO: Fix pdfium API compatibility issues
 pub mod types;  // Public for Phase 3b (BoundingBox, FontInfo, etc.)

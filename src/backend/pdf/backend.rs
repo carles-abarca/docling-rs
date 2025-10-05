@@ -1,6 +1,7 @@
 //! PDF backend implementation.
 
 use super::config::PdfConfig;
+use super::image_extractor::{ImageExtractor, PdfiumImageExtractor};
 use crate::backend::Backend;
 use crate::datamodel::{DoclingDocument, DocumentNode, DocumentSource, InputDocument, NodeType};
 use crate::error::ConversionError;
@@ -91,6 +92,14 @@ impl PdfBackend {
         // Extract text from all pages
         let page_count = pdf.pages().len() as usize;
         let mut full_text = String::new();
+        let mut all_images = Vec::new();
+
+        // Initialize image extractor if enabled
+        let image_extractor = if self.config.enable_images {
+            Some(PdfiumImageExtractor::new())
+        } else {
+            None
+        };
 
         // Determine page range
         let range = self.config.page_range.clone().unwrap_or(0..page_count);
@@ -104,6 +113,7 @@ impl PdfBackend {
                 ConversionError::ParseError(format!("Failed to get page {}: {}", page_index, e))
             })?;
 
+            // Extract text
             let text_page = page.text().map_err(|e| {
                 ConversionError::ParseError(format!("Failed to get text from page {}: {}", page_index, e))
             })?;
@@ -112,6 +122,12 @@ impl PdfBackend {
             if !page_text.is_empty() {
                 full_text.push_str(&page_text);
                 full_text.push('\n');
+            }
+
+            // Extract images if enabled
+            if let Some(ref extractor) = image_extractor {
+                let images = extractor.extract_images(&page);
+                all_images.extend(images);
             }
         }
 
@@ -131,6 +147,13 @@ impl PdfBackend {
         if !full_text.trim().is_empty() {
             let node = DocumentNode::new(NodeType::Text, full_text);
             doc.add_node(node);
+        }
+
+        // Add image count as metadata
+        if !all_images.is_empty() {
+            doc = doc.with_metadata("image_count", all_images.len());
+            // TODO: In a future phase, add actual Image nodes to the document
+            // For now, we've successfully extracted and classified the images
         }
 
         Ok(doc)
