@@ -5,13 +5,15 @@
 //! - Text extraction from all pages
 //! - Page metadata
 
+mod helpers;
+use helpers::pdf_fixtures::*;
+
 use docling_rs::backend::{Backend, PdfBackend};
 use docling_rs::cli::output;
 use docling_rs::datamodel::InputDocument;
 use docling_rs::InputFormat;
 
 #[test]
-#[ignore = "Requires PDF implementation"]
 fn test_multipage_pdf_page_count() {
     // This test verifies correct page counting in multi-page PDFs
 
@@ -33,7 +35,6 @@ fn test_multipage_pdf_page_count() {
 }
 
 #[test]
-#[ignore = "Requires PDF implementation"]
 fn test_multipage_pdf_text_extraction() {
     // This test verifies text extraction from all pages
 
@@ -63,7 +64,6 @@ fn test_multipage_pdf_text_extraction() {
 }
 
 #[test]
-#[ignore = "Requires PDF implementation"]
 fn test_multipage_pdf_reading_order() {
     // This test verifies that text from pages is extracted in correct order
 
@@ -93,16 +93,4 @@ fn test_multipage_pdf_reading_order() {
     );
 }
 
-// Helper functions
-
-#[allow(dead_code)]
-fn create_multipage_pdf(page_count: usize) -> std::path::PathBuf {
-    // TODO: Create a PDF with specified number of pages
-    std::path::PathBuf::from(format!("/tmp/multipage_{}.pdf", page_count))
-}
-
-#[allow(dead_code)]
-fn create_pdf_with_page_texts(texts: &[&str]) -> std::path::PathBuf {
-    // TODO: Create a PDF with text on each page
-    std::path::PathBuf::from(format!("/tmp/pages_{}.pdf", texts.len()))
-}
+// Helper functions now imported from helpers::pdf_fixtures
