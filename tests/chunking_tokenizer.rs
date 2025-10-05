@@ -20,7 +20,7 @@ impl MockTokenizer {
 impl Tokenizer for MockTokenizer {
     fn count_tokens(&self, text: &str) -> usize {
         // Simple approximation: count by characters / 4
-        (text.len() + self.chars_per_token - 1) / self.chars_per_token
+        text.len().div_ceil(self.chars_per_token)
     }
 
     fn max_tokens(&self) -> usize {

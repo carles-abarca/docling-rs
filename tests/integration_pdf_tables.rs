@@ -26,7 +26,7 @@ fn test_simple_table_extraction() {
     let nodes = doc.nodes();
 
     // Should have table content
-    assert!(nodes.len() > 0, "Should extract table content");
+    assert!(!nodes.is_empty(), "Should extract table content");
 
     // Verify table structure is preserved
     // (This assumes DoclingDocument can represent tables)

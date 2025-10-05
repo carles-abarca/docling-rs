@@ -85,7 +85,7 @@ Deep learning uses neural networks with multiple layers to learn hierarchical re
     // Step 4: Generate chunks with token awareness
     println!("=== Generated Chunks (Token-Aware) ===\n");
 
-    let chunks: Vec<_> = chunker.chunk(&doc).collect();
+    let chunks: Vec<_> = chunker.chunk(doc).collect();
     println!("Generated {} chunks\n", chunks.len());
 
     for chunk in chunks {

@@ -5,7 +5,7 @@
 
 use docling_rs::backend::pdf::{
     page::TextBlock,
-    table::{Table, TableCell, TableStructure},
+    table::TableStructure,
     table_detector::TableDetector,
     types::BoundingBox,
 };

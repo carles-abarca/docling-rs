@@ -46,7 +46,7 @@ Nested content here.
 
     // Step 3: Generate Chunks
     println!("=== Generated Chunks ===\n");
-    for chunk in chunker.chunk(&doc) {
+    for chunk in chunker.chunk(doc) {
         println!("Chunk {}: \"{}\"", chunk.meta.index, chunk.text);
         println!("  Headings: {:?}", chunk.meta.headings);
         println!(
@@ -58,7 +58,7 @@ Nested content here.
 
     // Step 4: Contextualize for Embedding
     println!("=== Contextualized Chunks ===\n");
-    for chunk in chunker.chunk(&doc) {
+    for chunk in chunker.chunk(doc) {
         let contextualized = chunker.contextualize(&chunk);
         println!("Chunk {}: {}", chunk.meta.index, contextualized.len());
         println!("  Content: {}", contextualized.trim());

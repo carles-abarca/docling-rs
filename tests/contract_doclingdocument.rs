@@ -9,7 +9,6 @@
 use docling_rs::datamodel::{
     ConversionMetrics, ConversionResult, ConversionStatus, DoclingDocument,
 };
-use serde_json;
 
 #[test]
 fn test_doclingdocument_new() {

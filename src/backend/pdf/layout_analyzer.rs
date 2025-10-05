@@ -38,6 +38,7 @@ pub struct RuleBasedLayoutAnalyzer {
     column_gap_threshold: f64,
 
     /// Tolerance for vertical alignment (in points)
+    #[allow(dead_code)]
     vertical_alignment_tolerance: f64,
 }
 

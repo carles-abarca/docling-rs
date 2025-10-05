@@ -42,6 +42,7 @@ pub struct GridBasedTableDetector {
     alignment_tolerance: f64,
 
     /// Minimum confidence score to return a table
+    #[allow(dead_code)]
     min_confidence: f32,
 }
 
@@ -192,7 +193,7 @@ impl GridBasedTableDetector {
         for (row_idx, row_group) in row_groups.iter().enumerate() {
             for (col_idx, &block_idx) in row_group.iter().enumerate() {
                 let block = &blocks[block_idx];
-                let cell = TableCell::new(row_idx, col_idx, block.text.clone(), block.bbox.clone())
+                let cell = TableCell::new(row_idx, col_idx, block.text.clone(), block.bbox)
                     .with_header(row_idx == 0);
 
                 table.add_cell(cell);

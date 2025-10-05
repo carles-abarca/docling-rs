@@ -42,6 +42,7 @@ pub trait OcrEngine {
 #[cfg(feature = "ocr")]
 pub struct TesseractOcr {
     /// Minimum confidence threshold
+    #[allow(dead_code)]
     min_confidence: f32,
 }
 
@@ -112,8 +113,10 @@ impl OcrEngine for TesseractOcr {
         use rusty_tesseract::{Args, Image};
 
         // Create tesseract arguments
-        let mut args = Args::default();
-        args.lang = language.to_string();
+        let args = Args {
+            lang: language.to_string(),
+            ..Default::default()
+        };
 
         // Convert image data to tesseract Image
         // Note: This is a simplified version - real implementation would need

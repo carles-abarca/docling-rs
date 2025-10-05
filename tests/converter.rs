@@ -3,7 +3,6 @@
 use docling_rs::datamodel::ConversionStatus;
 use docling_rs::DocumentConverter;
 use std::io::Write;
-use tempfile::NamedTempFile;
 
 #[test]
 fn test_converter_new() {

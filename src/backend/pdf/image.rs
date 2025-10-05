@@ -200,7 +200,7 @@ mod tests {
         let bbox = BoundingBox::new(100.0, 200.0, 300.0, 400.0);
         let metadata = ImageMetadata::new(800, 600, ImageFormat::Jpeg);
 
-        let region = ImageRegion::new(bbox.clone(), metadata);
+        let region = ImageRegion::new(bbox, metadata);
 
         assert_eq!(region.bbox.x, 100.0);
         assert_eq!(region.image_type, ImageType::Unknown);

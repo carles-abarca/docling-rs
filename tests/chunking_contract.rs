@@ -5,7 +5,6 @@
 use docling_rs::chunking::{BaseChunk, BaseChunker, ChunkMetadata, HierarchicalChunker};
 use docling_rs::{DoclingDocument, DocumentConverter};
 use std::fs;
-use std::io::Write;
 
 // Helper function to create a test document
 fn create_test_document() -> DoclingDocument {
@@ -39,7 +38,7 @@ fn test_chunks_are_sequential() {
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Verify chunks returned in order
-    assert!(chunks.len() > 0, "Should produce chunks");
+    assert!(!chunks.is_empty(), "Should produce chunks");
 
     // Verify start_offset is monotonically increasing
     for i in 1..chunks.len() {
@@ -104,7 +103,7 @@ fn test_all_content_represented() {
     let chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Should produce non-empty chunks
-    assert!(chunks.len() > 0, "Should produce at least one chunk");
+    assert!(!chunks.is_empty(), "Should produce at least one chunk");
 
     // Each chunk should have non-empty text
     for chunk in &chunks {

@@ -30,6 +30,7 @@ pub struct PdfiumImageExtractor {
     min_image_size: u32,
 
     /// Whether to extract bitmap data
+    #[allow(dead_code)]
     extract_bitmaps: bool,
 
     /// Whether to perform image classification
@@ -72,7 +73,7 @@ impl PdfiumImageExtractor {
             // Check if object is an image
             if let Some(image_obj) = object.as_image_object() {
                 // Get bounding box
-                let bounds = image_obj.bounds().unwrap_or_else(|_| PdfQuadPoints::ZERO);
+                let bounds = image_obj.bounds().unwrap_or(PdfQuadPoints::ZERO);
 
                 let left = bounds.left().value as f64;
                 let bottom = bounds.bottom().value as f64;
@@ -115,6 +116,7 @@ impl PdfiumImageExtractor {
     }
 
     /// Detect the format of an extracted image.
+    #[allow(dead_code)]
     fn detect_format(&self, bitmap_data: &[u8]) -> ImageFormat {
         // Check magic bytes to identify format
         if bitmap_data.len() < 4 {
@@ -167,7 +169,7 @@ impl PdfiumImageExtractor {
         }
 
         // Very wide/tall images might be charts
-        if aspect_ratio > 2.0 || aspect_ratio < 0.5 {
+        if !(0.5..=2.0).contains(&aspect_ratio) {
             return ImageType::Chart;
         }
 
