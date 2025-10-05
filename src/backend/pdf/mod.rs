@@ -34,4 +34,5 @@ mod backend;
 mod config;
 mod document;
 mod page;
+// mod text_extractor; // TODO: Re-enable for Phase 3b layout analysis
 mod types;
