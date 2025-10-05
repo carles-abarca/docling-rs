@@ -9,6 +9,7 @@ pub enum InputFormat {
     Html,
     Csv,
     Docx,
+    PDF,
 }
 
 impl InputFormat {
@@ -19,6 +20,7 @@ impl InputFormat {
             InputFormat::Html => "html",
             InputFormat::Csv => "csv",
             InputFormat::Docx => "docx",
+            InputFormat::PDF => "pdf",
         }
     }
 
@@ -29,6 +31,7 @@ impl InputFormat {
             "html" | "htm" => Some(InputFormat::Html),
             "csv" => Some(InputFormat::Csv),
             "docx" => Some(InputFormat::Docx),
+            "pdf" => Some(InputFormat::PDF),
             _ => None,
         }
     }
@@ -41,6 +44,7 @@ impl InputFormat {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => {
                     Some(InputFormat::Docx)
                 }
+                "application/pdf" => Some(InputFormat::PDF),
                 "text/html" => Some(InputFormat::Html),
                 "text/csv" => Some(InputFormat::Csv),
                 _ => None,

@@ -1,6 +1,6 @@
 //! Simple pipeline implementation
 
-use crate::backend::{CsvBackend, DocxBackend, HtmlBackend, MarkdownBackend};
+use crate::backend::{CsvBackend, DocxBackend, HtmlBackend, MarkdownBackend, PdfBackend};
 use crate::datamodel::{ConversionResult, ConversionStatus, InputDocument};
 use crate::error::ConversionError;
 use crate::pipeline::Pipeline;
@@ -12,6 +12,7 @@ pub struct SimplePipeline {
     html_backend: HtmlBackend,
     csv_backend: CsvBackend,
     docx_backend: DocxBackend,
+    pdf_backend: PdfBackend,
 }
 
 impl SimplePipeline {
@@ -22,6 +23,7 @@ impl SimplePipeline {
             html_backend: HtmlBackend::new(),
             csv_backend: CsvBackend::new(),
             docx_backend: DocxBackend::new(),
+            pdf_backend: PdfBackend::new(),
         }
     }
 }
@@ -42,6 +44,7 @@ impl Pipeline for SimplePipeline {
             InputFormat::Html => self.html_backend.convert(input)?,
             InputFormat::Csv => self.csv_backend.convert(input)?,
             InputFormat::Docx => self.docx_backend.convert(input)?,
+            InputFormat::PDF => self.pdf_backend.convert(input)?,
         };
 
         // Create conversion result
