@@ -10,7 +10,7 @@ use pdfium_render::prelude::*;
 
 // OCR engine imports (conditional on feature flag)
 #[cfg(feature = "ocr")]
-use super::ocr_engine::{OcrEngine, TesseractOcr};
+use super::ocr_engine::TesseractOcr;
 
 // Note: text_extractor with detailed position tracking is available but not used in basic implementation
 // It will be integrated in future iterations for advanced layout analysis

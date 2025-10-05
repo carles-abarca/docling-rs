@@ -3,7 +3,7 @@
 use crate::chunking::{BaseChunker, HierarchicalChunker};
 use crate::cli::args::{CliArgs, InputFormat, OutputFormat};
 use crate::cli::output;
-use crate::{DocumentConverter, InputDocument};
+use crate::DocumentConverter;
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::{Path, PathBuf};

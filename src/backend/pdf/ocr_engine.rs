@@ -1,7 +1,6 @@
 //! OCR engine implementations for PDF text recognition.
 
-use super::ocr::{OcrResult, OcrWord};
-use super::types::BoundingBox;
+use super::ocr::OcrResult;
 use crate::error::ConversionError;
 
 /// Trait for OCR engine implementations.
