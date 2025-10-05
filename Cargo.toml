@@ -37,6 +37,7 @@ anyhow = "1.0"
 tempfile = "3.8"
 assert_cmd = "2.0"
 predicates = "3.0"
+printpdf = "0.7"  # For creating test PDF fixtures
 
 [features]
 default = []

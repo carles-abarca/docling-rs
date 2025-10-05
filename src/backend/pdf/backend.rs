@@ -24,8 +24,8 @@ pub struct PdfBackend {
 impl PdfBackend {
     /// Create a new PDF backend with default configuration.
     pub fn new() -> Self {
-        let pdfium = Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
-            .or_else(|_| Pdfium::bind_to_system_library())
+        // Try to bind to system-installed pdfium library
+        let pdfium = Pdfium::bind_to_system_library()
             .ok()
             .map(Pdfium::new);
 
@@ -37,8 +37,8 @@ impl PdfBackend {
 
     /// Create a new PDF backend with custom configuration.
     pub fn with_config(config: PdfConfig) -> Self {
-        let pdfium = Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
-            .or_else(|_| Pdfium::bind_to_system_library())
+        // Try to bind to system-installed pdfium library
+        let pdfium = Pdfium::bind_to_system_library()
             .ok()
             .map(Pdfium::new);
 
