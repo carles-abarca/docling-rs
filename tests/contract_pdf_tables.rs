@@ -4,10 +4,7 @@
 //! its contract for detecting tables, cells, and structure.
 
 use docling_rs::backend::pdf::{
-    page::TextBlock,
-    table::TableStructure,
-    table_detector::TableDetector,
-    types::BoundingBox,
+    page::TextBlock, table::TableStructure, table_detector::TableDetector, types::BoundingBox,
 };
 
 #[test]
