@@ -13,6 +13,7 @@
 
 pub mod backend;
 pub mod chunking;
+pub mod cli;
 pub mod datamodel;
 pub mod error;
 pub mod format;

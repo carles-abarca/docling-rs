@@ -28,9 +28,15 @@ pdfium-render = "0.8"
 image = "0.24"
 # Phase 3e: OCR dependencies (optional, requires tesseract installation)
 rusty-tesseract = { version = "1.1", optional = true }
+# Phase 5: CLI dependencies
+clap = { version = "4.5", features = ["derive"] }
+indicatif = "0.17"
+anyhow = "1.0"
 
 [dev-dependencies]
 tempfile = "3.8"
+assert_cmd = "2.0"
+predicates = "3.0"
 
 [features]
 default = []
@@ -39,6 +45,10 @@ ocr = ["rusty-tesseract"]
 [lib]
 name = "docling_rs"
 path = "src/lib.rs"
+
+[[bin]]
+name = "docling-rs"
+path = "src/bin/docling-rs.rs"
 
 [lints.clippy]
 # Enforce best practices (especially for new PDF module)

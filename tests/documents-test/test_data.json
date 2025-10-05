@@ -1,0 +1,303 @@
+{
+  "application": {
+    "name": "TecGPT Desktop",
+    "version": "0.1.2",
+    "build_number": "B0045",
+    "description": "AI-powered desktop application for document indexing and intelligent search",
+    "author": "Tecnológico de Monterrey",
+    "license": "MIT"
+  },
+  "system_requirements": {
+    "platforms": ["macOS", "Windows", "Linux"],
+    "minimum_specs": {
+      "ram": "8GB",
+      "storage": "2GB",
+      "cpu": "Intel i5 or AMD equivalent",
+      "gpu": "Optional (improves embedding performance)"
+    },
+    "recommended_specs": {
+      "ram": "16GB",
+      "storage": "10GB",
+      "cpu": "Intel i7 or AMD equivalent",
+      "gpu": "NVIDIA GTX 1060 or better"
+    }
+  },
+  "ai_models": {
+    "embeddings": {
+      "primary": {
+        "name": "sentence-transformers/all-MiniLM-L6-v2",
+        "size": "80MB",
+        "dimensions": 384,
+        "languages": ["en", "es", "fr", "de"],
+        "performance": {
+          "encoding_speed": "1000 docs/sec",
+          "memory_usage": "200MB",
+          "accuracy": 0.82
+        }
+      },
+      "alternative": {
+        "name": "sentence-transformers/multilingual-e5-small",
+        "size": "118MB",
+        "dimensions": 384,
+        "languages": ["multilingual"],
+        "performance": {
+          "encoding_speed": "800 docs/sec",
+          "memory_usage": "300MB",
+          "accuracy": 0.85
+        }
+      }
+    },
+    "vision": {
+      "clip": {
+        "name": "openai/clip-vit-base-patch32",
+        "size": "600MB",
+        "input_resolution": "224x224",
+        "supported_formats": ["jpg", "png", "bmp", "tiff"]
+      },
+      "mobilenet": {
+        "name": "mobilenet_v2",
+        "size": "14MB",
+        "input_resolution": "224x224",
+        "classes": 1000
+      }
+    },
+    "language": {
+      "provider": "azure_openai",
+      "model": "gpt-4o",
+      "api_version": "2024-02-15-preview",
+      "max_tokens": 4096,
+      "temperature": 0.7,
+      "features": ["chat", "function_calling", "vision"]
+    }
+  },
+  "supported_file_types": {
+    "documents": [
+      {
+        "category": "text",
+        "extensions": [".txt", ".md", ".rtf"],
+        "indexing": true,
+        "embeddings": true,
+        "preview": true
+      },
+      {
+        "category": "office",
+        "extensions": [".docx", ".pptx", ".xlsx"],
+        "indexing": true,
+        "embeddings": true,
+        "preview": true,
+        "requirements": ["extractous"]
+      },
+      {
+        "category": "pdf",
+        "extensions": [".pdf"],
+        "indexing": true,
+        "embeddings": true,
+        "preview": true,
+        "ocr": true
+      },
+      {
+        "category": "code",
+        "extensions": [".py", ".js", ".ts", ".rs", ".java", ".cpp", ".c", ".html", ".css"],
+        "indexing": true,
+        "embeddings": true,
+        "preview": true,
+        "syntax_highlighting": true
+      },
+      {
+        "category": "data",
+        "extensions": [".json", ".yaml", ".yml", ".xml", ".csv"],
+        "indexing": true,
+        "embeddings": true,
+        "preview": true,
+        "structured_parsing": true
+      },
+      {
+        "category": "images",
+        "extensions": [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif"],
+        "indexing": true,
+        "embeddings": true,
+        "preview": true,
+        "vision_analysis": true
+      }
+    ]
+  },
+  "database_schema": {
+    "tables": [
+      {
+        "name": "files",
+        "columns": [
+          {"name": "id", "type": "INTEGER", "primary_key": true},
+          {"name": "path", "type": "TEXT", "unique": true},
+          {"name": "name", "type": "TEXT", "indexed": true},
+          {"name": "size", "type": "INTEGER"},
+          {"name": "modified_at", "type": "TEXT"},
+          {"name": "content_hash", "type": "TEXT"},
+          {"name": "content_preview", "type": "TEXT"},
+          {"name": "file_type", "type": "TEXT", "indexed": true},
+          {"name": "indexed_at", "type": "TEXT"}
+        ]
+      },
+      {
+        "name": "embeddings",
+        "columns": [
+          {"name": "id", "type": "INTEGER", "primary_key": true},
+          {"name": "file_id", "type": "INTEGER", "foreign_key": "files.id"},
+          {"name": "chunk_index", "type": "INTEGER"},
+          {"name": "embedding_blob", "type": "BLOB"},
+          {"name": "chunk_text", "type": "TEXT"},
+          {"name": "created_at", "type": "TEXT"}
+        ]
+      },
+      {
+        "name": "chat_threads",
+        "columns": [
+          {"name": "id", "type": "INTEGER", "primary_key": true},
+          {"name": "title", "type": "TEXT"},
+          {"name": "created_at", "type": "TEXT"},
+          {"name": "updated_at", "type": "TEXT"}
+        ]
+      },
+      {
+        "name": "chat_messages",
+        "columns": [
+          {"name": "id", "type": "INTEGER", "primary_key": true},
+          {"name": "thread_id", "type": "INTEGER", "foreign_key": "chat_threads.id"},
+          {"name": "role", "type": "TEXT"},
+          {"name": "content", "type": "TEXT"},
+          {"name": "timestamp", "type": "TEXT"},
+          {"name": "file_attachments", "type": "TEXT"}
+        ]
+      }
+    ],
+    "indexes": [
+      {"name": "idx_files_path", "table": "files", "columns": ["path"]},
+      {"name": "idx_files_type", "table": "files", "columns": ["file_type"]},
+      {"name": "idx_embeddings_file", "table": "embeddings", "columns": ["file_id"]},
+      {"name": "idx_messages_thread", "table": "chat_messages", "columns": ["thread_id"]}
+    ],
+    "virtual_tables": [
+      {
+        "name": "files_fts",
+        "type": "fts5",
+        "content_table": "files",
+        "columns": ["name", "content_preview"]
+      }
+    ]
+  },
+  "configuration_options": {
+    "indexing": {
+      "max_file_size": "100MB",
+      "batch_size": 50,
+      "watch_intervals": 5000,
+      "excluded_patterns": [".git", "node_modules", ".DS_Store", "*.tmp"],
+      "chunk_size": 512,
+      "chunk_overlap": 50
+    },
+    "embeddings": {
+      "model_cache_dir": "~/.cache/tecgpt/models",
+      "batch_size": 32,
+      "max_chunk_length": 512,
+      "similarity_threshold": 0.7,
+      "device": "auto"
+    },
+    "search": {
+      "max_results": 50,
+      "highlight_enabled": true,
+      "fuzzy_search": true,
+      "rag_context_limit": 5,
+      "semantic_weight": 0.6,
+      "lexical_weight": 0.4
+    },
+    "ui": {
+      "theme": "auto",
+      "font_size": "medium",
+      "preview_length": 300,
+      "auto_refresh": true,
+      "shortcuts_enabled": true
+    }
+  },
+  "test_data": {
+    "sample_queries": [
+      "artificial intelligence machine learning",
+      "database configuration settings",
+      "python function implementation",
+      "document processing workflow",
+      "search algorithm optimization",
+      "user interface components",
+      "API endpoint documentation",
+      "file system monitoring",
+      "embeddings vector similarity",
+      "chat conversation history"
+    ],
+    "performance_benchmarks": {
+      "indexing_speed": {
+        "target": "100 files/minute",
+        "measured": "85 files/minute",
+        "test_set_size": 1000
+      },
+      "search_latency": {
+        "target": "< 200ms",
+        "measured": "150ms average",
+        "test_queries": 50
+      },
+      "embedding_generation": {
+        "target": "50 docs/second",
+        "measured": "42 docs/second",
+        "model": "all-MiniLM-L6-v2"
+      }
+    },
+    "test_files": {
+      "total_count": 7,
+      "categories": {
+        "text": 2,
+        "code": 1,
+        "markdown": 1,
+        "json": 1,
+        "yaml": 1,
+        "shell": 1
+      },
+      "total_size": "156KB",
+      "content_diversity": [
+        "AI and technology concepts",
+        "Technical documentation",
+        "Source code with comments",
+        "Configuration data",
+        "System scripts",
+        "Machine learning notes"
+      ]
+    }
+  },
+  "development": {
+    "build_tools": {
+      "frontend": "Vite + React",
+      "backend": "Tauri + Rust",
+      "bundler": "Tauri CLI v2"
+    },
+    "dependencies": {
+      "rust_crates": [
+        "tauri",
+        "tokio",
+        "serde",
+        "sqlx",
+        "fastembed",
+        "notify",
+        "anyhow",
+        "extractous"
+      ],
+      "npm_packages": [
+        "react",
+        "typescript",
+        "tailwindcss",
+        "zustand",
+        "@tauri-apps/api"
+      ]
+    },
+    "commands": {
+      "dev": "npm run tauri dev",
+      "build": "npm run tauri build",
+      "test": "npm test",
+      "lint": "npm run lint",
+      "format": "npm run format"
+    }
+  }
+}

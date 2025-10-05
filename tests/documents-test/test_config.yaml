@@ -1,0 +1,299 @@
+# TecGPT Desktop Configuration File
+# This YAML file contains all configuration settings for the TecGPT Desktop application
+
+application:
+  name: "TecGPT Desktop"
+  version: "0.1.2"
+  build_number: "B0045"
+  environment: "development"
+  debug_mode: true
+  log_level: "info"
+
+# Database configuration
+database:
+  provider: "sqlite"
+  path: "./data/tecgpt.db"
+  enable_fts: true
+  enable_wal: true
+  max_connections: 10
+  connection_timeout: 30
+  pragma_settings:
+    journal_mode: "WAL"
+    synchronous: "NORMAL"
+    temp_store: "MEMORY"
+    mmap_size: 268435456  # 256MB
+    cache_size: -64000    # 64MB
+
+# AI Model Configuration
+ai_models:
+  # Embeddings model settings
+  embeddings:
+    primary_model:
+      name: "sentence-transformers/all-MiniLM-L6-v2"
+      cache_dir: "~/.cache/tecgpt/embeddings"
+      device: "auto"  # auto, cpu, cuda
+      batch_size: 32
+      max_sequence_length: 512
+      normalize_embeddings: true
+
+    fallback_model:
+      name: "sentence-transformers/multilingual-e5-small"
+      cache_dir: "~/.cache/tecgpt/embeddings"
+      device: "cpu"
+      batch_size: 16
+
+  # Vision models
+  vision:
+    clip_model:
+      name: "openai/clip-vit-base-patch32"
+      cache_dir: "~/.cache/tecgpt/vision"
+      input_resolution: 224
+      device: "auto"
+
+    mobilenet_model:
+      name: "mobilenet_v2"
+      cache_dir: "~/.cache/tecgpt/vision"
+      input_resolution: 224
+      num_classes: 1000
+
+  # Language model (Azure OpenAI)
+  language:
+    provider: "azure_openai"
+    api_version: "2024-02-15-preview"
+    model: "gpt-4o"
+    max_tokens: 4096
+    temperature: 0.7
+    top_p: 0.9
+    frequency_penalty: 0.0
+    presence_penalty: 0.0
+    timeout: 60
+    max_retries: 3
+
+# File Processing Configuration
+file_processing:
+  # Supported file types and their handlers
+  supported_types:
+    text_files:
+      extensions: [".txt", ".md", ".rtf"]
+      max_size: "50MB"
+      encoding: "utf-8"
+
+    office_documents:
+      extensions: [".docx", ".pptx", ".xlsx"]
+      max_size: "100MB"
+      extract_metadata: true
+      extract_images: false
+
+    pdf_documents:
+      extensions: [".pdf"]
+      max_size: "100MB"
+      ocr_enabled: true
+      extract_images: true
+
+    code_files:
+      extensions: [".py", ".js", ".ts", ".rs", ".java", ".cpp", ".c", ".h", ".html", ".css", ".sql", ".sh"]
+      max_size: "10MB"
+      syntax_highlighting: true
+
+    data_files:
+      extensions: [".json", ".yaml", ".yml", ".xml", ".csv", ".toml"]
+      max_size: "25MB"
+      parse_structure: true
+
+    image_files:
+      extensions: [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"]
+      max_size: "50MB"
+      extract_text: true
+      generate_captions: true
+
+  # File exclusion patterns
+  exclude_patterns:
+    - ".git/**"
+    - "node_modules/**"
+    - ".vscode/**"
+    - ".DS_Store"
+    - "*.tmp"
+    - "*.temp"
+    - "*.log"
+    - ".env"
+    - "*.key"
+    - "*.pem"
+
+# Indexing Configuration
+indexing:
+  # Batch processing settings
+  batch_size: 50
+  max_concurrent_files: 4
+  progress_update_interval: 1000  # milliseconds
+
+  # File watcher settings
+  watcher:
+    enabled: true
+    debounce_delay: 2000  # milliseconds
+    recursive: true
+    follow_symlinks: false
+
+  # Content chunking for embeddings
+  chunking:
+    strategy: "recursive"  # fixed, recursive, semantic
+    chunk_size: 512
+    chunk_overlap: 50
+    min_chunk_size: 50
+    respect_boundaries: true  # sentence/paragraph boundaries
+
+  # Progress tracking
+  progress:
+    persist_state: true
+    auto_resume: true
+    checkpoint_interval: 100
+
+# Search Configuration
+search:
+  # Full-text search settings
+  fts:
+    enabled: true
+    highlight_matches: true
+    max_snippet_length: 200
+
+  # Semantic search settings
+  semantic:
+    enabled: true
+    similarity_threshold: 0.7
+    max_results: 50
+    rerank_results: true
+
+  # Hybrid search weights
+  hybrid:
+    lexical_weight: 0.4
+    semantic_weight: 0.6
+    boost_title_matches: 1.5
+    boost_recent_files: 1.2
+
+  # RAG (Retrieval Augmented Generation)
+  rag:
+    max_context_files: 5
+    max_context_length: 8000
+    context_overlap: 200
+    include_file_metadata: true
+
+# User Interface Configuration
+ui:
+  # Theme settings
+  theme:
+    mode: "auto"  # light, dark, auto
+    accent_color: "#3b82f6"
+    font_family: "Inter"
+    font_size: "medium"
+
+  # Layout settings
+  layout:
+    sidebar_width: 300
+    preview_pane: true
+    file_tree_depth: 3
+
+  # Performance settings
+  performance:
+    virtual_scrolling: true
+    lazy_loading: true
+    thumbnail_cache_size: 100
+    max_preview_length: 1000
+
+# Logging Configuration
+logging:
+  # Log levels: debug, info, warn, error
+  level: "info"
+
+  # Log destinations
+  destinations:
+    file:
+      enabled: true
+      path: "~/Library/Application Support/TecGPT/logs"
+      max_file_size: "10MB"
+      max_files: 5
+      format: "json"
+
+    console:
+      enabled: true
+      format: "pretty"
+
+  # Module-specific log levels
+  modules:
+    indexer: "debug"
+    embeddings: "info"
+    search: "info"
+    ui: "warn"
+
+# Security Configuration
+security:
+  # API key management
+  api_keys:
+    encryption: "aes256"
+    storage: "keychain"  # keychain, file, memory
+
+  # File access permissions
+  file_access:
+    sandbox_mode: false
+    allowed_paths: []
+    blocked_paths: ["/System", "/usr", "/bin"]
+
+  # Network settings
+  network:
+    ssl_verify: true
+    timeout: 30
+    max_redirects: 5
+
+# Development Configuration
+development:
+  # Hot reload settings
+  hot_reload:
+    enabled: true
+    watch_paths: ["src/", "src-tauri/src/"]
+
+  # Debug features
+  debug:
+    show_sql_queries: false
+    log_api_requests: true
+    performance_metrics: true
+
+  # Testing
+  testing:
+    mock_ai_responses: false
+    test_data_path: "./tests/documents-test"
+    reset_db_on_start: false
+
+# Backup and Maintenance
+maintenance:
+  # Automatic maintenance tasks
+  auto_tasks:
+    database_vacuum: "weekly"
+    log_rotation: "daily"
+    cache_cleanup: "daily"
+
+  # Backup settings
+  backup:
+    enabled: true
+    interval: "daily"
+    max_backups: 7
+    compress: true
+
+  # Performance monitoring
+  monitoring:
+    track_performance: true
+    alert_thresholds:
+      memory_usage: "80%"
+      disk_usage: "90%"
+      response_time: "5s"
+
+# Feature Flags
+features:
+  # Experimental features
+  experimental:
+    advanced_rag: false
+    multi_language_support: true
+    plugin_system: false
+
+  # Beta features
+  beta:
+    voice_search: false
+    collaborative_mode: false
+    cloud_sync: false
