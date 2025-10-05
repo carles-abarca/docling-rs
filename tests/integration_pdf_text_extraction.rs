@@ -6,6 +6,7 @@
 //! - Text position metadata
 
 use docling_rs::backend::{Backend, PdfBackend};
+use docling_rs::cli::output;
 use docling_rs::datamodel::InputDocument;
 use docling_rs::InputFormat;
 
@@ -19,7 +20,7 @@ fn test_extract_text_from_simple_pdf() {
     let pdf_path = create_simple_text_pdf(test_content);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
+    let input = InputDocument::from_path(pdf_path, InputFormat::PDF);
 
     // Act: Convert PDF
     let result = backend.convert(&input);
@@ -28,7 +29,7 @@ fn test_extract_text_from_simple_pdf() {
     assert!(result.is_ok(), "PDF conversion should succeed");
 
     let doc = result.unwrap();
-    let text = doc.export_to_text();
+    let text = output::to_text(&doc);
 
     assert!(
         text.contains("Hello, World!"),
@@ -50,7 +51,7 @@ fn test_extract_text_with_positions() {
     let pdf_path = create_simple_text_pdf(test_content);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
+    let input = InputDocument::from_path(pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -81,7 +82,7 @@ fn test_extract_text_from_empty_pdf() {
     let pdf_path = create_empty_pdf();
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
+    let input = InputDocument::from_path(pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -90,7 +91,7 @@ fn test_extract_text_from_empty_pdf() {
     assert!(result.is_ok(), "Empty PDF conversion should succeed");
 
     let doc = result.unwrap();
-    let text = doc.export_to_text();
+    let text = output::to_text(&doc);
 
     assert!(
         text.trim().is_empty(),

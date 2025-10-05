@@ -6,9 +6,8 @@ use std::io::Write;
 
 #[test]
 fn test_converter_new() {
-    let converter = DocumentConverter::new();
+    let _converter = DocumentConverter::new();
     // Converter should be created successfully
-    assert!(true);
 }
 
 #[test]

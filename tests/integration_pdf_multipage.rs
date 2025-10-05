@@ -6,6 +6,7 @@
 //! - Page metadata
 
 use docling_rs::backend::{Backend, PdfBackend};
+use docling_rs::cli::output;
 use docling_rs::datamodel::InputDocument;
 use docling_rs::InputFormat;
 
@@ -18,7 +19,7 @@ fn test_multipage_pdf_page_count() {
     let pdf_path = create_multipage_pdf(3);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
+    let input = InputDocument::from_path(pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -26,7 +27,7 @@ fn test_multipage_pdf_page_count() {
     // Assert
     assert!(result.is_ok(), "Multi-page PDF conversion should succeed");
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // TODO: Add assertion for page count once metadata is available
     // assert_eq!(doc.page_count(), 3, "Should have 3 pages");
 }
@@ -41,7 +42,7 @@ fn test_multipage_pdf_text_extraction() {
     let pdf_path = create_pdf_with_page_texts(&page_texts);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
+    let input = InputDocument::from_path(pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -50,7 +51,7 @@ fn test_multipage_pdf_text_extraction() {
     assert!(result.is_ok(), "Multi-page PDF conversion should succeed");
 
     let doc = result.unwrap();
-    let full_text = doc.export_to_text();
+    let full_text = output::to_text(&doc);
 
     for page_text in &page_texts {
         assert!(
@@ -71,7 +72,7 @@ fn test_multipage_pdf_reading_order() {
     let pdf_path = create_pdf_with_page_texts(&page_texts);
 
     let backend = PdfBackend::new();
-    let input = InputDocument::from_path(&pdf_path, InputFormat::PDF);
+    let input = InputDocument::from_path(pdf_path, InputFormat::PDF);
 
     // Act
     let result = backend.convert(&input);
@@ -80,7 +81,7 @@ fn test_multipage_pdf_reading_order() {
     assert!(result.is_ok(), "Multi-page PDF conversion should succeed");
 
     let doc = result.unwrap();
-    let full_text = doc.export_to_text();
+    let full_text = output::to_text(&doc);
 
     let first_pos = full_text.find("First").expect("Should find 'First'");
     let second_pos = full_text.find("Second").expect("Should find 'Second'");

@@ -51,7 +51,7 @@ fn test_complex_table_with_merged_cells() {
         "Complex table PDF should convert successfully"
     );
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Verify merged cells are handled correctly
     // (Implementation-specific assertions)
 }
@@ -72,7 +72,7 @@ fn test_multiple_tables_on_page() {
     // Assert
     assert!(result.is_ok());
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Should detect and extract multiple tables
     // (Verify count and content)
 }
@@ -93,7 +93,7 @@ fn test_table_with_header_rows() {
     // Assert
     assert!(result.is_ok());
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Verify header rows are marked/identified
 }
 

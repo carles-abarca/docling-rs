@@ -98,7 +98,7 @@ fn test_empty_document() {
     let content = "";
 
     let doc = create_test_document(content);
-    let chunks: Vec<_> = chunker.chunk(&doc).collect();
+    let _chunks: Vec<_> = chunker.chunk(&doc).collect();
 
     // Empty document may produce chunks depending on backend implementation
     // The important thing is that it doesn't panic (test passes if we get here)
@@ -230,13 +230,13 @@ First paragraph under chapter 2."#;
     );
 
     // All chunks should be sequential
-    for i in 1..chunks.len() {
+    for (i, chunk) in chunks.iter().enumerate().skip(1) {
         assert!(
-            chunks[i].meta.index == i,
+            chunk.meta.index == i,
             "Chunk {} should have index {}, got {}",
             i,
             i,
-            chunks[i].meta.index
+            chunk.meta.index
         );
     }
 }

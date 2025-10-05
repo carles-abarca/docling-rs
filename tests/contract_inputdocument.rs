@@ -12,7 +12,7 @@ fn test_inputdocument_from_path() {
     assert_eq!(input.format(), InputFormat::Markdown);
     match input.source() {
         DocumentSource::FilePath(p) => assert_eq!(p, &path),
-        _ => panic!("Expected FilePath source"),
+        _ => unreachable!("Expected FilePath source"),
     }
 }
 
@@ -27,7 +27,7 @@ fn test_inputdocument_from_bytes() {
             assert_eq!(data, &bytes);
             assert_eq!(name, "test.md");
         }
-        _ => panic!("Expected Bytes source"),
+        _ => unreachable!("Expected Bytes source"),
     }
 }
 

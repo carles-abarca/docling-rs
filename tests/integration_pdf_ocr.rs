@@ -81,7 +81,6 @@ fn test_scanned_pdf_detection() {
     // In practice, we'd check if a PDF page has no text but has images
     let has_text = false;
     let has_images = true;
-    let text_confidence = 0.0;
 
     // Act: Determine if PDF is scanned
     let is_scanned = !has_text && has_images;
@@ -124,7 +123,7 @@ fn test_multi_language_ocr() {
     // Test would verify multi-language OCR support
     // For now, just test the API
 
-    let engine = TesseractOcr::new();
+    let _engine = TesseractOcr::new();
 
     // The engine should accept language codes
     // This is a placeholder - actual test would use real image data

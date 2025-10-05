@@ -9,7 +9,7 @@ use std::path::PathBuf;
 struct MockPipeline;
 
 impl Pipeline for MockPipeline {
-    fn execute(&self, input: &InputDocument) -> Result<ConversionResult, ConversionError> {
+    fn execute(&self, _input: &InputDocument) -> Result<ConversionResult, ConversionError> {
         let doc = docling_rs::datamodel::DoclingDocument::new("test");
         let result = ConversionResult::new(doc, docling_rs::datamodel::ConversionStatus::Success);
         Ok(result)

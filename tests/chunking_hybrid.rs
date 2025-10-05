@@ -32,7 +32,6 @@ fn test_new_uses_tokenizer_max() {
     let _chunker = HybridChunker::new(tokenizer);
 
     // If this compiles and doesn't panic, the test passes
-    assert!(true);
 }
 
 // Test 2: Builder pattern

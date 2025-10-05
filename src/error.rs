@@ -18,6 +18,9 @@ pub enum ConversionError {
     #[error("Parse error: {0}")]
     ParseError(String),
 
+    #[error("Encryption error: {0}")]
+    EncryptionError(String),
+
     #[error("I/O error: {0}")]
     Io(#[from] std::io::Error),
 

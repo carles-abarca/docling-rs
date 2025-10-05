@@ -25,7 +25,7 @@ fn test_extract_images_from_pdf() {
         "PDF with images should convert successfully"
     );
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Verify images were detected
     // (This assumes DoclingDocument can represent images)
 }
@@ -46,7 +46,7 @@ fn test_image_metadata_extraction() {
     // Assert
     assert!(result.is_ok());
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Verify image metadata (width, height, format, etc.)
 }
 
@@ -66,7 +66,7 @@ fn test_multiple_images_per_page() {
     // Assert
     assert!(result.is_ok());
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Verify all images are extracted
 }
 
@@ -86,7 +86,7 @@ fn test_image_type_classification() {
     // Assert
     assert!(result.is_ok());
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Verify image types are classified (Photo, Diagram, Chart, etc.)
 }
 
@@ -123,7 +123,7 @@ fn test_image_format_conversion() {
     // Assert
     assert!(result.is_ok());
 
-    let doc = result.unwrap();
+    let _doc = result.unwrap();
     // Verify image formats are correctly identified (JPEG, PNG, etc.)
 }
 

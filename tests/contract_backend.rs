@@ -9,7 +9,7 @@ use std::path::PathBuf;
 struct MockBackend;
 
 impl Backend for MockBackend {
-    fn convert(&self, input: &InputDocument) -> Result<DoclingDocument, ConversionError> {
+    fn convert(&self, _input: &InputDocument) -> Result<DoclingDocument, ConversionError> {
         Ok(DoclingDocument::new("mock"))
     }
 

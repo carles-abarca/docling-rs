@@ -6,9 +6,8 @@ use docling_rs::InputFormat;
 
 #[test]
 fn test_simple_pipeline_new() {
-    let pipeline = SimplePipeline::new();
+    let _pipeline = SimplePipeline::new();
     // Pipeline should be created successfully
-    assert!(true);
 }
 
 #[test]
