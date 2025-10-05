@@ -124,6 +124,22 @@ cargo build
 cargo test
 ```
 
+### Manual Testing with Real Documents
+
+To manually test the CLI with real-world documents:
+
+```bash
+./scripts/test-cli-manual.sh
+```
+
+This script processes all documents in `tests/documents-test/` and displays:
+- Text extraction results
+- Chunking results
+- Processing times
+- Summary statistics
+
+See [quickstart guide](specs/006-cli-manual-testing/quickstart.md) for details.
+
 ### Linting
 
 ```bash
