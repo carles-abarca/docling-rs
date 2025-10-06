@@ -46,6 +46,7 @@ ocr = ["rusty-tesseract"]
 [lib]
 name = "docling_rs"
 path = "src/lib.rs"
+crate-type = ["lib", "rlib", "dylib", "staticlib"]
 
 [[bin]]
 name = "docling-rs"

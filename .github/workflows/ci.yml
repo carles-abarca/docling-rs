@@ -50,27 +50,154 @@ jobs:
         run: cargo clippy --all-targets --all-features -- -D warnings
 
   build:
-    name: Build
+    name: Build Distribution Package
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
         include:
           - os: windows-latest
-            artifact_name: docling-rs.exe
-            asset_name: docling-rs-windows-x64.exe
+            cli_binary: docling-rs.exe
+            lib_static: docling_rs.lib
+            lib_dynamic: docling_rs.dll
+            package_name: docling-rs-windows-x64
           - os: macos-latest
-            artifact_name: docling-rs
-            asset_name: docling-rs-macos-x64
+            cli_binary: docling-rs
+            lib_static: libdocling_rs.a
+            lib_dynamic: libdocling_rs.dylib
+            package_name: docling-rs-macos-x64
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Build
-        run: cargo build --release --all-features
-      - name: Upload artifacts
+
+      # Build CLI binary
+      - name: Build CLI binary
+        run: cargo build --release --all-features --bin docling-rs
+
+      # Build static library
+      - name: Build static library
+        run: cargo build --release --lib
+
+      # Build dynamic library
+      - name: Build dynamic library
+        run: cargo rustc --release --lib --crate-type cdylib
+
+      # Generate documentation
+      - name: Generate documentation
+        run: cargo doc --no-deps --all-features
+
+      # Package crate for distribution
+      - name: Package crate
+        run: cargo package --allow-dirty
+
+      # Create distribution directory
+      - name: Create distribution package
+        shell: bash
+        run: |
+          mkdir -p dist/${{ matrix.package_name }}/{bin,lib,doc,examples}
+
+          # Copy CLI binary
+          cp target/release/${{ matrix.cli_binary }} dist/${{ matrix.package_name }}/bin/
+
+          # Copy libraries
+          cp target/release/${{ matrix.lib_static }} dist/${{ matrix.package_name }}/lib/ || true
+          cp target/release/${{ matrix.lib_dynamic }} dist/${{ matrix.package_name }}/lib/ || true
+
+          # Copy documentation
+          cp -r target/doc/* dist/${{ matrix.package_name }}/doc/
+
+          # Copy examples
+          cp -r examples/* dist/${{ matrix.package_name }}/examples/ || true
+
+          # Copy README and LICENSE
+          cp README.md dist/${{ matrix.package_name }}/
+          cp LICENSE dist/${{ matrix.package_name }}/ || echo "No LICENSE file"
+
+          # Copy packaged crate
+          cp target/package/docling-rs-*.crate dist/${{ matrix.package_name }}/ || true
+
+          # Create usage guide
+          cat > dist/${{ matrix.package_name }}/INSTALL.md << 'EOF'
+          # docling-rs Installation Guide
+
+          ## Contents
+
+          - `bin/` - CLI executable
+          - `lib/` - Static and dynamic libraries
+          - `doc/` - API documentation (open doc/docling_rs/index.html)
+          - `examples/` - Usage examples
+          - `*.crate` - Packaged crate for Cargo
+
+          ## Using the CLI
+
+          Add `bin/` to your PATH:
+
+          ```bash
+          # Unix/macOS
+          export PATH="$PATH:$(pwd)/bin"
+
+          # Windows (PowerShell)
+          $env:Path += ";$(pwd)\bin"
+          ```
+
+          Then run:
+          ```bash
+          docling-rs --help
+          ```
+
+          ## Using the Library in Rust
+
+          ### Option 1: From crates.io (when published)
+          ```toml
+          [dependencies]
+          docling-rs = "0.1.0"
+          ```
+
+          ### Option 2: From local crate
+          ```bash
+          cargo install --path docling-rs-*.crate
+          ```
+
+          ### Option 3: Add to Cargo.toml
+          ```toml
+          [dependencies]
+          docling-rs = { path = "/path/to/this/directory" }
+          ```
+
+          ## Examples
+
+          See `examples/` directory for usage examples:
+          - `basic_conversion.rs` - Basic document conversion
+          - `chunking_rag.rs` - RAG chunking workflow
+          - `json_serialization.rs` - JSON serialization
+
+          Run examples with:
+          ```bash
+          cd examples
+          # Follow instructions in examples/README.md
+          ```
+
+          ## Documentation
+
+          Open `doc/docling_rs/index.html` in a browser to view the full API documentation.
+          EOF
+
+      # Create tarball/zip
+      - name: Create archive
+        shell: bash
+        run: |
+          cd dist
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            7z a -tzip ${{ matrix.package_name }}.zip ${{ matrix.package_name }}
+          else
+            tar czf ${{ matrix.package_name }}.tar.gz ${{ matrix.package_name }}
+          fi
+
+      # Upload complete distribution package
+      - name: Upload distribution package
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.asset_name }}
-          path: target/release/${{ matrix.artifact_name }}
+          name: ${{ matrix.package_name }}
+          path: dist/${{ matrix.package_name }}.*
           if-no-files-found: error
