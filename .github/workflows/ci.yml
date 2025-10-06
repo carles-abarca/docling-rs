@@ -71,17 +71,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
-      # Build CLI binary
-      - name: Build CLI binary
-        run: cargo build --release --all-features --bin docling-rs
-
-      # Build static library
-      - name: Build static library
-        run: cargo build --release --lib
-
-      # Build dynamic library
-      - name: Build dynamic library
-        run: cargo rustc --release --lib --crate-type cdylib
+      # Build CLI binary and all libraries in one go
+      # The Cargo.toml specifies crate-type = ["lib", "rlib", "dylib", "staticlib"]
+      # so this will generate all library types at once
+      - name: Build all binaries and libraries
+        run: cargo build --release --all-features
 
       # Generate documentation
       - name: Generate documentation
