@@ -3,15 +3,20 @@
 //! These functions create real PDF files for use in integration tests.
 
 use printpdf::*;
-use std::fs::File;
-use std::io::BufWriter;
+use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 
 /// Create a simple text PDF with given content.
 #[allow(dead_code)]
 pub fn create_simple_text_pdf(content: &str) -> PathBuf {
-    let output_path = format!("/tmp/test_simple_{}.pdf", content.len());
-    let path = PathBuf::from(&output_path);
+    // Use tempfile for cross-platform compatibility
+    let temp_file = tempfile::Builder::new()
+        .prefix("test_simple_")
+        .suffix(".pdf")
+        .tempfile()
+        .expect("Failed to create temp file");
+
+    let path = temp_file.path().to_path_buf();
 
     // Create PDF document
     let (doc, page1, layer1) = PdfDocument::new("Test PDF", Mm(210.0), Mm(297.0), "Layer 1");
@@ -32,9 +37,14 @@ pub fn create_simple_text_pdf(content: &str) -> PathBuf {
     }
 
     // Save PDF
-    let file = File::create(&path).unwrap();
-    let mut writer = BufWriter::new(file);
-    doc.save(&mut writer).unwrap();
+    {
+        let mut writer = BufWriter::new(temp_file.as_file());
+        doc.save(&mut writer).unwrap();
+        writer.flush().unwrap();
+    } // writer is dropped here
+
+    // Persist the temp file so it doesn't get deleted when temp_file is dropped
+    temp_file.keep().unwrap();
 
     path
 }
@@ -42,16 +52,27 @@ pub fn create_simple_text_pdf(content: &str) -> PathBuf {
 /// Create an empty PDF (one page, no content).
 #[allow(dead_code)]
 pub fn create_empty_pdf() -> PathBuf {
-    let output_path = "/tmp/test_empty.pdf";
-    let path = PathBuf::from(output_path);
+    // Use tempfile for cross-platform compatibility
+    let temp_file = tempfile::Builder::new()
+        .prefix("test_empty_")
+        .suffix(".pdf")
+        .tempfile()
+        .expect("Failed to create temp file");
+
+    let path = temp_file.path().to_path_buf();
 
     // Create PDF with empty page
     let (doc, _page1, _layer1) = PdfDocument::new("Empty PDF", Mm(210.0), Mm(297.0), "Layer 1");
 
     // Save without adding any content
-    let file = File::create(&path).unwrap();
-    let mut writer = BufWriter::new(file);
-    doc.save(&mut writer).unwrap();
+    {
+        let mut writer = BufWriter::new(temp_file.as_file());
+        doc.save(&mut writer).unwrap();
+        writer.flush().unwrap();
+    } // writer is dropped here
+
+    // Persist the temp file
+    temp_file.keep().unwrap();
 
     path
 }
@@ -59,8 +80,14 @@ pub fn create_empty_pdf() -> PathBuf {
 /// Create a multi-page PDF with specific text on each page.
 #[allow(dead_code)]
 pub fn create_multipage_pdf(page_count: usize) -> PathBuf {
-    let output_path = format!("/tmp/test_multipage_{}.pdf", page_count);
-    let path = PathBuf::from(&output_path);
+    // Use tempfile for cross-platform compatibility
+    let temp_file = tempfile::Builder::new()
+        .prefix(&format!("test_multipage_{}_", page_count))
+        .suffix(".pdf")
+        .tempfile()
+        .expect("Failed to create temp file");
+
+    let path = temp_file.path().to_path_buf();
 
     let (doc, page1, layer1) = PdfDocument::new("Multi-page PDF", Mm(210.0), Mm(297.0), "Layer 1");
     let font = doc.add_builtin_font(BuiltinFont::TimesRoman).unwrap();
@@ -77,9 +104,14 @@ pub fn create_multipage_pdf(page_count: usize) -> PathBuf {
     }
 
     // Save PDF
-    let file = File::create(&path).unwrap();
-    let mut writer = BufWriter::new(file);
-    doc.save(&mut writer).unwrap();
+    {
+        let mut writer = BufWriter::new(temp_file.as_file());
+        doc.save(&mut writer).unwrap();
+        writer.flush().unwrap();
+    } // writer is dropped here
+
+    // Persist the temp file
+    temp_file.keep().unwrap();
 
     path
 }
@@ -87,8 +119,14 @@ pub fn create_multipage_pdf(page_count: usize) -> PathBuf {
 /// Create a PDF with specific text on each page (for testing reading order).
 #[allow(dead_code)]
 pub fn create_pdf_with_page_texts(texts: &[&str]) -> PathBuf {
-    let output_path = format!("/tmp/test_pages_{}.pdf", texts.len());
-    let path = PathBuf::from(&output_path);
+    // Use tempfile for cross-platform compatibility
+    let temp_file = tempfile::Builder::new()
+        .prefix(&format!("test_pages_{}_", texts.len()))
+        .suffix(".pdf")
+        .tempfile()
+        .expect("Failed to create temp file");
+
+    let path = temp_file.path().to_path_buf();
 
     let (doc, page1, layer1) = PdfDocument::new("Page Texts PDF", Mm(210.0), Mm(297.0), "Layer 1");
     let font = doc.add_builtin_font(BuiltinFont::TimesRoman).unwrap();
@@ -107,9 +145,14 @@ pub fn create_pdf_with_page_texts(texts: &[&str]) -> PathBuf {
     }
 
     // Save PDF
-    let file = File::create(&path).unwrap();
-    let mut writer = BufWriter::new(file);
-    doc.save(&mut writer).unwrap();
+    {
+        let mut writer = BufWriter::new(temp_file.as_file());
+        doc.save(&mut writer).unwrap();
+        writer.flush().unwrap();
+    } // writer is dropped here
+
+    // Persist the temp file
+    temp_file.keep().unwrap();
 
     path
 }
