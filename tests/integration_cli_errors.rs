@@ -91,11 +91,13 @@ fn test_empty_input_directory() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_output_permission_error() {
     let temp = TempDir::new().unwrap();
     let input = temp.path().join("test.md");
     fs::write(&input, "# Test").unwrap();
 
+    // On Unix, /root/forbidden should cause permission error for non-root users
     let output_dir = "/root/forbidden";
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
@@ -106,6 +108,31 @@ fn test_output_permission_error() {
         .failure()
         .code(1)
         .stderr(predicate::str::contains("Permission").or(predicate::str::contains("permission")));
+}
+
+#[test]
+#[cfg(windows)]
+fn test_output_permission_error() {
+    let temp = TempDir::new().unwrap();
+    let input = temp.path().join("test.md");
+    fs::write(&input, "# Test").unwrap();
+
+    // On Windows, C:\Windows\System32\forbidden should cause permission error
+    let output_dir = "C:\\Windows\\System32\\forbidden";
+
+    let mut cmd = Command::cargo_bin("docling-rs").unwrap();
+    cmd.arg(&input)
+        .arg("--output-dir")
+        .arg(output_dir)
+        .assert()
+        .failure()
+        .code(1)
+        .stderr(
+            predicate::str::contains("Permission")
+                .or(predicate::str::contains("permission"))
+                .or(predicate::str::contains("Access is denied"))
+                .or(predicate::str::contains("denied")),
+        );
 }
 
 #[test]
