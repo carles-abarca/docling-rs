@@ -24,21 +24,24 @@ pub struct PdfBackend {
 impl PdfBackend {
     /// Create a new PDF backend with default configuration.
     pub fn new() -> Self {
-        // Try to bind to system-installed pdfium library
-        let pdfium = Pdfium::bind_to_system_library().ok().map(Pdfium::new);
+        // Use bundled pdfium library (configured via build.rs)
+        let pdfium = Pdfium::default();
 
         Self {
             config: PdfConfig::default(),
-            pdfium,
+            pdfium: Some(pdfium),
         }
     }
 
     /// Create a new PDF backend with custom configuration.
     pub fn with_config(config: PdfConfig) -> Self {
-        // Try to bind to system-installed pdfium library
-        let pdfium = Pdfium::bind_to_system_library().ok().map(Pdfium::new);
+        // Use bundled pdfium library (configured via build.rs)
+        let pdfium = Pdfium::default();
 
-        Self { config, pdfium }
+        Self {
+            config,
+            pdfium: Some(pdfium),
+        }
     }
 
     /// Get the pdfium instance, returning an error if not available.
