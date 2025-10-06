@@ -55,9 +55,22 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            artifact_name: docling-rs.exe
+            asset_name: docling-rs-windows-x64.exe
+          - os: macos-latest
+            artifact_name: docling-rs
+            asset_name: docling-rs-macos-x64
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build
         run: cargo build --release --all-features
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: target/release/${{ matrix.artifact_name }}
+          if-no-files-found: error
