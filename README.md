@@ -105,7 +105,24 @@ let csv_result = converter.convert_bytes(
 - ✅ HTML
 - ✅ CSV
 - ✅ DOCX (Microsoft Word)
-- 🔜 PDF (planned for Phase 3)
+- ✅ PDF (with chunking support)
+
+## Examples
+
+Check out the [`examples/`](examples/) directory for practical demonstrations:
+
+- **[basic_conversion.rs](examples/basic_conversion.rs)** - Converting documents from different formats
+- **[chunking_rag.rs](examples/chunking_rag.rs)** - Document chunking for RAG applications
+- **[json_serialization.rs](examples/json_serialization.rs)** - Serializing documents to JSON
+
+Run any example with:
+```bash
+cargo run --example basic_conversion
+cargo run --example chunking_rag
+cargo run --example json_serialization
+```
+
+See the [examples README](examples/README.md) for detailed documentation.
 
 ## Development
 

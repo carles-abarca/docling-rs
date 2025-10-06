@@ -1,92 +1,58 @@
-//! Basic document conversion example
+//! Basic Document Conversion Example
 //!
-//! Run with: cargo run --example basic_conversion
+//! This example shows how to convert a document from one format to another.
+//!
+//! Run with:
+//! ```bash
+//! cargo run --example basic_conversion
+//! ```
 
-use docling_rs::{DocumentConverter, InputFormat};
+use docling_rs::DocumentConverter;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== Docling-rs Basic Conversion Example ===\n");
+    println!("=== Basic Document Conversion ===\n");
 
+    // Create a new document converter
     let converter = DocumentConverter::new();
 
     // Example 1: Convert Markdown
-    println!("1. Converting Markdown:");
-    let markdown = r#"# Welcome to Docling-rs
-
-This is a **Rust** library for document conversion.
-
-## Features
-
-- Fast and reliable
-- Type-safe
-- Cross-platform
-"#;
-
+    let markdown = "# Hello World\n\nThis is a **test** document with some content.";
     let result = converter.convert_bytes(
         markdown.as_bytes().to_vec(),
-        "example.md".to_string(),
-        InputFormat::Markdown,
+        "test.md".to_string(),
+        docling_rs::InputFormat::Markdown,
     )?;
 
-    println!("   Document: {}", result.document().name());
-    println!("   Status: {:?}", result.status());
-    println!("   Nodes: {}", result.document().nodes().len());
-    println!();
+    println!("Converted Markdown:");
+    println!("  Name: {}", result.document().name());
+    println!("  Nodes: {}", result.document().nodes().len());
+    println!("  Status: {:?}\n", result.status());
 
     // Example 2: Convert HTML
-    println!("2. Converting HTML:");
-    let html = r#"
-<!DOCTYPE html>
-<html>
-<head><title>Test</title></head>
-<body>
-    <h1>HTML Document</h1>
-    <p>This is a paragraph.</p>
-    <ul>
-        <li>Item 1</li>
-        <li>Item 2</li>
-    </ul>
-</body>
-</html>
-"#;
-
+    let html = r#"<html><body><h1>Title</h1><p>Paragraph</p></body></html>"#;
     let result = converter.convert_bytes(
         html.as_bytes().to_vec(),
-        "example.html".to_string(),
-        InputFormat::Html,
+        "test.html".to_string(),
+        docling_rs::InputFormat::Html,
     )?;
 
-    println!("   Document: {}", result.document().name());
-    println!("   Status: {:?}", result.status());
-    println!();
+    println!("Converted HTML:");
+    println!("  Name: {}", result.document().name());
+    println!("  Nodes: {}", result.document().nodes().len());
+    println!("  Status: {:?}\n", result.status());
 
     // Example 3: Convert CSV
-    println!("3. Converting CSV:");
-    let csv = r#"Name,Role,Department
-Alice,Engineer,Development
-Bob,Designer,UX
-Charlie,Manager,Operations
-"#;
-
+    let csv = "Name,Age\nAlice,30\nBob,25";
     let result = converter.convert_bytes(
         csv.as_bytes().to_vec(),
-        "employees.csv".to_string(),
-        InputFormat::Csv,
+        "test.csv".to_string(),
+        docling_rs::InputFormat::Csv,
     )?;
 
-    println!("   Document: {}", result.document().name());
-    println!("   Status: {:?}", result.status());
-    println!();
-
-    // Example 4: Serialize to JSON
-    println!("4. Serializing to JSON:");
-    let json = serde_json::to_string_pretty(&result)?;
-    println!("   JSON output (first 200 chars):");
-    println!("   {}", &json.chars().take(200).collect::<String>());
-    println!("   ...");
-    println!();
-
-    println!("=== All conversions completed successfully! ===");
+    println!("Converted CSV:");
+    println!("  Name: {}", result.document().name());
+    println!("  Nodes: {}", result.document().nodes().len());
+    println!("  Status: {:?}\n", result.status());
 
     Ok(())
 }
