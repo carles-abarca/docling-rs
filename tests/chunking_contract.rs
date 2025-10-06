@@ -5,6 +5,7 @@
 use docling_rs::chunking::{BaseChunk, BaseChunker, ChunkMetadata, HierarchicalChunker};
 use docling_rs::{DoclingDocument, DocumentConverter};
 use std::fs;
+use std::io::Write;
 
 // Helper function to create a test document
 fn create_test_document() -> DoclingDocument {
@@ -19,13 +20,20 @@ This is the second paragraph.
 
 Content in section 1.1."#;
 
-    let temp_file = "/tmp/test_chunking.md";
-    fs::write(temp_file, content).expect("Failed to write test file");
+    // Use tempfile with .md extension for cross-platform compatibility
+    let mut temp_file = tempfile::Builder::new()
+        .suffix(".md")
+        .tempfile()
+        .expect("Failed to create temp file");
+    temp_file
+        .write_all(content.as_bytes())
+        .expect("Failed to write test file");
+    temp_file.flush().expect("Failed to flush temp file");
 
     // Convert using DocumentConverter
     let converter = DocumentConverter::new();
     let result = converter
-        .convert_file(temp_file)
+        .convert_file(temp_file.path())
         .expect("Failed to convert");
     result.document().clone()
 }

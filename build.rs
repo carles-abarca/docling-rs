@@ -33,7 +33,10 @@ fn main() {
     let lib_path = PathBuf::from(&manifest_dir).join(lib_dir);
 
     // Set PDFIUM_DYNAMIC_LIB_PATH environment variable so pdfium-render can find the library
-    println!("cargo:rustc-env=PDFIUM_DYNAMIC_LIB_PATH={}", lib_path.display());
+    println!(
+        "cargo:rustc-env=PDFIUM_DYNAMIC_LIB_PATH={}",
+        lib_path.display()
+    );
 
     // Copy the library to multiple locations for runtime access
     let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
