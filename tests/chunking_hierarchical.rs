@@ -4,7 +4,6 @@
 
 use docling_rs::chunking::{BaseChunker, HierarchicalChunker};
 use docling_rs::{DoclingDocument, DocumentConverter};
-use std::fs;
 use std::io::Write;
 
 // Helper function to create a test document

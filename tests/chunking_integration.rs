@@ -2,7 +2,6 @@
 
 use docling_rs::chunking::{BaseChunk, BaseChunker, HierarchicalChunker};
 use docling_rs::{DoclingDocument, DocumentConverter};
-use std::fs;
 use std::io::Write;
 
 // Helper to create test document
