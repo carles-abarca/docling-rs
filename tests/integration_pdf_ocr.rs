@@ -147,7 +147,6 @@ fn load_test_scanned_image() -> Vec<u8> {
 #[test]
 #[cfg(not(feature = "ocr"))]
 fn test_ocr_feature_disabled() {
-    // When OCR feature is disabled, this test should pass
+    // When OCR feature is disabled, this test should pass (no-op test)
     // indicating that the feature flag is working correctly
-    assert!(true, "OCR feature is disabled as expected");
 }

@@ -8,7 +8,6 @@
 //! ```
 
 use docling_rs::DocumentConverter;
-use serde_json;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== JSON Serialization Example ===\n");

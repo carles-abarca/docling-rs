@@ -101,6 +101,5 @@ fn test_multiple_words_in_result() {
 #[test]
 #[cfg(not(feature = "ocr"))]
 fn test_ocr_contract_without_feature() {
-    // When feature is disabled, contract test should pass
-    assert!(true);
+    // When feature is disabled, contract test should pass (no-op test)
 }

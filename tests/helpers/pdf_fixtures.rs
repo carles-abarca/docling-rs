@@ -8,6 +8,7 @@ use std::io::BufWriter;
 use std::path::PathBuf;
 
 /// Create a simple text PDF with given content.
+#[allow(dead_code)]
 pub fn create_simple_text_pdf(content: &str) -> PathBuf {
     let output_path = format!("/tmp/test_simple_{}.pdf", content.len());
     let path = PathBuf::from(&output_path);
@@ -39,6 +40,7 @@ pub fn create_simple_text_pdf(content: &str) -> PathBuf {
 }
 
 /// Create an empty PDF (one page, no content).
+#[allow(dead_code)]
 pub fn create_empty_pdf() -> PathBuf {
     let output_path = "/tmp/test_empty.pdf";
     let path = PathBuf::from(output_path);
@@ -55,6 +57,7 @@ pub fn create_empty_pdf() -> PathBuf {
 }
 
 /// Create a multi-page PDF with specific text on each page.
+#[allow(dead_code)]
 pub fn create_multipage_pdf(page_count: usize) -> PathBuf {
     let output_path = format!("/tmp/test_multipage_{}.pdf", page_count);
     let path = PathBuf::from(&output_path);
@@ -70,7 +73,7 @@ pub fn create_multipage_pdf(page_count: usize) -> PathBuf {
     for i in 2..=page_count {
         let (page, layer) = doc.add_page(Mm(210.0), Mm(297.0), "Layer 1");
         let current_layer = doc.get_page(page).get_layer(layer);
-        current_layer.use_text(&format!("Page {}", i), 12.0, Mm(10.0), Mm(280.0), &font);
+        current_layer.use_text(format!("Page {}", i), 12.0, Mm(10.0), Mm(280.0), &font);
     }
 
     // Save PDF
@@ -82,6 +85,7 @@ pub fn create_multipage_pdf(page_count: usize) -> PathBuf {
 }
 
 /// Create a PDF with specific text on each page (for testing reading order).
+#[allow(dead_code)]
 pub fn create_pdf_with_page_texts(texts: &[&str]) -> PathBuf {
     let output_path = format!("/tmp/test_pages_{}.pdf", texts.len());
     let path = PathBuf::from(&output_path);
@@ -113,6 +117,7 @@ pub fn create_pdf_with_page_texts(texts: &[&str]) -> PathBuf {
 /// Get path to an encrypted PDF with a password.
 /// Uses pre-made encrypted PDFs from tests/fixtures/pdfs/
 /// These PDFs were created using qpdf with 256-bit AES encryption.
+#[allow(dead_code)]
 pub fn create_encrypted_pdf(_content: &str, password: &str) -> PathBuf {
     // Map passwords to pre-made encrypted PDF files
     let filename = match password {

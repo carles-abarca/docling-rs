@@ -7,8 +7,8 @@
 //! cargo run --example chunking_rag
 //! ```
 
-use docling_rs::chunking::{BaseChunker, HierarchicalChunker, HybridChunker};
 use docling_rs::chunking::tokenizer::HuggingFaceTokenizer;
+use docling_rs::chunking::{BaseChunker, HierarchicalChunker, HybridChunker};
 use docling_rs::DocumentConverter;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,18 +41,27 @@ Rust is designed to be fast and efficient, with zero-cost abstractions."#;
     )?;
 
     let doc = result.document();
-    println!("Original document: {} ({} nodes)\n", doc.name(), doc.nodes().len());
+    println!(
+        "Original document: {} ({} nodes)\n",
+        doc.name(),
+        doc.nodes().len()
+    );
 
     // 2. Hierarchical Chunking (simple, preserves structure)
     println!("--- Hierarchical Chunking ---");
     let hierarchical = HierarchicalChunker::new();
     let chunks: Vec<_> = hierarchical.chunk(doc).collect();
-    
+
     println!("Generated {} chunks:", chunks.len());
     for (i, chunk) in chunks.iter().enumerate() {
         println!("  Chunk {}: {} chars", i + 1, chunk.text.len());
         println!("    Headings: {:?}", chunk.meta.headings);
-        let preview = chunk.text.chars().take(60).collect::<String>().replace('\n', " ");
+        let preview = chunk
+            .text
+            .chars()
+            .take(60)
+            .collect::<String>()
+            .replace('\n', " ");
         println!("    Text preview: {}...\n", preview);
     }
 
@@ -64,13 +73,17 @@ Rust is designed to be fast and efficient, with zero-cost abstractions."#;
         .max_tokens(100)
         .merge_peers(true)
         .build()?;
-    
+
     let chunks: Vec<_> = hybrid.chunk(doc).collect();
     println!("Generated {} chunks (max 100 tokens each):", chunks.len());
     for (i, chunk) in chunks.iter().enumerate() {
         println!("  Chunk {}: {} chars", i + 1, chunk.text.len());
-        let context = hybrid.contextualize(&chunk);
-        let context_preview = context.chars().take(80).collect::<String>().replace('\n', " ");
+        let context = hybrid.contextualize(chunk);
+        let context_preview = context
+            .chars()
+            .take(80)
+            .collect::<String>()
+            .replace('\n', " ");
         println!("    Context: {}\n", context_preview);
     }
 
