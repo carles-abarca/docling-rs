@@ -110,12 +110,17 @@ pub fn create_pdf_with_page_texts(texts: &[&str]) -> PathBuf {
     path
 }
 
-/// Create an encrypted PDF with a password.
-/// Note: printpdf doesn't support encryption, so this returns a regular PDF.
-/// For real encrypted PDF testing, you'd need pre-made encrypted PDFs.
-pub fn create_encrypted_pdf(_content: &str, _password: &str) -> PathBuf {
-    // printpdf doesn't support PDF encryption
-    // For now, return path to a simple PDF
-    // In production, you'd use pre-made encrypted PDFs or a different library
-    create_simple_text_pdf("Encrypted content placeholder")
+/// Get path to an encrypted PDF with a password.
+/// Uses pre-made encrypted PDFs from tests/fixtures/pdfs/
+/// These PDFs were created using qpdf with 256-bit AES encryption.
+pub fn create_encrypted_pdf(_content: &str, password: &str) -> PathBuf {
+    // Map passwords to pre-made encrypted PDF files
+    let filename = match password {
+        "secret123" => "encrypted_secret123.pdf",
+        "password123" => "encrypted_password123.pdf",
+        "correct_password" => "encrypted_correct_password.pdf",
+        _ => "encrypted_secret123.pdf", // Default
+    };
+
+    PathBuf::from("tests/fixtures/pdfs").join(filename)
 }

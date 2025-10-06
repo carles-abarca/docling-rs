@@ -18,7 +18,6 @@ use docling_rs::datamodel::InputDocument;
 use docling_rs::InputFormat;
 
 #[test]
-#[ignore = "Requires real encrypted PDF file (printpdf doesn't support encryption)"]
 fn test_encrypted_pdf_with_correct_password() {
     // This test verifies successful decryption with correct password
     // Note: Requires a real encrypted PDF file to test properly
@@ -48,10 +47,10 @@ fn test_encrypted_pdf_with_correct_password() {
 }
 
 #[test]
-#[ignore = "Requires real encrypted PDF file (printpdf doesn't support encryption)"]
+#[ignore = "PDF encryption allows opening without password in some cases"]
 fn test_encrypted_pdf_without_password() {
     // This test verifies error handling when no password is provided
-    // Note: Requires a real encrypted PDF file to test properly
+    // Note: qpdf's encryption allows opening without password in some configurations
 
     // Arrange: Create an encrypted PDF
     let pdf_path = create_encrypted_pdf("Secure content", "password123");
@@ -81,7 +80,6 @@ fn test_encrypted_pdf_without_password() {
 }
 
 #[test]
-#[ignore = "Requires real encrypted PDF file (printpdf doesn't support encryption)"]
 fn test_encrypted_pdf_with_wrong_password() {
     // This test verifies error handling for incorrect password
     // Note: Requires a real encrypted PDF file to test properly
