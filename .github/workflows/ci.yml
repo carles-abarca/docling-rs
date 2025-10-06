@@ -59,12 +59,12 @@ jobs:
           - os: windows-latest
             cli_binary: docling-rs.exe
             lib_static: docling_rs.lib
-            lib_dynamic: docling_rs.dll
+            lib_rlib: docling_rs.rlib
             package_name: docling-rs-windows-x64
           - os: macos-latest
             cli_binary: docling-rs
             lib_static: libdocling_rs.a
-            lib_dynamic: libdocling_rs.dylib
+            lib_rlib: libdocling_rs.rlib
             package_name: docling-rs-macos-x64
     steps:
       - uses: actions/checkout@v4
@@ -94,9 +94,9 @@ jobs:
           # Copy CLI binary
           cp target/release/${{ matrix.cli_binary }} dist/${{ matrix.package_name }}/bin/
 
-          # Copy libraries
+          # Copy libraries (static + rlib, no DLL on Windows due to linker limits)
           cp target/release/${{ matrix.lib_static }} dist/${{ matrix.package_name }}/lib/ || true
-          cp target/release/${{ matrix.lib_dynamic }} dist/${{ matrix.package_name }}/lib/ || true
+          cp target/release/${{ matrix.lib_rlib }} dist/${{ matrix.package_name }}/lib/ || true
 
           # Copy pdfium runtime libraries (required for PDF support)
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
@@ -135,12 +135,17 @@ jobs:
           ### Libraries Included
 
           **docling-rs libraries:**
-          - `libdocling_rs.a` / `docling_rs.lib` - Static library
-          - `libdocling_rs.dylib` / `docling_rs.dll` - Dynamic library
-          - `libdocling_rs.rlib` - Rust library
+          - `docling_rs.lib` (Windows) / `libdocling_rs.a` (macOS) - Static library for C/C++ linking
+          - `docling_rs.rlib` / `libdocling_rs.rlib` - Rust library for Rust projects
+
+          **Note:** Dynamic library (DLL/dylib) is NOT included for docling-rs due to:
+          - Windows: Exceeds MSVC linker limits (65535 objects)
+          - macOS: Use static linking for better portability
+
+          For dynamic linking, use the pdfium libraries directly.
 
           **pdfium runtime (required for PDF support):**
-          - `libpdfium.dylib` (macOS) / `pdfium.dll` (Windows)
+          - `pdfium.dll` (Windows) / `libpdfium.dylib` (macOS) - Required for PDF processing
 
           ## Using the CLI
 
