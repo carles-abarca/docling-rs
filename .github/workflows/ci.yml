@@ -104,6 +104,15 @@ jobs:
           cp target/release/${{ matrix.lib_static }} dist/${{ matrix.package_name }}/lib/ || true
           cp target/release/${{ matrix.lib_dynamic }} dist/${{ matrix.package_name }}/lib/ || true
 
+          # Copy pdfium runtime libraries (required for PDF support)
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp pdfium/lib/windows-x64/pdfium.dll dist/${{ matrix.package_name }}/bin/ || echo "Warning: pdfium.dll not found"
+            cp pdfium/lib/windows-x64/pdfium.dll dist/${{ matrix.package_name }}/lib/ || true
+          else
+            cp pdfium/lib/macos-x64/libpdfium.dylib dist/${{ matrix.package_name }}/bin/ || echo "Warning: libpdfium.dylib not found"
+            cp pdfium/lib/macos-x64/libpdfium.dylib dist/${{ matrix.package_name }}/lib/ || true
+          fi
+
           # Copy documentation
           cp -r target/doc/* dist/${{ matrix.package_name }}/doc/
 
@@ -123,11 +132,21 @@ jobs:
 
           ## Contents
 
-          - `bin/` - CLI executable
-          - `lib/` - Static and dynamic libraries
+          - `bin/` - CLI executable + pdfium runtime library
+          - `lib/` - Static and dynamic libraries (docling-rs + pdfium)
           - `doc/` - API documentation (open doc/docling_rs/index.html)
           - `examples/` - Usage examples
           - `*.crate` - Packaged crate for Cargo
+
+          ### Libraries Included
+
+          **docling-rs libraries:**
+          - `libdocling_rs.a` / `docling_rs.lib` - Static library
+          - `libdocling_rs.dylib` / `docling_rs.dll` - Dynamic library
+          - `libdocling_rs.rlib` - Rust library
+
+          **pdfium runtime (required for PDF support):**
+          - `libpdfium.dylib` (macOS) / `pdfium.dll` (Windows)
 
           ## Using the CLI
 
@@ -181,6 +200,39 @@ jobs:
           ## Documentation
 
           Open `doc/docling_rs/index.html` in a browser to view the full API documentation.
+
+          ## Important Notes
+
+          ### PDF Support Runtime Requirements
+
+          The CLI and library include PDF processing capabilities via pdfium. The required runtime libraries are included:
+
+          - **Windows**: `pdfium.dll` (in `bin/` and `lib/`)
+          - **macOS**: `libpdfium.dylib` (in `bin/` and `lib/`)
+
+          **For CLI usage:** The pdfium library in `bin/` will be automatically loaded when you run the CLI from that directory.
+
+          **For library usage:** When linking docling-rs into your Rust application:
+          1. The pdfium library must be in the same directory as your executable, OR
+          2. In your system library path (LD_LIBRARY_PATH on Unix, PATH on Windows), OR
+          3. Set `PDFIUM_DYNAMIC_LIB_PATH` environment variable to point to the library location
+
+          Example:
+          ```bash
+          # Option 1: Copy to your executable directory
+          cp lib/libpdfium.dylib /path/to/your/executable/
+
+          # Option 2: Set environment variable
+          export PDFIUM_DYNAMIC_LIB_PATH=/path/to/docling-rs-macos-x64/lib
+          ```
+
+          ### macOS Security Notice
+
+          On macOS, you may need to allow the binaries to run:
+          ```bash
+          xattr -d com.apple.quarantine bin/docling-rs
+          xattr -d com.apple.quarantine bin/libpdfium.dylib
+          ```
           EOF
 
       # Create tarball/zip
