@@ -79,12 +79,19 @@ fn test_iterator_is_lazy() {
     // Create a larger document to test laziness
     let large_text = "# Heading\n\n".to_string() + &"Paragraph.\n\n".repeat(100);
 
-    let temp_file = "/tmp/test_chunking_large.md";
-    fs::write(temp_file, &large_text).expect("Failed to write test file");
+    // Use tempfile for cross-platform compatibility
+    let mut temp_file = tempfile::Builder::new()
+        .suffix(".md")
+        .tempfile()
+        .expect("Failed to create temp file");
+    temp_file
+        .write_all(large_text.as_bytes())
+        .expect("Failed to write test file");
+    temp_file.flush().expect("Failed to flush temp file");
 
     let converter = DocumentConverter::new();
     let doc = converter
-        .convert_file(temp_file)
+        .convert_file(temp_file.path())
         .expect("Failed to convert")
         .document()
         .clone();

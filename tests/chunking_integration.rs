@@ -3,27 +3,24 @@
 use docling_rs::chunking::{BaseChunk, BaseChunker, HierarchicalChunker};
 use docling_rs::{DoclingDocument, DocumentConverter};
 use std::fs;
+use std::io::Write;
 
 // Helper to create test document
 fn create_test_document(content: &str) -> DoclingDocument {
-    use std::time::{SystemTime, UNIX_EPOCH};
-
-    // Create unique temp file to avoid race conditions
-    let timestamp = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_nanos();
-    let temp_file = format!("/tmp/test_integration_{}.md", timestamp);
-
-    fs::write(&temp_file, content).expect("Failed to write test file");
+    // Use tempfile for cross-platform compatibility
+    let mut temp_file = tempfile::Builder::new()
+        .suffix(".md")
+        .tempfile()
+        .expect("Failed to create temp file");
+    temp_file
+        .write_all(content.as_bytes())
+        .expect("Failed to write test file");
+    temp_file.flush().expect("Failed to flush temp file");
 
     let converter = DocumentConverter::new();
     let result = converter
-        .convert_file(&temp_file)
+        .convert_file(temp_file.path())
         .expect("Failed to convert");
-
-    // Clean up
-    let _ = fs::remove_file(&temp_file);
 
     result.document().clone()
 }

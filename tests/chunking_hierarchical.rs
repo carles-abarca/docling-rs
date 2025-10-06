@@ -5,15 +5,23 @@
 use docling_rs::chunking::{BaseChunker, HierarchicalChunker};
 use docling_rs::{DoclingDocument, DocumentConverter};
 use std::fs;
+use std::io::Write;
 
 // Helper function to create a test document
 fn create_test_document(content: &str) -> DoclingDocument {
-    let temp_file = "/tmp/test_hierarchical.md";
-    fs::write(temp_file, content).expect("Failed to write test file");
+    // Use tempfile for cross-platform compatibility
+    let mut temp_file = tempfile::Builder::new()
+        .suffix(".md")
+        .tempfile()
+        .expect("Failed to create temp file");
+    temp_file
+        .write_all(content.as_bytes())
+        .expect("Failed to write test file");
+    temp_file.flush().expect("Failed to flush temp file");
 
     let converter = DocumentConverter::new();
     let result = converter
-        .convert_file(temp_file)
+        .convert_file(temp_file.path())
         .expect("Failed to convert");
     result.document().clone()
 }
