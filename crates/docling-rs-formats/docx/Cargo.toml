@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-docling-rs-core = { path = "../../docling-rs-core" }
+docling-rs-core.workspace = true
 docx-rs.workspace = true
 
 [lints]

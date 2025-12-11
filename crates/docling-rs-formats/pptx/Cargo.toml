@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-docling-rs-core = { path = "../../docling-rs-core" }
+docling-rs-core.workspace = true
 pptx-to-md.workspace = true
 tempfile.workspace = true
 

@@ -11,7 +11,7 @@ default = []
 ocr = ["dep:rusty-tesseract"]
 
 [dependencies]
-docling-rs-core = { path = "../../docling-rs-core" }
+docling-rs-core.workspace = true
 pdfium-render.workspace = true
 image.workspace = true
 rusty-tesseract = { workspace = true, optional = true }

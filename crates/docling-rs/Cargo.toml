@@ -19,14 +19,14 @@ pdf = ["dep:docling-rs-pdf"]
 ocr = ["pdf", "docling-rs-pdf?/ocr"]
 
 [dependencies]
-docling-rs-core = { path = "../docling-rs-core" }
-docling-rs-markdown = { path = "../docling-rs-formats/markdown", optional = true }
-docling-rs-html = { path = "../docling-rs-formats/html", optional = true }
-docling-rs-csv = { path = "../docling-rs-formats/csv", optional = true }
-docling-rs-docx = { path = "../docling-rs-formats/docx", optional = true }
-docling-rs-xlsx = { path = "../docling-rs-formats/xlsx", optional = true }
-docling-rs-pptx = { path = "../docling-rs-formats/pptx", optional = true }
-docling-rs-pdf = { path = "../docling-rs-formats/pdf", optional = true }
+docling-rs-core.workspace = true
+docling-rs-markdown = { workspace = true, optional = true }
+docling-rs-html = { workspace = true, optional = true }
+docling-rs-csv = { workspace = true, optional = true }
+docling-rs-docx = { workspace = true, optional = true }
+docling-rs-xlsx = { workspace = true, optional = true }
+docling-rs-pptx = { workspace = true, optional = true }
+docling-rs-pdf = { workspace = true, optional = true }
 serde_json.workspace = true
 
 [lib]

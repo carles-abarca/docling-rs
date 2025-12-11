@@ -23,6 +23,16 @@ repository = "https://github.com/your-org/docling-rs"
 description = "Native Rust document processing library"
 
 [workspace.dependencies]
+# Internal crates
+docling-rs-core = { version = "1.0.0", path = "crates/docling-rs-core" }
+docling-rs-markdown = { version = "1.0.0", path = "crates/docling-rs-formats/markdown" }
+docling-rs-html = { version = "1.0.0", path = "crates/docling-rs-formats/html" }
+docling-rs-csv = { version = "1.0.0", path = "crates/docling-rs-formats/csv" }
+docling-rs-docx = { version = "1.0.0", path = "crates/docling-rs-formats/docx" }
+docling-rs-xlsx = { version = "1.0.0", path = "crates/docling-rs-formats/xlsx" }
+docling-rs-pptx = { version = "1.0.0", path = "crates/docling-rs-formats/pptx" }
+docling-rs-pdf = { version = "1.0.0", path = "crates/docling-rs-formats/pdf" }
+
 # Core dependencies shared across crates
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
