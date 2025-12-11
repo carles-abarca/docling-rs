@@ -1,6 +1,8 @@
 //! Document converter - main entry point for document conversion
 
-use crate::{ConversionResult, ConversionError, InputDocument, InputFormat, Pipeline, SimplePipeline};
+use crate::{
+    ConversionError, ConversionResult, InputDocument, InputFormat, Pipeline, SimplePipeline,
+};
 use std::path::Path;
 
 /// Main entry point for document conversion

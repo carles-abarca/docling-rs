@@ -1,10 +1,10 @@
 //! CSV backend for docling-rs
 
+use csv::ReaderBuilder;
 use docling_rs_core::{
     Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
     InputFormat, NodeType,
 };
-use csv::ReaderBuilder;
 use std::io::Cursor;
 
 /// CSV backend
@@ -27,13 +27,13 @@ impl Backend for CsvBackend {
     fn convert(&self, input: &InputDocument) -> Result<DoclingDocument, ConversionError> {
         let content = match input.source() {
             DocumentSource::FilePath(path) => std::fs::read_to_string(path)?,
-            DocumentSource::Bytes { data, .. } => {
-                String::from_utf8(data.clone()).map_err(|e| ConversionError::ParseError(e.to_string()))?
-            }
+            DocumentSource::Bytes { data, .. } => String::from_utf8(data.clone())
+                .map_err(|e| ConversionError::ParseError(e.to_string()))?,
         };
 
         let name = match input.source() {
-            DocumentSource::FilePath(path) => path.file_name()
+            DocumentSource::FilePath(path) => path
+                .file_name()
                 .and_then(|n| n.to_str())
                 .unwrap_or("document")
                 .to_string(),

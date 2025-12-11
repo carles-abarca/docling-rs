@@ -1,10 +1,10 @@
 //! XLSX backend for docling-rs
 
+use calamine::{open_workbook_auto_from_rs, Reader, Sheets};
 use docling_rs_core::{
     Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
     InputFormat, NodeType,
 };
-use calamine::{open_workbook_auto_from_rs, Reader, Sheets};
 use std::io::Cursor;
 
 /// XLSX backend using calamine
@@ -18,9 +18,7 @@ impl XlsxBackend {
 
     fn get_bytes(input: &InputDocument) -> Result<Vec<u8>, ConversionError> {
         match input.source() {
-            DocumentSource::FilePath(path) => {
-                std::fs::read(path).map_err(ConversionError::Io)
-            }
+            DocumentSource::FilePath(path) => std::fs::read(path).map_err(ConversionError::Io),
             DocumentSource::Bytes { data, .. } => Ok(data.clone()),
         }
     }

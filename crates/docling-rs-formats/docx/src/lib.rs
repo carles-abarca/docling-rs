@@ -36,7 +36,8 @@ impl Backend for DocxBackend {
         };
 
         let name = match input.source() {
-            DocumentSource::FilePath(path) => path.file_name()
+            DocumentSource::FilePath(path) => path
+                .file_name()
                 .and_then(|n| n.to_str())
                 .unwrap_or("document")
                 .to_string(),
