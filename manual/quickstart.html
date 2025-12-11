@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Start - docling-rs Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html" class="active">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html">API Reference</a></li>
+                    <li><a href="cli.html">CLI Usage</a></li>
+                    <li><a href="formats.html">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html">Chunking for RAG</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / Quick Start
+            </div>
+
+            <h1>Quick Start Guide</h1>
+
+            <p>
+                Get started with docling-rs in under 5 minutes. This guide covers the
+                most common use cases for both the CLI and Rust library.
+            </p>
+
+            <h2>CLI Quick Start</h2>
+
+            <h3>1. Convert a Single File</h3>
+
+            <p>Convert any supported document to Markdown:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Convert PDF to Markdown</span>
+docling-rs report.pdf --to markdown --output-dir ./output
+
+<span class="comment"># Convert DOCX to JSON</span>
+docling-rs document.docx --to json --output-dir ./output
+
+<span class="comment"># Convert to plain text</span>
+docling-rs spreadsheet.xlsx --to text</code></pre>
+
+            <h3>2. Batch Convert a Directory</h3>
+
+            <p>Process multiple files at once:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Convert all documents in a folder</span>
+docling-rs ./documents/ --to json --output-dir ./converted
+
+<span class="comment"># Filter by input format</span>
+docling-rs ./documents/ --from pdf,docx --to markdown
+
+<span class="comment"># Continue on errors</span>
+docling-rs ./documents/ --to json --continue-on-error</code></pre>
+
+            <h3>3. Chunking for RAG Applications</h3>
+
+            <p>Split documents into chunks for embedding:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Enable chunking with default size (512)</span>
+docling-rs document.pdf --chunk --to json
+
+<span class="comment"># Custom chunk size</span>
+docling-rs document.pdf --chunk --chunk-size 1000 --to markdown
+
+<span class="comment"># Chunk with overlap</span>
+docling-rs document.pdf --chunk --chunk-size 500 --chunk-overlap 50</code></pre>
+
+            <h2>Rust Library Quick Start</h2>
+
+            <h3>1. Basic Document Conversion</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::DocumentConverter;
+
+<span class="keyword">fn</span> <span class="function">main</span>() -> Result&lt;(), Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="comment">// Create a converter with all enabled backends</span>
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+
+    <span class="comment">// Convert a file</span>
+    <span class="keyword">let</span> result = converter.convert_file(<span class="string">"document.pdf"</span>)?;
+
+    <span class="comment">// Access the converted document</span>
+    <span class="keyword">let</span> doc = result.document();
+
+    <span class="comment">// Print document info</span>
+    println!(<span class="string">"Name: {}"</span>, doc.name());
+    println!(<span class="string">"Nodes: {}"</span>, doc.nodes().len());
+
+    Ok(())
+}</code></pre>
+
+            <h3>2. Export to Different Formats</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::DocumentConverter;
+
+<span class="keyword">fn</span> <span class="function">main</span>() -> Result&lt;(), Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+    <span class="keyword">let</span> result = converter.convert_file(<span class="string">"report.docx"</span>)?;
+    <span class="keyword">let</span> doc = result.document();
+
+    <span class="comment">// Export to Markdown</span>
+    <span class="keyword">let</span> markdown = doc.to_markdown();
+    std::fs::write(<span class="string">"output.md"</span>, &amp;markdown)?;
+
+    <span class="comment">// Export to JSON</span>
+    <span class="keyword">let</span> json = serde_json::to_string_pretty(doc)?;
+    std::fs::write(<span class="string">"output.json"</span>, &amp;json)?;
+
+    <span class="comment">// Export to plain text</span>
+    <span class="keyword">let</span> text = doc.to_text();
+    std::fs::write(<span class="string">"output.txt"</span>, &amp;text)?;
+
+    Ok(())
+}</code></pre>
+
+            <h3>3. Convert from Bytes</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, InputFormat};
+
+<span class="keyword">fn</span> <span class="function">convert_from_bytes</span>(data: Vec&lt;u8&gt;) -> Result&lt;String, Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+
+    <span class="comment">// Convert bytes with explicit format</span>
+    <span class="keyword">let</span> result = converter.convert_bytes(
+        data,
+        <span class="string">"uploaded_file.pdf"</span>.to_string(),
+        InputFormat::PDF
+    )?;
+
+    Ok(result.document().to_markdown())
+}</code></pre>
+
+            <h3>4. Working with Document Nodes</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, NodeType};
+
+<span class="keyword">fn</span> <span class="function">analyze_document</span>(path: &amp;str) -> Result&lt;(), Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+    <span class="keyword">let</span> result = converter.convert_file(path)?;
+    <span class="keyword">let</span> doc = result.document();
+
+    <span class="comment">// Iterate over document nodes</span>
+    <span class="keyword">for</span> node <span class="keyword">in</span> doc.nodes() {
+        <span class="keyword">match</span> node.item().node_type() {
+            NodeType::Heading =&gt; {
+                println!(<span class="string">"Heading: {}"</span>, node.item().text_content());
+            }
+            NodeType::Paragraph =&gt; {
+                println!(<span class="string">"Paragraph: {} chars"</span>,
+                    node.item().text_content().len());
+            }
+            NodeType::Table =&gt; {
+                println!(<span class="string">"Table found"</span>);
+            }
+            _ =&gt; {}
+        }
+    }
+
+    Ok(())
+}</code></pre>
+
+            <h3>5. Chunking Documents</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, HierarchicalChunker};
+
+<span class="keyword">fn</span> <span class="function">chunk_document</span>(path: &amp;str) -> Result&lt;Vec&lt;String&gt;, Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+    <span class="keyword">let</span> result = converter.convert_file(path)?;
+    <span class="keyword">let</span> doc = result.document();
+
+    <span class="comment">// Create a hierarchical chunker</span>
+    <span class="keyword">let</span> chunker = HierarchicalChunker::new()
+        .with_max_chunk_size(<span class="number">512</span>)
+        .with_overlap(<span class="number">50</span>);
+
+    <span class="comment">// Chunk the document</span>
+    <span class="keyword">let</span> chunks = chunker.chunk(doc)?;
+
+    <span class="comment">// Extract chunk texts</span>
+    <span class="keyword">let</span> texts: Vec&lt;String&gt; = chunks
+        .iter()
+        .map(|c| c.text().to_string())
+        .collect();
+
+    Ok(texts)
+}</code></pre>
+
+            <h2>Output Formats</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>JSON</h3>
+                    <p>Structured document model with full metadata. Best for programmatic processing.</p>
+                </div>
+                <div class="card">
+                    <h3>Markdown</h3>
+                    <p>Human-readable format preserving document structure. Great for documentation.</p>
+                </div>
+                <div class="card">
+                    <h3>Text</h3>
+                    <p>Plain text extraction. Ideal for full-text search and simple analysis.</p>
+                </div>
+            </div>
+
+            <h2>Common Patterns</h2>
+
+            <h3>Error Handling</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, ConversionError};
+
+<span class="keyword">fn</span> <span class="function">safe_convert</span>(path: &amp;str) -> Result&lt;String, String&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+
+    <span class="keyword">match</span> converter.convert_file(path) {
+        Ok(result) =&gt; Ok(result.document().to_markdown()),
+        Err(ConversionError::FileNotFound(_)) =&gt; {
+            Err(<span class="string">"File not found"</span>.to_string())
+        }
+        Err(ConversionError::UnsupportedFormat(fmt)) =&gt; {
+            Err(<span class="keyword">format!</span>(<span class="string">"Unsupported format: {}"</span>, fmt))
+        }
+        Err(e) =&gt; Err(<span class="keyword">format!</span>(<span class="string">"Conversion error: {}"</span>, e))
+    }
+}</code></pre>
+
+            <h3>Batch Processing</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::DocumentConverter;
+<span class="keyword">use</span> std::path::Path;
+
+<span class="keyword">fn</span> <span class="function">batch_convert</span>(dir: &amp;Path) -> Vec&lt;Result&lt;String, String&gt;&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+    <span class="keyword">let</span> <span class="keyword">mut</span> results = Vec::new();
+
+    <span class="keyword">for</span> entry <span class="keyword">in</span> std::fs::read_dir(dir).unwrap() {
+        <span class="keyword">let</span> path = entry.unwrap().path();
+
+        <span class="keyword">if</span> path.is_file() {
+            <span class="keyword">match</span> converter.convert_file(&amp;path) {
+                Ok(result) =&gt; {
+                    results.push(Ok(result.document().to_text()));
+                }
+                Err(e) =&gt; {
+                    results.push(Err(<span class="keyword">format!</span>(<span class="string">"{}: {}"</span>,
+                        path.display(), e)));
+                }
+            }
+        }
+    }
+
+    results
+}</code></pre>
+
+            <div class="tip">
+                <div class="tip-title">Next Steps</div>
+                <p>
+                    Now that you've learned the basics, explore the
+                    <a href="api-reference.html">API Reference</a> for detailed documentation
+                    or check out <a href="chunking.html">Chunking for RAG</a> for advanced
+                    RAG application patterns.
+                </p>
+            </div>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

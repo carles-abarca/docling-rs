@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chunking for RAG - docling-rs Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html">API Reference</a></li>
+                    <li><a href="cli.html">CLI Usage</a></li>
+                    <li><a href="formats.html">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html" class="active">Chunking for RAG</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / Chunking for RAG
+            </div>
+
+            <h1>Chunking for RAG Applications</h1>
+
+            <p>
+                docling-rs provides intelligent chunking strategies designed specifically
+                for Retrieval-Augmented Generation (RAG) applications. The chunking system
+                splits documents into semantically meaningful pieces suitable for embedding
+                and retrieval.
+            </p>
+
+            <h2>Why Chunk Documents?</h2>
+
+            <p>
+                Embedding models and LLM context windows have size limits. Chunking helps by:
+            </p>
+
+            <ul class="feature-list">
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Fitting context windows</strong> - Chunks match embedding model limits</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Improving retrieval</strong> - Smaller, focused chunks retrieve better</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Preserving meaning</strong> - Semantic boundaries keep context intact</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Enabling metadata</strong> - Each chunk carries source information</span>
+                </li>
+            </ul>
+
+            <h2>Chunking Strategies</h2>
+
+            <h3>Hierarchical Chunker</h3>
+
+            <p>
+                The <code>HierarchicalChunker</code> respects document structure when splitting:
+            </p>
+
+            <ul>
+                <li>Splits at section boundaries (headings)</li>
+                <li>Preserves paragraph integrity when possible</li>
+                <li>Maintains parent-child relationships</li>
+                <li>Adds hierarchical context to chunks</li>
+            </ul>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, HierarchicalChunker};
+
+<span class="keyword">fn</span> <span class="function">chunk_with_hierarchy</span>() -> Result&lt;(), Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+    <span class="keyword">let</span> result = converter.convert_file(<span class="string">"document.pdf"</span>)?;
+    <span class="keyword">let</span> doc = result.document();
+
+    <span class="comment">// Create chunker with configuration</span>
+    <span class="keyword">let</span> chunker = HierarchicalChunker::new()
+        .with_max_chunk_size(<span class="number">512</span>)     <span class="comment">// Max characters per chunk</span>
+        .with_overlap(<span class="number">50</span>);             <span class="comment">// Overlap between chunks</span>
+
+    <span class="comment">// Generate chunks</span>
+    <span class="keyword">let</span> chunks = chunker.chunk(doc)?;
+
+    <span class="keyword">for</span> (i, chunk) <span class="keyword">in</span> chunks.iter().enumerate() {
+        println!(<span class="string">"Chunk {}: {} chars"</span>, i + <span class="number">1</span>, chunk.text().len());
+        println!(<span class="string">"  Text: {}..."</span>, &amp;chunk.text()[..<span class="number">50</span>.min(chunk.text().len())]);
+    }
+
+    Ok(())
+}</code></pre>
+
+            <h3>Hybrid Chunker</h3>
+
+            <p>
+                The <code>HybridChunker</code> combines hierarchical awareness with token-based sizing:
+            </p>
+
+            <ul>
+                <li>Uses tokenizer for accurate size estimation</li>
+                <li>Respects embedding model token limits</li>
+                <li>Balances structure preservation with size constraints</li>
+                <li>Ideal for production RAG systems</li>
+            </ul>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, HybridChunkerBuilder};
+
+<span class="keyword">fn</span> <span class="function">chunk_with_tokens</span>() -> Result&lt;(), Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+    <span class="keyword">let</span> result = converter.convert_file(<span class="string">"document.pdf"</span>)?;
+    <span class="keyword">let</span> doc = result.document();
+
+    <span class="comment">// Build hybrid chunker</span>
+    <span class="keyword">let</span> chunker = HybridChunkerBuilder::new()
+        .max_tokens(<span class="number">256</span>)              <span class="comment">// Token limit for embeddings</span>
+        .overlap_tokens(<span class="number">20</span>)           <span class="comment">// Token overlap</span>
+        .build()?;
+
+    <span class="keyword">let</span> chunks = chunker.chunk(doc)?;
+
+    println!(<span class="string">"Generated {} chunks"</span>, chunks.len());
+    Ok(())
+}</code></pre>
+
+            <h2>CLI Chunking</h2>
+
+            <p>
+                Enable chunking from the command line with the <code>--chunk</code> flag:
+            </p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Basic chunking with default size (512)</span>
+docling-rs document.pdf --chunk --to json
+
+<span class="comment"># Custom chunk size</span>
+docling-rs document.pdf --chunk --chunk-size 1000 --to markdown
+
+<span class="comment"># Chunking with overlap</span>
+docling-rs document.pdf --chunk --chunk-size 500 --chunk-overlap 50
+
+<span class="comment"># Batch chunking</span>
+docling-rs ./documents/ --chunk --chunk-size 512 --to json --output-dir ./chunks</code></pre>
+
+            <h2>Chunk Output Format</h2>
+
+            <h3>JSON Output</h3>
+
+            <p>When outputting to JSON with chunking enabled, each chunk includes metadata:</p>
+
+            <div class="code-header">JSON</div>
+            <pre><code>{
+  <span class="string">"chunks"</span>: [
+    {
+      <span class="string">"text"</span>: <span class="string">"Introduction to Machine Learning..."</span>,
+      <span class="string">"metadata"</span>: {
+        <span class="string">"chunk_index"</span>: <span class="number">0</span>,
+        <span class="string">"total_chunks"</span>: <span class="number">15</span>,
+        <span class="string">"char_count"</span>: <span class="number">487</span>,
+        <span class="string">"source_document"</span>: <span class="string">"ml_guide.pdf"</span>,
+        <span class="string">"headings"</span>: [<span class="string">"Chapter 1"</span>, <span class="string">"Introduction"</span>]
+      }
+    },
+    ...
+  ]
+}</code></pre>
+
+            <h3>Markdown Output</h3>
+
+            <p>Markdown output separates chunks with headers:</p>
+
+            <div class="code-header">Markdown</div>
+            <pre><code># Chunk 1 of 15
+Size: 487 characters
+
+Introduction to Machine Learning...
+
+---
+
+# Chunk 2 of 15
+Size: 512 characters
+
+Supervised learning is a type of...</code></pre>
+
+            <h2>Chunk Metadata</h2>
+
+            <p>Each chunk includes metadata for tracking and retrieval:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>chunk_index</code></td>
+                        <td>Zero-based index of the chunk</td>
+                    </tr>
+                    <tr>
+                        <td><code>total_chunks</code></td>
+                        <td>Total number of chunks from this document</td>
+                    </tr>
+                    <tr>
+                        <td><code>char_count</code></td>
+                        <td>Number of characters in the chunk</td>
+                    </tr>
+                    <tr>
+                        <td><code>source_document</code></td>
+                        <td>Original document filename</td>
+                    </tr>
+                    <tr>
+                        <td><code>headings</code></td>
+                        <td>Hierarchy of headings leading to this chunk</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Best Practices</h2>
+
+            <h3>Choosing Chunk Size</h3>
+
+            <div class="tip">
+                <div class="tip-title">Recommended Chunk Sizes</div>
+                <ul>
+                    <li><strong>256-512 tokens</strong> - Best for most embedding models</li>
+                    <li><strong>1000+ chars</strong> - For longer context retrieval</li>
+                    <li><strong>Match your model</strong> - Check your embedding model's limits</li>
+                </ul>
+            </div>
+
+            <h3>Using Overlap</h3>
+
+            <p>
+                Overlap helps maintain context across chunk boundaries:
+            </p>
+
+            <ul>
+                <li><strong>10-20%</strong> overlap is typically effective</li>
+                <li>Higher overlap for documents with continuous narrative</li>
+                <li>Lower overlap for structured documents with clear sections</li>
+            </ul>
+
+            <h3>RAG Integration Example</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, HierarchicalChunker};
+
+<span class="keyword">fn</span> <span class="function">prepare_for_rag</span>(path: &amp;str) -> Result&lt;Vec&lt;(String, serde_json::Value)&gt;, Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="comment">// Convert document</span>
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+    <span class="keyword">let</span> result = converter.convert_file(path)?;
+    <span class="keyword">let</span> doc = result.document();
+
+    <span class="comment">// Chunk for embedding</span>
+    <span class="keyword">let</span> chunker = HierarchicalChunker::new()
+        .with_max_chunk_size(<span class="number">512</span>)
+        .with_overlap(<span class="number">50</span>);
+
+    <span class="keyword">let</span> chunks = chunker.chunk(doc)?;
+
+    <span class="comment">// Prepare for vector store</span>
+    <span class="keyword">let</span> documents: Vec&lt;_&gt; = chunks
+        .iter()
+        .map(|chunk| {
+            <span class="keyword">let</span> metadata = serde_json::json!({
+                <span class="string">"source"</span>: path,
+                <span class="string">"chunk_id"</span>: chunk.metadata().chunk_index(),
+                <span class="string">"headings"</span>: chunk.metadata().headings(),
+            });
+            (chunk.text().to_string(), metadata)
+        })
+        .collect();
+
+    Ok(documents)
+}
+
+<span class="comment">// Usage with a vector store</span>
+<span class="keyword">fn</span> <span class="function">index_documents</span>(paths: &amp;[&amp;str]) {
+    <span class="keyword">for</span> path <span class="keyword">in</span> paths {
+        <span class="keyword">match</span> prepare_for_rag(path) {
+            Ok(docs) =&gt; {
+                <span class="keyword">for</span> (text, metadata) <span class="keyword">in</span> docs {
+                    <span class="comment">// Generate embedding</span>
+                    <span class="comment">// let embedding = embed(&text);</span>
+                    <span class="comment">// Store in vector database</span>
+                    <span class="comment">// vector_store.insert(embedding, text, metadata);</span>
+                }
+            }
+            Err(e) =&gt; eprintln!(<span class="string">"Error processing {}: {}"</span>, path, e),
+        }
+    }
+}</code></pre>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

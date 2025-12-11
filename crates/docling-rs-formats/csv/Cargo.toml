@@ -1,0 +1,14 @@
+[package]
+name = "docling-rs-csv"
+version.workspace = true
+edition.workspace = true
+description = "CSV backend for docling-rs"
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+docling-rs-core = { path = "../../docling-rs-core" }
+csv.workspace = true
+
+[lints]
+workspace = true

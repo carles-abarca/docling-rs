@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Usage - docling-rs Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html">API Reference</a></li>
+                    <li><a href="cli.html" class="active">CLI Usage</a></li>
+                    <li><a href="formats.html">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html">Chunking for RAG</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / CLI Usage
+            </div>
+
+            <h1>CLI Usage Guide</h1>
+
+            <p>
+                The docling-rs command-line interface provides powerful document conversion
+                and processing capabilities for shell scripts, automation, and batch processing.
+            </p>
+
+            <h2>Basic Syntax</h2>
+
+            <div class="code-header">Terminal</div>
+            <pre><code>docling-rs [OPTIONS] &lt;INPUT&gt;</code></pre>
+
+            <p>Where <code>&lt;INPUT&gt;</code> is a file path or directory.</p>
+
+            <h2>Command Options</h2>
+
+            <h3>Input/Output Options</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>&lt;INPUT&gt;</code></td>
+                        <td>Input file or directory path (required)</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><code>--output-dir &lt;DIR&gt;</code></td>
+                        <td>Output directory for converted files</td>
+                        <td>Current directory</td>
+                    </tr>
+                    <tr>
+                        <td><code>--to &lt;FORMAT&gt;</code></td>
+                        <td>Output format: <code>json</code>, <code>markdown</code>, <code>text</code></td>
+                        <td><code>markdown</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>--from &lt;FORMATS&gt;</code></td>
+                        <td>Filter input formats (comma-separated)</td>
+                        <td>All supported</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Chunking Options</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>--chunk</code></td>
+                        <td>Enable document chunking</td>
+                        <td>Disabled</td>
+                    </tr>
+                    <tr>
+                        <td><code>--chunk-size &lt;SIZE&gt;</code></td>
+                        <td>Maximum chunk size in characters</td>
+                        <td>512</td>
+                    </tr>
+                    <tr>
+                        <td><code>--chunk-overlap &lt;SIZE&gt;</code></td>
+                        <td>Overlap between chunks</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Processing Options</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>--continue-on-error</code></td>
+                        <td>Continue processing if a file fails (batch mode)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--abort-on-error</code></td>
+                        <td>Stop processing on first error (batch mode)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--verbose</code></td>
+                        <td>Show detailed processing information</td>
+                    </tr>
+                    <tr>
+                        <td><code>--quiet</code></td>
+                        <td>Suppress all output except errors</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>PDF Options</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>--pdf-extract-tables</code></td>
+                        <td>Extract tables from PDFs (requires table detection)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--pdf-extract-images</code></td>
+                        <td>Extract images from PDFs</td>
+                    </tr>
+                    <tr>
+                        <td><code>--ocr-enabled</code></td>
+                        <td>Enable OCR for scanned documents</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>General Options</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>-h, --help</code></td>
+                        <td>Show help message</td>
+                    </tr>
+                    <tr>
+                        <td><code>-V, --version</code></td>
+                        <td>Show version information</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Usage Examples</h2>
+
+            <h3>Single File Conversion</h3>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Convert PDF to Markdown</span>
+docling-rs report.pdf --to markdown --output-dir ./output
+
+<span class="comment"># Convert Word document to JSON</span>
+docling-rs document.docx --to json --output-dir ./output
+
+<span class="comment"># Convert Excel to plain text (output to stdout)</span>
+docling-rs data.xlsx --to text</code></pre>
+
+            <h3>Directory Processing</h3>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Convert all documents in a directory</span>
+docling-rs ./documents/ --to json --output-dir ./converted
+
+<span class="comment"># Convert only PDF and DOCX files</span>
+docling-rs ./documents/ --from pdf,docx --to markdown
+
+<span class="comment"># Process with verbose output</span>
+docling-rs ./documents/ --to json --verbose</code></pre>
+
+            <h3>Error Handling in Batch Mode</h3>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Continue even if some files fail</span>
+docling-rs ./documents/ --continue-on-error --to json
+
+<span class="comment"># Stop on first error</span>
+docling-rs ./documents/ --abort-on-error --to markdown</code></pre>
+
+            <h3>Chunking for RAG</h3>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Basic chunking</span>
+docling-rs document.pdf --chunk --to json
+
+<span class="comment"># Custom chunk size</span>
+docling-rs document.pdf --chunk --chunk-size 1000 --to json
+
+<span class="comment"># Chunking with overlap</span>
+docling-rs document.pdf --chunk --chunk-size 500 --chunk-overlap 50</code></pre>
+
+            <h2>Output Structure</h2>
+
+            <h3>Single File Output</h3>
+
+            <p>When converting a single file, the output file is named after the input:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code>docling-rs report.pdf --to markdown --output-dir ./output
+<span class="comment"># Creates: ./output/report.md</span>
+
+docling-rs report.pdf --to json --output-dir ./output
+<span class="comment"># Creates: ./output/report.json</span></code></pre>
+
+            <h3>Directory Output</h3>
+
+            <p>When converting a directory, the output structure mirrors the input:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Input structure:</span>
+documents/
+  ├── report.pdf
+  ├── data.xlsx
+  └── subdir/
+      └── notes.md
+
+<span class="comment"># Command:</span>
+docling-rs ./documents/ --to json --output-dir ./output
+
+<span class="comment"># Output structure:</span>
+output/
+  ├── report.json
+  ├── data.json
+  └── subdir/
+      └── notes.json</code></pre>
+
+            <h2>Exit Codes</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>0</code></td>
+                        <td>Success - all files processed</td>
+                    </tr>
+                    <tr>
+                        <td><code>1</code></td>
+                        <td>Error - one or more files failed</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Shell Integration</h2>
+
+            <h3>Bash Script Example</h3>
+
+            <div class="code-header">bash</div>
+            <pre><code><span class="comment">#!/bin/bash</span>
+
+<span class="comment"># Convert all PDFs in a directory</span>
+<span class="keyword">for</span> pdf <span class="keyword">in</span> ./documents/*.pdf; <span class="keyword">do</span>
+    <span class="keyword">if</span> docling-rs <span class="string">"$pdf"</span> --to json --output-dir ./output; <span class="keyword">then</span>
+        echo <span class="string">"Converted: $pdf"</span>
+    <span class="keyword">else</span>
+        echo <span class="string">"Failed: $pdf"</span> &gt;&amp;2
+    <span class="keyword">fi</span>
+<span class="keyword">done</span></code></pre>
+
+            <h3>PowerShell Example</h3>
+
+            <div class="code-header">PowerShell</div>
+            <pre><code><span class="comment"># Convert all documents and log results</span>
+Get-ChildItem -Path .\documents -Recurse -Include *.pdf,*.docx | ForEach-Object {
+    $result = docling-rs $_.FullName --to json --output-dir .\output 2&gt;&amp;1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Success: $($_.Name)" -ForegroundColor Green
+    } else {
+        Write-Host "Failed: $($_.Name)" -ForegroundColor Red
+    }
+}</code></pre>
+
+            <h3>Unix Pipes</h3>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Find and convert all PDFs</span>
+find ./documents -name "*.pdf" -exec docling-rs {} --to markdown --output-dir ./output \;
+
+<span class="comment"># Convert and pipe to another tool</span>
+docling-rs document.pdf --to text | wc -w
+<span class="comment"># Outputs word count</span>
+
+<span class="comment"># Convert and search content</span>
+docling-rs document.pdf --to text | grep -i "keyword"</code></pre>
+
+            <div class="warning">
+                <div class="warning-title">Note on Conflicting Options</div>
+                <p>
+                    The following option pairs cannot be used together:
+                </p>
+                <ul>
+                    <li><code>--verbose</code> and <code>--quiet</code></li>
+                    <li><code>--continue-on-error</code> and <code>--abort-on-error</code></li>
+                </ul>
+            </div>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

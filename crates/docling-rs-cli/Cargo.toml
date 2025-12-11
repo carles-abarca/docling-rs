@@ -1,0 +1,27 @@
+[package]
+name = "docling-rs-cli"
+version.workspace = true
+edition.workspace = true
+description = "Command-line interface for docling-rs document processing"
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "docling-rs"
+path = "src/main.rs"
+
+[dependencies]
+docling-rs = { path = "../docling-rs", features = ["full"] }
+clap.workspace = true
+indicatif.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+assert_cmd.workspace = true
+predicates.workspace = true
+tempfile.workspace = true
+
+[lints]
+workspace = true

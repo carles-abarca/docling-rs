@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supported Formats - docling-rs Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html">API Reference</a></li>
+                    <li><a href="cli.html">CLI Usage</a></li>
+                    <li><a href="formats.html" class="active">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html">Chunking for RAG</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / Supported Formats
+            </div>
+
+            <h1>Supported Formats</h1>
+
+            <p>
+                docling-rs supports a wide range of document formats for input, with multiple
+                output options for different use cases.
+            </p>
+
+            <h2>Input Formats</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>Extensions</th>
+                        <th>Feature Flag</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Markdown</strong></td>
+                        <td><code>.md</code>, <code>.markdown</code></td>
+                        <td><code>markdown</code></td>
+                        <td>CommonMark and GitHub Flavored Markdown</td>
+                    </tr>
+                    <tr>
+                        <td><strong>HTML</strong></td>
+                        <td><code>.html</code>, <code>.htm</code></td>
+                        <td><code>html</code></td>
+                        <td>HTML documents with semantic extraction</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CSV</strong></td>
+                        <td><code>.csv</code></td>
+                        <td><code>csv</code></td>
+                        <td>Comma-separated values (tabular data)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Word</strong></td>
+                        <td><code>.docx</code>, <code>.dotx</code>, <code>.docm</code>, <code>.dotm</code></td>
+                        <td><code>docx</code></td>
+                        <td>Microsoft Word documents (Office Open XML)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Excel</strong></td>
+                        <td><code>.xlsx</code>, <code>.xlsm</code>, <code>.xlsb</code>, <code>.xls</code></td>
+                        <td><code>xlsx</code></td>
+                        <td>Microsoft Excel spreadsheets</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PowerPoint</strong></td>
+                        <td><code>.pptx</code>, <code>.potx</code>, <code>.ppsx</code>, <code>.pptm</code></td>
+                        <td><code>pptx</code></td>
+                        <td>Microsoft PowerPoint presentations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PDF</strong></td>
+                        <td><code>.pdf</code></td>
+                        <td><code>pdf</code></td>
+                        <td>PDF documents (requires PDFium library)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Output Formats</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>CLI Option</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>JSON</strong></td>
+                        <td><code>--to json</code></td>
+                        <td>Full document model with metadata, ideal for programmatic processing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Markdown</strong></td>
+                        <td><code>--to markdown</code></td>
+                        <td>Human-readable format preserving document structure</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Text</strong></td>
+                        <td><code>--to text</code></td>
+                        <td>Plain text extraction, ideal for search and analysis</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Format Details</h2>
+
+            <h3>Markdown</h3>
+
+            <p>
+                The Markdown backend parses CommonMark and GitHub Flavored Markdown (GFM).
+                It extracts:
+            </p>
+
+            <ul>
+                <li>Headings (H1-H6) with hierarchy preservation</li>
+                <li>Paragraphs with inline formatting</li>
+                <li>Lists (ordered and unordered)</li>
+                <li>Code blocks with language detection</li>
+                <li>Tables (GFM syntax)</li>
+                <li>Links and images</li>
+                <li>Blockquotes</li>
+            </ul>
+
+            <h3>HTML</h3>
+
+            <p>
+                The HTML backend uses semantic parsing to extract meaningful content:
+            </p>
+
+            <ul>
+                <li>Headings (<code>&lt;h1&gt;</code>-<code>&lt;h6&gt;</code>)</li>
+                <li>Paragraphs and text content</li>
+                <li>Lists (<code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code>)</li>
+                <li>Tables with header detection</li>
+                <li>Links and images</li>
+                <li>Handles malformed HTML gracefully</li>
+            </ul>
+
+            <div class="note">
+                <div class="note-title">Note</div>
+                <p>
+                    Script and style content is automatically stripped. Only semantic
+                    content is extracted.
+                </p>
+            </div>
+
+            <h3>CSV</h3>
+
+            <p>
+                CSV files are processed as tabular data:
+            </p>
+
+            <ul>
+                <li>First row treated as headers</li>
+                <li>Each row becomes a TableRow node</li>
+                <li>Supports various delimiters (auto-detected)</li>
+                <li>Handles quoted fields with commas</li>
+            </ul>
+
+            <h3>Microsoft Word (DOCX)</h3>
+
+            <p>
+                Word documents are processed using Office Open XML parsing:
+            </p>
+
+            <ul>
+                <li>Headings with style-based level detection</li>
+                <li>Paragraphs with formatting</li>
+                <li>Lists (numbered and bulleted)</li>
+                <li>Tables with merged cells support</li>
+                <li>Embedded images (metadata only)</li>
+            </ul>
+
+            <h3>Microsoft Excel (XLSX)</h3>
+
+            <p>
+                Excel spreadsheets are converted with sheet-level organization:
+            </p>
+
+            <ul>
+                <li>Each sheet becomes a section</li>
+                <li>Cell data extracted as tabular content</li>
+                <li>Formula results (not formulas) are extracted</li>
+                <li>Supports multiple sheets</li>
+            </ul>
+
+            <h3>Microsoft PowerPoint (PPTX)</h3>
+
+            <p>
+                Presentations are converted slide-by-slide:
+            </p>
+
+            <ul>
+                <li>Each slide becomes a section</li>
+                <li>Title and content extraction</li>
+                <li>Bullet points preserved</li>
+                <li>Speaker notes (if present)</li>
+            </ul>
+
+            <h3>PDF</h3>
+
+            <p>
+                PDF processing uses the PDFium library for high-quality extraction:
+            </p>
+
+            <ul>
+                <li>Text extraction with reading order detection</li>
+                <li>Page-by-page processing</li>
+                <li>Paragraph detection</li>
+                <li>Multi-column layout support</li>
+            </ul>
+
+            <div class="warning">
+                <div class="warning-title">PDF Requirements</div>
+                <p>
+                    PDF support requires the PDFium library to be installed.
+                    See <a href="installation.html#pdf-support">Installation Guide</a>
+                    for setup instructions.
+                </p>
+            </div>
+
+            <h2>Feature Combinations</h2>
+
+            <div class="code-header">Cargo.toml</div>
+            <pre><code><span class="comment"># Enable only specific formats</span>
+[dependencies]
+docling-rs = { version = <span class="string">"0.1"</span>, default-features = <span class="keyword">false</span>, features = [<span class="string">"markdown"</span>, <span class="string">"html"</span>] }
+
+<span class="comment"># Enable all formats</span>
+[dependencies]
+docling-rs = { version = <span class="string">"0.1"</span>, features = [<span class="string">"full"</span>] }
+
+<span class="comment"># Default features (no PDF)</span>
+[dependencies]
+docling-rs = <span class="string">"0.1"</span></code></pre>
+
+            <h2>Format Detection</h2>
+
+            <p>
+                docling-rs automatically detects input formats using:
+            </p>
+
+            <ol>
+                <li><strong>File extension</strong> - Primary detection method</li>
+                <li><strong>Magic bytes</strong> - Fallback for ambiguous extensions</li>
+            </ol>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::InputFormat;
+
+<span class="comment">// Detect from extension</span>
+<span class="keyword">let</span> format = InputFormat::from_extension(<span class="string">"pdf"</span>);
+assert_eq!(format, Some(InputFormat::PDF));
+
+<span class="comment">// Detect from bytes</span>
+<span class="keyword">let</span> pdf_bytes = std::fs::read(<span class="string">"document.pdf"</span>)?;
+<span class="keyword">let</span> format = InputFormat::from_bytes(&amp;pdf_bytes);
+assert_eq!(format, Some(InputFormat::PDF));</code></pre>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

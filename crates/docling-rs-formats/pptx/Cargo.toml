@@ -1,0 +1,15 @@
+[package]
+name = "docling-rs-pptx"
+version.workspace = true
+edition.workspace = true
+description = "PPTX backend for docling-rs"
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+docling-rs-core = { path = "../../docling-rs-core" }
+pptx-to-md.workspace = true
+tempfile.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,13 @@
+[package]
+name = "docling-rs-markdown"
+version.workspace = true
+edition.workspace = true
+description = "Markdown backend for docling-rs"
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+docling-rs-core = { path = "../../docling-rs-core" }
+
+[lints]
+workspace = true

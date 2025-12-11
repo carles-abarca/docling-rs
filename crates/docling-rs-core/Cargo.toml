@@ -1,0 +1,22 @@
+[package]
+name = "docling-rs-core"
+version.workspace = true
+edition.workspace = true
+rust-version = "1.75"
+description = "Core types and traits for docling-rs document processing"
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+infer.workspace = true
+
+# Chunking dependencies
+tokenizers.workspace = true
+unicode-segmentation.workspace = true
+
+[lints]
+workspace = true

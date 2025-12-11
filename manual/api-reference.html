@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - docling-rs Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html" class="active">API Reference</a></li>
+                    <li><a href="cli.html">CLI Usage</a></li>
+                    <li><a href="formats.html">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html">Chunking for RAG</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / API Reference
+            </div>
+
+            <h1>API Reference</h1>
+
+            <p>
+                Complete reference for the docling-rs Rust library API. For full documentation
+                with all types and methods, see the generated Rust docs at
+                <a href="https://docs.rs/docling-rs">docs.rs/docling-rs</a>.
+            </p>
+
+            <h2>Core Types</h2>
+
+            <h3>DocumentConverter</h3>
+
+            <p>The main entry point for document conversion.</p>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub struct</span> <span class="type">DocumentConverter</span>
+                </div>
+                <div class="api-description">
+                    A high-level converter that automatically detects input formats
+                    and uses the appropriate backend for conversion.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">impl</span> <span class="type">DocumentConverter</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">new</span>() -&gt; <span class="type">Self</span>
+                </div>
+                <div class="api-description">
+                    Creates a new DocumentConverter with all enabled format backends.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">convert_file</span>&lt;P: AsRef&lt;Path&gt;&gt;(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&amp;<span class="keyword">self</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;path: P<br>
+                    &nbsp;&nbsp;) -&gt; Result&lt;<span class="type">ConversionResult</span>, <span class="type">ConversionError</span>&gt;
+                </div>
+                <div class="api-description">
+                    Converts a document from a file path. The format is automatically
+                    detected from the file extension.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">convert_bytes</span>(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&amp;<span class="keyword">self</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;bytes: Vec&lt;u8&gt;,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;name: String,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;format: <span class="type">InputFormat</span><br>
+                    &nbsp;&nbsp;) -&gt; Result&lt;<span class="type">ConversionResult</span>, <span class="type">ConversionError</span>&gt;
+                </div>
+                <div class="api-description">
+                    Converts a document from raw bytes with an explicit format specification.
+                </div>
+            </div>
+
+            <h3>DoclingDocument</h3>
+
+            <p>The unified document model representing a converted document.</p>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub struct</span> <span class="type">DoclingDocument</span>
+                </div>
+                <div class="api-description">
+                    Represents a parsed document with a hierarchical structure of nodes.
+                    Contains the document name, source information, and content nodes.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">impl</span> <span class="type">DoclingDocument</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">name</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;str
+                </div>
+                <div class="api-description">
+                    Returns the document name (usually the original filename).
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">nodes</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;[<span class="type">DocumentNode</span>]
+                </div>
+                <div class="api-description">
+                    Returns a slice of all document nodes in order.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">to_markdown</span>(&amp;<span class="keyword">self</span>) -&gt; String
+                </div>
+                <div class="api-description">
+                    Exports the document to Markdown format.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">to_text</span>(&amp;<span class="keyword">self</span>) -&gt; String
+                </div>
+                <div class="api-description">
+                    Exports the document to plain text format.
+                </div>
+            </div>
+
+            <h3>DocumentNode</h3>
+
+            <p>Represents a single element in the document structure.</p>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub struct</span> <span class="type">DocumentNode</span>
+                </div>
+                <div class="api-description">
+                    A node in the document tree containing content item and optional metadata.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">impl</span> <span class="type">DocumentNode</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">item</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;<span class="type">NodeItem</span>
+                </div>
+                <div class="api-description">
+                    Returns the content item for this node.
+                </div>
+            </div>
+
+            <h3>NodeType</h3>
+
+            <p>Enumeration of document node types.</p>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub enum</span> <span class="type">NodeType</span> {<br>
+                    &nbsp;&nbsp;Heading,<br>
+                    &nbsp;&nbsp;Paragraph,<br>
+                    &nbsp;&nbsp;List,<br>
+                    &nbsp;&nbsp;ListItem,<br>
+                    &nbsp;&nbsp;Table,<br>
+                    &nbsp;&nbsp;TableRow,<br>
+                    &nbsp;&nbsp;TableCell,<br>
+                    &nbsp;&nbsp;Code,<br>
+                    &nbsp;&nbsp;Quote,<br>
+                    &nbsp;&nbsp;Image,<br>
+                    &nbsp;&nbsp;Link,<br>
+                    &nbsp;&nbsp;Text,<br>
+                    }
+                </div>
+                <div class="api-description">
+                    The type of content a document node represents.
+                </div>
+            </div>
+
+            <h3>InputFormat</h3>
+
+            <p>Supported input document formats.</p>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub enum</span> <span class="type">InputFormat</span> {<br>
+                    &nbsp;&nbsp;Markdown,<br>
+                    &nbsp;&nbsp;Html,<br>
+                    &nbsp;&nbsp;Csv,<br>
+                    &nbsp;&nbsp;Docx,<br>
+                    &nbsp;&nbsp;Xlsx,<br>
+                    &nbsp;&nbsp;Pptx,<br>
+                    &nbsp;&nbsp;PDF,<br>
+                    }
+                </div>
+                <div class="api-description">
+                    Enumeration of supported input formats.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">impl</span> <span class="type">InputFormat</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">from_extension</span>(ext: &amp;str) -&gt; Option&lt;<span class="type">Self</span>&gt;
+                </div>
+                <div class="api-description">
+                    Detects the format from a file extension string.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">from_bytes</span>(bytes: &amp;[u8]) -&gt; Option&lt;<span class="type">Self</span>&gt;
+                </div>
+                <div class="api-description">
+                    Detects the format from file magic bytes.
+                </div>
+            </div>
+
+            <h2>Error Types</h2>
+
+            <h3>ConversionError</h3>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub enum</span> <span class="type">ConversionError</span> {<br>
+                    &nbsp;&nbsp;FileNotFound(PathBuf),<br>
+                    &nbsp;&nbsp;UnsupportedFormat(String),<br>
+                    &nbsp;&nbsp;ParseError(String),<br>
+                    &nbsp;&nbsp;IoError(std::io::Error),<br>
+                    &nbsp;&nbsp;NoBackendAvailable,<br>
+                    }
+                </div>
+                <div class="api-description">
+                    Errors that can occur during document conversion.
+                </div>
+            </div>
+
+            <h2>Chunking API</h2>
+
+            <h3>HierarchicalChunker</h3>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub struct</span> <span class="type">HierarchicalChunker</span>
+                </div>
+                <div class="api-description">
+                    A chunker that preserves document hierarchy when splitting content.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">impl</span> <span class="type">HierarchicalChunker</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">new</span>() -&gt; <span class="type">Self</span>
+                </div>
+                <div class="api-description">
+                    Creates a new hierarchical chunker with default settings.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">with_max_chunk_size</span>(<span class="keyword">self</span>, size: usize) -&gt; <span class="type">Self</span>
+                </div>
+                <div class="api-description">
+                    Sets the maximum chunk size in characters.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">chunk</span>(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&amp;<span class="keyword">self</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;doc: &amp;<span class="type">DoclingDocument</span><br>
+                    &nbsp;&nbsp;) -&gt; Result&lt;Vec&lt;<span class="type">BaseChunk</span>&gt;, <span class="type">ChunkingError</span>&gt;
+                </div>
+                <div class="api-description">
+                    Chunks a document into semantically meaningful pieces.
+                </div>
+            </div>
+
+            <h3>HybridChunker</h3>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub struct</span> <span class="type">HybridChunker</span>
+                </div>
+                <div class="api-description">
+                    An advanced chunker that combines hierarchical and token-aware strategies.
+                </div>
+            </div>
+
+            <h3>BaseChunk</h3>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub struct</span> <span class="type">BaseChunk</span>
+                </div>
+                <div class="api-description">
+                    A chunk of document content with associated metadata.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">impl</span> <span class="type">BaseChunk</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">text</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;str
+                </div>
+                <div class="api-description">
+                    Returns the text content of the chunk.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">metadata</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;<span class="type">ChunkMetadata</span>
+                </div>
+                <div class="api-description">
+                    Returns metadata about the chunk's source location.
+                </div>
+            </div>
+
+            <h2>Pipeline API</h2>
+
+            <h3>SimplePipeline</h3>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub struct</span> <span class="type">SimplePipeline</span>
+                </div>
+                <div class="api-description">
+                    A conversion pipeline that routes documents to appropriate backends.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">impl</span> <span class="type">SimplePipeline</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">new</span>() -&gt; <span class="type">Self</span>
+                </div>
+                <div class="api-description">
+                    Creates an empty pipeline with no backends.
+                </div>
+            </div>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    &nbsp;&nbsp;<span class="keyword">pub fn</span> <span class="function">register_backend</span>(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&amp;<span class="keyword">mut self</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;backend: Box&lt;<span class="keyword">dyn</span> <span class="type">Backend</span>&gt;<br>
+                    &nbsp;&nbsp;)
+                </div>
+                <div class="api-description">
+                    Registers a format backend with the pipeline.
+                </div>
+            </div>
+
+            <h3>create_pipeline()</h3>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub fn</span> <span class="function">create_pipeline</span>() -&gt; <span class="type">SimplePipeline</span>
+                </div>
+                <div class="api-description">
+                    Creates a pipeline pre-configured with all enabled format backends.
+                    This is what <code>DocumentConverter::new()</code> uses internally.
+                </div>
+            </div>
+
+            <h2>Backend Trait</h2>
+
+            <div class="api-item">
+                <div class="api-signature">
+                    <span class="keyword">pub trait</span> <span class="type">Backend</span>: Send + Sync {<br>
+                    &nbsp;&nbsp;<span class="keyword">fn</span> <span class="function">name</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;str;<br>
+                    &nbsp;&nbsp;<span class="keyword">fn</span> <span class="function">supported_formats</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;[<span class="type">InputFormat</span>];<br>
+                    &nbsp;&nbsp;<span class="keyword">fn</span> <span class="function">convert</span>(&amp;<span class="keyword">self</span>, input: &amp;<span class="type">InputDocument</span>) -&gt; Result&lt;<span class="type">ConversionResult</span>, <span class="type">ConversionError</span>&gt;;<br>
+                    }
+                </div>
+                <div class="api-description">
+                    Trait for implementing custom document format backends.
+                </div>
+            </div>
+
+            <div class="tip">
+                <div class="tip-title">Full API Documentation</div>
+                <p>
+                    For complete API documentation with all types, methods, and examples,
+                    visit <a href="https://docs.rs/docling-rs">docs.rs/docling-rs</a>.
+                </p>
+            </div>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

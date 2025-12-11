@@ -1,0 +1,245 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v0.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build x86_64
+        run: cargo build --release --target x86_64-apple-darwin -p docling-rs-cli
+
+      - name: Build arm64
+        run: cargo build --release --target aarch64-apple-darwin -p docling-rs-cli
+
+      - name: Create Universal Binary
+        run: |
+          mkdir -p dist/docling-rs.app/Contents/{MacOS,Frameworks,Resources}
+
+          # Create universal binary
+          lipo -create \
+            target/x86_64-apple-darwin/release/docling-rs \
+            target/aarch64-apple-darwin/release/docling-rs \
+            -output dist/docling-rs.app/Contents/MacOS/docling-rs
+
+          # Bundle pdfium library for arm64
+          if [ -f pdfium/lib/macos-arm64/libpdfium.dylib ]; then
+            cp pdfium/lib/macos-arm64/libpdfium.dylib dist/docling-rs.app/Contents/Frameworks/
+          fi
+
+          # Create Info.plist
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"  # Remove 'v' prefix
+          cat > dist/docling-rs.app/Contents/Info.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>docling-rs</string>
+            <key>CFBundleDisplayName</key>
+            <string>docling-rs</string>
+            <key>CFBundleExecutable</key>
+            <string>docling-rs</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.docling-rs.cli</string>
+            <key>CFBundleVersion</key>
+            <string>${VERSION}</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${VERSION}</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>11.0</string>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Create DMG
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+
+          # Create a temporary directory for DMG contents
+          mkdir -p dmg-contents
+          cp -R dist/docling-rs.app dmg-contents/
+
+          # Also include standalone CLI binary
+          mkdir -p dmg-contents/bin
+          cp dist/docling-rs.app/Contents/MacOS/docling-rs dmg-contents/bin/
+          if [ -f dist/docling-rs.app/Contents/Frameworks/libpdfium.dylib ]; then
+            cp dist/docling-rs.app/Contents/Frameworks/libpdfium.dylib dmg-contents/bin/
+          fi
+
+          # Include documentation manual
+          if [ -d manual ]; then
+            cp -R manual dmg-contents/
+          fi
+
+          # Include README
+          cp README.md dmg-contents/
+
+          # Create DMG
+          hdiutil create -volname "docling-rs ${VERSION}" \
+            -srcfolder dmg-contents \
+            -ov -format UDZO \
+            docling-rs-${VERSION}-universal.dmg
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: docling-rs-*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build
+        run: cargo build --release -p docling-rs-cli
+
+      - name: Prepare distribution
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item target/release/docling-rs.exe dist/
+          if (Test-Path pdfium/lib/windows-x64/pdfium.dll) {
+            Copy-Item pdfium/lib/windows-x64/pdfium.dll dist/
+          }
+
+      - name: Install WiX Toolset
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix
+
+      - name: Create ZIP distribution
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          # Include documentation manual
+          if (Test-Path manual) {
+            Copy-Item -Recurse manual dist/
+          }
+          # Include README
+          Copy-Item README.md dist/
+          Compress-Archive -Path dist/* -DestinationPath "docling-rs-${version}-windows-x64.zip"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: docling-rs-*-windows-x64.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build
+        run: cargo build --release -p docling-rs-cli
+
+      - name: Prepare distribution
+        run: |
+          mkdir -p dist
+          cp target/release/docling-rs dist/
+          if [ -f pdfium/lib/linux-x64/libpdfium.so ]; then
+            cp pdfium/lib/linux-x64/libpdfium.so dist/
+          fi
+
+      - name: Create tarball
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          # Include documentation manual
+          if [ -d manual ]; then
+            cp -R manual dist/
+          fi
+          # Include README
+          cp README.md dist/
+          tar -czvf docling-rs-${VERSION}-linux-x64.tar.gz -C dist .
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-tarball
+          path: docling-rs-*-linux-x64.tar.gz
+
+  release:
+    needs: [build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: List artifacts
+        run: find . -type f -name "docling-rs-*"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            macos-dmg/*.dmg
+            windows-zip/*.zip
+            linux-tarball/*.tar.gz
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,14 @@
+[package]
+name = "docling-rs-xlsx"
+version.workspace = true
+edition.workspace = true
+description = "XLSX backend for docling-rs"
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+docling-rs-core = { path = "../../docling-rs-core" }
+calamine.workspace = true
+
+[lints]
+workspace = true

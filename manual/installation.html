@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation - docling-rs Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="installation.html" class="active">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html">API Reference</a></li>
+                    <li><a href="cli.html">CLI Usage</a></li>
+                    <li><a href="formats.html">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html">Chunking for RAG</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / Installation
+            </div>
+
+            <h1>Installation</h1>
+
+            <p>
+                docling-rs can be installed as a standalone CLI application or integrated
+                as a library in your Rust projects. Choose the installation method that
+                best fits your needs.
+            </p>
+
+            <h2>Pre-built Binaries</h2>
+
+            <p>
+                The easiest way to install docling-rs is using the pre-built binaries
+                available for Windows, macOS, and Linux.
+            </p>
+
+            <h3>Windows</h3>
+
+            <p>Download and run the MSI installer:</p>
+
+            <div class="code-header">PowerShell</div>
+            <pre><code><span class="comment"># Download the installer</span>
+Invoke-WebRequest -Uri "https://github.com/docling-rs/docling-rs/releases/latest/download/docling-rs-x86_64-windows.msi" -OutFile "docling-rs.msi"
+
+<span class="comment"># Run the installer</span>
+Start-Process msiexec.exe -ArgumentList "/i docling-rs.msi" -Wait</code></pre>
+
+            <p>Or use the ZIP package:</p>
+            <div class="code-header">PowerShell</div>
+            <pre><code><span class="comment"># Extract to a directory in your PATH</span>
+Expand-Archive docling-rs-x86_64-windows.zip -DestinationPath "C:\Program Files\docling-rs"</code></pre>
+
+            <h3>macOS</h3>
+
+            <p>Download and mount the DMG installer:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># For Apple Silicon (M1/M2/M3)</span>
+curl -LO https://github.com/docling-rs/docling-rs/releases/latest/download/docling-rs-aarch64-macos.dmg
+open docling-rs-aarch64-macos.dmg
+
+<span class="comment"># For Intel Macs</span>
+curl -LO https://github.com/docling-rs/docling-rs/releases/latest/download/docling-rs-x86_64-macos.dmg
+open docling-rs-x86_64-macos.dmg</code></pre>
+
+            <p>Or use Homebrew (coming soon):</p>
+            <div class="code-header">Terminal</div>
+            <pre><code>brew install docling-rs</code></pre>
+
+            <h3>Linux</h3>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Download and extract</span>
+curl -LO https://github.com/docling-rs/docling-rs/releases/latest/download/docling-rs-x86_64-linux.tar.gz
+tar -xzf docling-rs-x86_64-linux.tar.gz
+
+<span class="comment"># Move to a directory in your PATH</span>
+sudo mv docling-rs /usr/local/bin/
+sudo mv libpdfium.so /usr/local/lib/
+sudo ldconfig</code></pre>
+
+            <h2>Rust Library</h2>
+
+            <p>Add docling-rs to your <code>Cargo.toml</code>:</p>
+
+            <div class="code-header">Cargo.toml</div>
+            <pre><code>[dependencies]
+docling-rs = <span class="string">"0.1"</span></code></pre>
+
+            <h3>Feature Flags</h3>
+
+            <p>
+                docling-rs uses feature flags to enable format backends. By default,
+                only common formats are enabled. Use the <code>full</code> feature
+                for all formats:
+            </p>
+
+            <div class="code-header">Cargo.toml</div>
+            <pre><code>[dependencies]
+docling-rs = { version = <span class="string">"0.1"</span>, features = [<span class="string">"full"</span>] }</code></pre>
+
+            <p>Available features:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Description</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>markdown</code></td>
+                        <td>Markdown file support</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>html</code></td>
+                        <td>HTML file support</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>csv</code></td>
+                        <td>CSV file support</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>docx</code></td>
+                        <td>Microsoft Word support</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>xlsx</code></td>
+                        <td>Microsoft Excel support</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>pptx</code></td>
+                        <td>Microsoft PowerPoint support</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>pdf</code></td>
+                        <td>PDF file support (requires PDFium)</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><code>full</code></td>
+                        <td>Enable all format backends</td>
+                        <td>No</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 id="pdf-support">PDF Support Setup</h2>
+
+            <p>
+                PDF processing requires the PDFium library. The pre-built installers
+                include PDFium automatically. For development or custom builds:
+            </p>
+
+            <h3>Download PDFium</h3>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Create pdfium directory</span>
+mkdir -p pdfium/lib
+
+<span class="comment"># Download for your platform (example for macOS ARM64)</span>
+curl -LO https://github.com/nicklockwood/pdfium-lib/releases/download/v123/pdfium-macos-arm64.zip
+unzip pdfium-macos-arm64.zip -d pdfium/lib/macos-arm64</code></pre>
+
+            <h3>Set Library Path</h3>
+
+            <div class="code-header">Terminal (macOS/Linux)</div>
+            <pre><code><span class="comment"># macOS</span>
+export DYLD_LIBRARY_PATH="/path/to/pdfium/lib/macos-arm64:$DYLD_LIBRARY_PATH"
+
+<span class="comment"># Linux</span>
+export LD_LIBRARY_PATH="/path/to/pdfium/lib/linux-x64:$LD_LIBRARY_PATH"</code></pre>
+
+            <div class="code-header">PowerShell (Windows)</div>
+            <pre><code>$env:PATH = "C:\path\to\pdfium\lib\windows-x64;$env:PATH"</code></pre>
+
+            <h2>Building from Source</h2>
+
+            <p>To build docling-rs from source, you need Rust 1.75 or later:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Clone the repository</span>
+git clone https://github.com/docling-rs/docling-rs.git
+cd docling-rs
+
+<span class="comment"># Build the CLI (release mode)</span>
+cargo build --release -p docling-rs-cli
+
+<span class="comment"># The binary will be at target/release/docling-rs</span></code></pre>
+
+            <h2>Verify Installation</h2>
+
+            <p>After installation, verify everything works:</p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Check version</span>
+docling-rs --version
+
+<span class="comment"># Show help</span>
+docling-rs --help
+
+<span class="comment"># Test conversion</span>
+echo "# Test Document" > test.md
+docling-rs test.md --to json</code></pre>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

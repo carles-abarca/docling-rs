@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture - docling-rs Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html">API Reference</a></li>
+                    <li><a href="cli.html">CLI Usage</a></li>
+                    <li><a href="formats.html">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html">Chunking for RAG</a></li>
+                    <li><a href="architecture.html" class="active">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / Architecture
+            </div>
+
+            <h1>Architecture Overview</h1>
+
+            <p>
+                docling-rs is built with a modular, workspace-based architecture that enables
+                flexible deployment and easy extension.
+            </p>
+
+            <h2>Workspace Structure</h2>
+
+            <pre><code>docling-rs/
+├── crates/
+│   ├── docling-rs/              <span class="comment"># Main facade library</span>
+│   ├── docling-rs-core/         <span class="comment"># Core types and traits</span>
+│   ├── docling-rs-cli/          <span class="comment"># Command-line interface</span>
+│   └── docling-rs-formats/      <span class="comment"># Format backends</span>
+│       ├── markdown/
+│       ├── html/
+│       ├── csv/
+│       ├── docx/
+│       ├── xlsx/
+│       ├── pptx/
+│       └── pdf/
+├── manual/                      <span class="comment"># Documentation</span>
+├── pdfium/                      <span class="comment"># PDFium library binaries</span>
+└── scripts/                     <span class="comment"># Build and test scripts</span></code></pre>
+
+            <h2>Core Components</h2>
+
+            <h3>docling-rs (Facade)</h3>
+
+            <p>
+                The main crate that users import. Re-exports all public types and provides
+                the <code>DocumentConverter</code> high-level API.
+            </p>
+
+            <div class="card">
+                <h3>Key Responsibilities</h3>
+                <ul>
+                    <li>Re-export public API from core and format crates</li>
+                    <li>Provide <code>DocumentConverter</code> convenience wrapper</li>
+                    <li>Configure feature flags for format backends</li>
+                </ul>
+            </div>
+
+            <h3>docling-rs-core</h3>
+
+            <p>
+                Foundation crate containing shared types, traits, and utilities:
+            </p>
+
+            <ul>
+                <li><strong>Data Model</strong> - <code>DoclingDocument</code>, <code>DocumentNode</code>, <code>NodeType</code></li>
+                <li><strong>Traits</strong> - <code>Backend</code>, <code>Pipeline</code></li>
+                <li><strong>Chunking</strong> - <code>HierarchicalChunker</code>, <code>HybridChunker</code></li>
+                <li><strong>Errors</strong> - <code>ConversionError</code>, <code>ChunkingError</code></li>
+            </ul>
+
+            <h3>docling-rs-cli</h3>
+
+            <p>
+                The command-line interface binary. Depends on the facade library
+                and provides:
+            </p>
+
+            <ul>
+                <li>Argument parsing with clap</li>
+                <li>Batch processing</li>
+                <li>Progress reporting</li>
+                <li>Output formatting</li>
+            </ul>
+
+            <h3>Format Backends</h3>
+
+            <p>
+                Each format is implemented as a separate crate:
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Crate</th>
+                        <th>Format</th>
+                        <th>Key Dependency</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>docling-rs-markdown</code></td>
+                        <td>Markdown</td>
+                        <td>pulldown-cmark</td>
+                    </tr>
+                    <tr>
+                        <td><code>docling-rs-html</code></td>
+                        <td>HTML</td>
+                        <td>scraper</td>
+                    </tr>
+                    <tr>
+                        <td><code>docling-rs-csv</code></td>
+                        <td>CSV</td>
+                        <td>csv</td>
+                    </tr>
+                    <tr>
+                        <td><code>docling-rs-docx</code></td>
+                        <td>Word</td>
+                        <td>docx-rs</td>
+                    </tr>
+                    <tr>
+                        <td><code>docling-rs-xlsx</code></td>
+                        <td>Excel</td>
+                        <td>calamine</td>
+                    </tr>
+                    <tr>
+                        <td><code>docling-rs-pptx</code></td>
+                        <td>PowerPoint</td>
+                        <td>pptx-to-md</td>
+                    </tr>
+                    <tr>
+                        <td><code>docling-rs-pdf</code></td>
+                        <td>PDF</td>
+                        <td>pdfium-render</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Data Flow</h2>
+
+            <pre><code>┌─────────────┐     ┌───────────────┐     ┌────────────────┐
+│ Input File  │────▶│ InputDocument │────▶│ Format Backend │
+└─────────────┘     └───────────────┘     └────────────────┘
+                                                   │
+                                                   ▼
+┌─────────────┐     ┌───────────────┐     ┌────────────────┐
+│ Output File │◀────│ Export Format │◀────│DoclingDocument │
+└─────────────┘     └───────────────┘     └────────────────┘
+                                                   │
+                                          ┌────────┴────────┐
+                                          ▼                 ▼
+                                    ┌──────────┐     ┌──────────┐
+                                    │ Chunking │     │ Analysis │
+                                    └──────────┘     └──────────┘</code></pre>
+
+            <h2>Document Model</h2>
+
+            <p>
+                All documents are converted to a unified <code>DoclingDocument</code> model:
+            </p>
+
+            <div class="code-header">Structure</div>
+            <pre><code>DoclingDocument
+├── name: String
+├── source: DocumentSource
+└── nodes: Vec&lt;DocumentNode&gt;
+    └── DocumentNode
+        ├── item: NodeItem
+        │   ├── node_type: NodeType
+        │   ├── text_content: String
+        │   └── position: Option&lt;SourcePosition&gt;
+        └── metadata: Option&lt;NodeMetadata&gt;</code></pre>
+
+            <h3>Node Types</h3>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Structural</h3>
+                    <ul>
+                        <li>Heading</li>
+                        <li>Paragraph</li>
+                        <li>List / ListItem</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Content</h3>
+                    <ul>
+                        <li>Text</li>
+                        <li>Code</li>
+                        <li>Quote</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Tabular</h3>
+                    <ul>
+                        <li>Table</li>
+                        <li>TableRow</li>
+                        <li>TableCell</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Media</h3>
+                    <ul>
+                        <li>Image</li>
+                        <li>Link</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>Backend Trait</h2>
+
+            <p>
+                Format backends implement the <code>Backend</code> trait:
+            </p>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">pub trait</span> <span class="type">Backend</span>: Send + Sync {
+    <span class="comment">/// Backend name for identification</span>
+    <span class="keyword">fn</span> <span class="function">name</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;str;
+
+    <span class="comment">/// Formats this backend can handle</span>
+    <span class="keyword">fn</span> <span class="function">supported_formats</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;[InputFormat];
+
+    <span class="comment">/// Convert an input document</span>
+    <span class="keyword">fn</span> <span class="function">convert</span>(
+        &amp;<span class="keyword">self</span>,
+        input: &amp;InputDocument
+    ) -&gt; Result&lt;ConversionResult, ConversionError&gt;;
+}</code></pre>
+
+            <h2>Pipeline Architecture</h2>
+
+            <p>
+                The <code>SimplePipeline</code> routes documents to appropriate backends:
+            </p>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="comment">// Pipeline selects backend based on input format</span>
+<span class="keyword">impl</span> Pipeline <span class="keyword">for</span> SimplePipeline {
+    <span class="keyword">fn</span> <span class="function">execute</span>(
+        &amp;<span class="keyword">self</span>,
+        input: &amp;InputDocument
+    ) -&gt; Result&lt;ConversionResult, ConversionError&gt; {
+        <span class="comment">// Find backend that supports this format</span>
+        <span class="keyword">for</span> backend <span class="keyword">in</span> &amp;<span class="keyword">self</span>.backends {
+            <span class="keyword">if</span> backend.supported_formats().contains(&amp;input.format()) {
+                <span class="keyword">return</span> backend.convert(input);
+            }
+        }
+        Err(ConversionError::NoBackendAvailable)
+    }
+}</code></pre>
+
+            <h2>Extending docling-rs</h2>
+
+            <h3>Adding a Custom Backend</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{Backend, InputDocument, InputFormat, ConversionResult, ConversionError};
+
+<span class="keyword">pub struct</span> <span class="type">CustomBackend</span>;
+
+<span class="keyword">impl</span> Backend <span class="keyword">for</span> CustomBackend {
+    <span class="keyword">fn</span> <span class="function">name</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;str {
+        <span class="string">"custom"</span>
+    }
+
+    <span class="keyword">fn</span> <span class="function">supported_formats</span>(&amp;<span class="keyword">self</span>) -&gt; &amp;[InputFormat] {
+        <span class="comment">// Define supported formats</span>
+        &amp;[]
+    }
+
+    <span class="keyword">fn</span> <span class="function">convert</span>(
+        &amp;<span class="keyword">self</span>,
+        input: &amp;InputDocument
+    ) -&gt; Result&lt;ConversionResult, ConversionError&gt; {
+        <span class="comment">// Implement conversion logic</span>
+        todo!()
+    }
+}</code></pre>
+
+            <h3>Using Custom Pipeline</h3>
+
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{SimplePipeline, MarkdownBackend};
+
+<span class="keyword">fn</span> <span class="function">custom_pipeline</span>() -&gt; SimplePipeline {
+    <span class="keyword">let</span> <span class="keyword">mut</span> pipeline = SimplePipeline::new();
+
+    <span class="comment">// Register only specific backends</span>
+    pipeline.register_backend(Box::new(MarkdownBackend::new()));
+    pipeline.register_backend(Box::new(CustomBackend));
+
+    pipeline
+}</code></pre>
+
+            <h2>Build System</h2>
+
+            <p>
+                The workspace uses Cargo with feature flags for conditional compilation:
+            </p>
+
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Build everything</span>
+cargo build --workspace
+
+<span class="comment"># Build CLI only</span>
+cargo build -p docling-rs-cli
+
+<span class="comment"># Build with specific features</span>
+cargo build -p docling-rs --features "markdown,html"
+
+<span class="comment"># Release build</span>
+cargo build --release -p docling-rs-cli</code></pre>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

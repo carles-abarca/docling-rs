@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>docling-rs - Developer Manual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>docling-rs</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html" class="active">Overview</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                    <li class="nav-section">Reference</li>
+                    <li><a href="api-reference.html">API Reference</a></li>
+                    <li><a href="cli.html">CLI Usage</a></li>
+                    <li><a href="formats.html">Supported Formats</a></li>
+                    <li class="nav-section">Advanced</li>
+                    <li><a href="chunking.html">Chunking for RAG</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>docling-rs Developer Manual</h1>
+
+            <p>
+                <strong>docling-rs</strong> is a high-performance document processing library written in Rust.
+                It provides unified document conversion, text extraction, and intelligent chunking capabilities
+                for building RAG (Retrieval-Augmented Generation) applications.
+            </p>
+
+            <div class="note">
+                <div class="note-title">What is docling-rs?</div>
+                <p>
+                    docling-rs converts documents from various formats (PDF, DOCX, XLSX, PPTX, HTML, Markdown, CSV)
+                    into a unified document model that can be exported to JSON, Markdown, or plain text.
+                </p>
+            </div>
+
+            <h2>Key Features</h2>
+
+            <ul class="feature-list">
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Multi-format support</strong> - PDF, DOCX, XLSX, PPTX, HTML, Markdown, CSV</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Unified document model</strong> - Consistent output regardless of input format</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Intelligent chunking</strong> - Hierarchical and hybrid chunking strategies for RAG</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>High performance</strong> - Native Rust implementation with parallel processing</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>Cross-platform</strong> - Windows, macOS, and Linux support</span>
+                </li>
+                <li>
+                    <span class="icon">&#10003;</span>
+                    <span><strong>CLI and Library</strong> - Use as a command-line tool or integrate as a library</span>
+                </li>
+            </ul>
+
+            <h2>Quick Links</h2>
+
+            <div class="card-grid">
+                <a href="installation.html" class="card" style="text-decoration: none; color: inherit;">
+                    <h3>Installation</h3>
+                    <p>Set up docling-rs on your system or add it to your Rust project.</p>
+                </a>
+                <a href="quickstart.html" class="card" style="text-decoration: none; color: inherit;">
+                    <h3>Quick Start</h3>
+                    <p>Get started with document conversion in under 5 minutes.</p>
+                </a>
+                <a href="api-reference.html" class="card" style="text-decoration: none; color: inherit;">
+                    <h3>API Reference</h3>
+                    <p>Complete reference for the Rust library API.</p>
+                </a>
+                <a href="cli.html" class="card" style="text-decoration: none; color: inherit;">
+                    <h3>CLI Guide</h3>
+                    <p>Learn to use the command-line interface for batch processing.</p>
+                </a>
+            </div>
+
+            <h2>Example Usage</h2>
+
+            <h3>Command Line</h3>
+            <div class="code-header">Terminal</div>
+            <pre><code><span class="comment"># Convert a PDF to Markdown</span>
+docling-rs document.pdf --to markdown --output-dir ./output
+
+<span class="comment"># Convert with chunking for RAG</span>
+docling-rs document.pdf --to json --chunk --chunk-size 512
+
+<span class="comment"># Batch convert a directory</span>
+docling-rs ./documents/ --to json --output-dir ./converted</code></pre>
+
+            <h3>Rust Library</h3>
+            <div class="code-header">Rust</div>
+            <pre><code><span class="keyword">use</span> docling_rs::{DocumentConverter, InputFormat};
+
+<span class="keyword">fn</span> <span class="function">main</span>() -> Result&lt;(), Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="comment">// Create a converter</span>
+    <span class="keyword">let</span> converter = DocumentConverter::new();
+
+    <span class="comment">// Convert a file</span>
+    <span class="keyword">let</span> result = converter.convert_file(<span class="string">"document.pdf"</span>)?;
+
+    <span class="comment">// Access the document</span>
+    <span class="keyword">let</span> doc = result.document();
+    println!(<span class="string">"Document: {}"</span>, doc.name());
+    println!(<span class="string">"Nodes: {}"</span>, doc.nodes().len());
+
+    <span class="comment">// Export to Markdown</span>
+    <span class="keyword">let</span> markdown = doc.to_markdown();
+    println!(<span class="string">"{}"</span>, markdown);
+
+    Ok(())
+}</code></pre>
+
+            <h2>System Requirements</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Architecture</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Windows</td>
+                        <td>x86_64</td>
+                        <td>&#10003; Supported</td>
+                    </tr>
+                    <tr>
+                        <td>macOS</td>
+                        <td>x86_64, ARM64 (Apple Silicon)</td>
+                        <td>&#10003; Supported</td>
+                    </tr>
+                    <tr>
+                        <td>Linux</td>
+                        <td>x86_64</td>
+                        <td>&#10003; Supported</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip">
+                <div class="tip-title">PDF Support</div>
+                <p>
+                    PDF processing requires the PDFium library. Pre-built binaries are included
+                    in the distribution packages. For development builds, see the
+                    <a href="installation.html#pdf-support">Installation Guide</a>.
+                </p>
+            </div>
+
+            <h2>License</h2>
+            <p>
+                docling-rs is licensed under the MIT License. See the
+                <a href="https://github.com/docling-rs/docling-rs/blob/main/LICENSE">LICENSE</a>
+                file for details.
+            </p>
+
+            <div class="footer">
+                <p>docling-rs v1.0.0 &bull; <a href="https://github.com/docling-rs/docling-rs">GitHub</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

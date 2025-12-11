@@ -1,0 +1,20 @@
+[package]
+name = "docling-rs-pdf"
+version.workspace = true
+edition.workspace = true
+description = "PDF backend for docling-rs"
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+ocr = ["dep:rusty-tesseract"]
+
+[dependencies]
+docling-rs-core = { path = "../../docling-rs-core" }
+pdfium-render.workspace = true
+image.workspace = true
+rusty-tesseract = { workspace = true, optional = true }
+
+[lints]
+workspace = true

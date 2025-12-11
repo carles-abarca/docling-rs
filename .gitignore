@@ -16,6 +16,7 @@ Thumbs.db
 # Testing
 *.profraw
 *.profdata
+scripts/output/
 
 # Documentation
 /doc/
@@ -23,4 +24,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
+
+# Reference code (Python original)
 docling-original/

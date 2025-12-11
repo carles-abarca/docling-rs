@@ -1,4 +1,0 @@
-# good.md
-
-## # Good
-

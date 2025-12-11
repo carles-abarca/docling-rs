@@ -1,0 +1,43 @@
+[package]
+name = "docling-rs"
+version.workspace = true
+edition.workspace = true
+description = "Native Rust document processing library"
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["markdown", "html", "csv"]
+full = ["markdown", "html", "csv", "docx", "xlsx", "pptx", "pdf"]
+markdown = ["dep:docling-rs-markdown"]
+html = ["dep:docling-rs-html"]
+csv = ["dep:docling-rs-csv"]
+docx = ["dep:docling-rs-docx"]
+xlsx = ["dep:docling-rs-xlsx"]
+pptx = ["dep:docling-rs-pptx"]
+pdf = ["dep:docling-rs-pdf"]
+ocr = ["pdf", "docling-rs-pdf?/ocr"]
+
+[dependencies]
+docling-rs-core = { path = "../docling-rs-core" }
+docling-rs-markdown = { path = "../docling-rs-formats/markdown", optional = true }
+docling-rs-html = { path = "../docling-rs-formats/html", optional = true }
+docling-rs-csv = { path = "../docling-rs-formats/csv", optional = true }
+docling-rs-docx = { path = "../docling-rs-formats/docx", optional = true }
+docling-rs-xlsx = { path = "../docling-rs-formats/xlsx", optional = true }
+docling-rs-pptx = { path = "../docling-rs-formats/pptx", optional = true }
+docling-rs-pdf = { path = "../docling-rs-formats/pdf", optional = true }
+serde_json.workspace = true
+
+[lib]
+name = "docling_rs"
+crate-type = ["rlib", "staticlib"]
+
+[dev-dependencies]
+assert_cmd.workspace = true
+predicates.workspace = true
+printpdf.workspace = true
+tempfile.workspace = true
+
+[lints]
+workspace = true
