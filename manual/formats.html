@@ -247,17 +247,17 @@
             <h2>Feature Combinations</h2>
 
             <div class="code-header">Cargo.toml</div>
-            <pre><code><span class="comment"># Enable only specific formats</span>
+            <pre><code><span class="comment"># All formats enabled by default (including PDF)</span>
 [dependencies]
-docling-rs = { version = <span class="string">"0.1"</span>, default-features = <span class="keyword">false</span>, features = [<span class="string">"markdown"</span>, <span class="string">"html"</span>] }
+docling-rs = <span class="string">"1.0"</span>
 
-<span class="comment"># Enable all formats</span>
+<span class="comment"># Enable only specific formats (minimal build)</span>
 [dependencies]
-docling-rs = { version = <span class="string">"0.1"</span>, features = [<span class="string">"full"</span>] }
+docling-rs = { version = <span class="string">"1.0"</span>, default-features = <span class="keyword">false</span>, features = [<span class="string">"markdown"</span>, <span class="string">"html"</span>] }
 
-<span class="comment"># Default features (no PDF)</span>
+<span class="comment"># Exclude PDF only</span>
 [dependencies]
-docling-rs = <span class="string">"0.1"</span></code></pre>
+docling-rs = { version = <span class="string">"1.0"</span>, default-features = <span class="keyword">false</span>, features = [<span class="string">"markdown"</span>, <span class="string">"html"</span>, <span class="string">"csv"</span>, <span class="string">"docx"</span>, <span class="string">"xlsx"</span>, <span class="string">"pptx"</span>] }</code></pre>
 
             <h2>Format Detection</h2>
 

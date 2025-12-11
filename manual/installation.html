@@ -100,19 +100,19 @@ sudo ldconfig</code></pre>
 
             <div class="code-header">Cargo.toml</div>
             <pre><code>[dependencies]
-docling-rs = <span class="string">"0.1"</span></code></pre>
+docling-rs = <span class="string">"1.0"</span></code></pre>
 
             <h3>Feature Flags</h3>
 
             <p>
                 docling-rs uses feature flags to enable format backends. By default,
-                only common formats are enabled. Use the <code>full</code> feature
-                for all formats:
+                <strong>all formats are enabled</strong> including PDF support. For a minimal build,
+                disable default features:
             </p>
 
-            <div class="code-header">Cargo.toml</div>
+            <div class="code-header">Cargo.toml (minimal build)</div>
             <pre><code>[dependencies]
-docling-rs = { version = <span class="string">"0.1"</span>, features = [<span class="string">"full"</span>] }</code></pre>
+docling-rs = { version = <span class="string">"1.0"</span>, default-features = <span class="keyword">false</span>, features = [<span class="string">"markdown"</span>, <span class="string">"html"</span>] }</code></pre>
 
             <p>Available features:</p>
 
@@ -125,6 +125,11 @@ docling-rs = { version = <span class="string">"0.1"</span>, features = [<span cl
                     </tr>
                 </thead>
                 <tbody>
+                    <tr>
+                        <td><code>full</code></td>
+                        <td>Enable all format backends</td>
+                        <td><strong>Yes</strong></td>
+                    </tr>
                     <tr>
                         <td><code>markdown</code></td>
                         <td>Markdown file support</td>
@@ -158,12 +163,7 @@ docling-rs = { version = <span class="string">"0.1"</span>, features = [<span cl
                     <tr>
                         <td><code>pdf</code></td>
                         <td>PDF file support (requires PDFium)</td>
-                        <td>No</td>
-                    </tr>
-                    <tr>
-                        <td><code>full</code></td>
-                        <td>Enable all format backends</td>
-                        <td>No</td>
+                        <td>Yes</td>
                     </tr>
                 </tbody>
             </table>
