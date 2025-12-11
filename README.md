@@ -48,24 +48,24 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-docling-rs = "0.1"
+docling-rs = "1.0"
 
-# Or with all features
-docling-rs = { version = "0.1", features = ["full"] }
+# Or with minimal features (no PDF/Office)
+docling-rs = { version = "1.0", default-features = false, features = ["markdown", "html", "csv"] }
 ```
 
 ### Feature Flags
 
 | Feature | Description | Default |
 |---------|-------------|---------|
+| `full` | All format backends | **Yes** |
 | `markdown` | Markdown support | Yes |
 | `html` | HTML support | Yes |
 | `csv` | CSV support | Yes |
 | `docx` | Microsoft Word support | Yes |
 | `xlsx` | Microsoft Excel support | Yes |
 | `pptx` | Microsoft PowerPoint support | Yes |
-| `pdf` | PDF support (requires PDFium) | No |
-| `full` | All format backends | No |
+| `pdf` | PDF support (requires PDFium) | Yes |
 
 ## Quick Start
 

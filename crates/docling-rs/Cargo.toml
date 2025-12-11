@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [features]
-default = ["markdown", "html", "csv"]
+default = ["full"]
 full = ["markdown", "html", "csv", "docx", "xlsx", "pptx", "pdf"]
 markdown = ["dep:docling-rs-markdown"]
 html = ["dep:docling-rs-html"]
