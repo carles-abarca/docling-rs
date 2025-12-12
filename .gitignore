@@ -17,6 +17,7 @@ Thumbs.db
 *.profraw
 *.profdata
 scripts/output/
+scripts/output-original/
 
 # Documentation
 /doc/
