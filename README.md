@@ -180,18 +180,32 @@ Arguments:
   <INPUT>  Input file or directory
 
 Options:
-  -t, --to <FORMAT>          Output format: json, markdown, text [default: markdown]
-  -o, --output-dir <DIR>     Output directory
-  -f, --from <FORMATS>       Filter input formats (comma-separated)
-      --chunk                Enable document chunking
-      --chunk-size <SIZE>    Chunk size in characters [default: 512]
-      --chunk-overlap <N>    Overlap between chunks [default: 0]
-      --continue-on-error    Continue on errors (batch mode)
-      --abort-on-error       Stop on first error (batch mode)
-  -v, --verbose              Verbose output
-  -q, --quiet                Suppress output
-  -h, --help                 Print help
-  -V, --version              Print version
+  -t, --to <FORMAT>              Output format: json, markdown, text [default: markdown]
+  -o, --output-dir <DIR>         Output directory
+  -f, --from <FORMATS>           Filter input formats (comma-separated)
+      --chunk                    Enable document chunking
+      --chunk-strategy <STRAT>   Chunking strategy: hierarchical, hybrid [default: hierarchical]
+      --chunk-max-tokens <N>     Max tokens per chunk (hybrid) [default: 512]
+      --chunk-merge-peers        Merge undersized peer chunks (hybrid) [default: true]
+      --continue-on-error        Continue on errors (batch mode)
+      --abort-on-error           Stop on first error (batch mode)
+  -v, --verbose                  Verbose output
+  -q, --quiet                    Suppress output
+  -h, --help                     Print help
+  -V, --version                  Print version
+```
+
+### Chunking Strategies
+
+```bash
+# Hierarchical chunking (default) - preserves document structure
+docling-rs document.pdf --chunk --to json
+
+# Hybrid chunking - token-aware, ideal for embeddings
+docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-max-tokens 512 --to json
+
+# Hybrid without merging small chunks
+docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-merge-peers false --to json
 ```
 
 ## Architecture

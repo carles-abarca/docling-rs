@@ -21,4 +21,4 @@ pub use base::{BaseChunk, BaseChunker, ChunkingError};
 pub use hierarchical::HierarchicalChunker;
 pub use hybrid::{HybridChunker, HybridChunkerBuilder};
 pub use metadata::ChunkMetadata;
-pub use tokenizer::{HuggingFaceTokenizer, Tokenizer};
+pub use tokenizer::{HuggingFaceTokenizer, SimpleTokenizer, Tokenizer};

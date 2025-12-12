@@ -57,9 +57,21 @@ pub struct CliArgs {
     #[arg(long = "chunk")]
     pub chunk: bool,
 
-    /// Chunk size in characters (default: 1000)
-    #[arg(long = "chunk-size", value_name = "SIZE", default_value = "1000", value_parser = validate_chunk_size)]
-    pub chunk_size: usize,
+    /// Chunking strategy: hierarchical (structure-based) or hybrid (token-aware)
+    #[arg(
+        long = "chunk-strategy",
+        value_name = "STRATEGY",
+        default_value = "hierarchical"
+    )]
+    pub chunk_strategy: ChunkStrategy,
+
+    /// Maximum tokens per chunk (for hybrid strategy, default: 512)
+    #[arg(long = "chunk-max-tokens", value_name = "TOKENS", default_value = "512", value_parser = validate_chunk_size)]
+    pub chunk_max_tokens: usize,
+
+    /// Merge undersized peer chunks (for hybrid strategy)
+    #[arg(long = "chunk-merge-peers", default_value = "true")]
+    pub chunk_merge_peers: bool,
 
     /// Continue processing on error (batch mode)
     #[arg(long = "continue-on-error")]
@@ -136,6 +148,16 @@ pub enum OutputFormat {
     Json,
     /// Plain text format
     Text,
+}
+
+/// Chunking strategy for document splitting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum, Default)]
+pub enum ChunkStrategy {
+    /// Structure-based chunking (preserves document hierarchy)
+    #[default]
+    Hierarchical,
+    /// Token-aware chunking (respects token limits for embeddings)
+    Hybrid,
 }
 
 impl std::fmt::Display for OutputFormat {

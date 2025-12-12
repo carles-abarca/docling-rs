@@ -1,9 +1,11 @@
 //! Conversion orchestration logic.
 
-use crate::cli::args::{CliArgs, InputFormat, OutputFormat};
+use crate::cli::args::{ChunkStrategy, CliArgs, InputFormat, OutputFormat};
 use crate::cli::output;
 use anyhow::{Context, Result};
-use docling_rs::chunking::{BaseChunker, HierarchicalChunker};
+use docling_rs::chunking::{
+    BaseChunk, BaseChunker, HierarchicalChunker, HybridChunker, SimpleTokenizer,
+};
 use docling_rs::DocumentConverter;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -350,13 +352,30 @@ impl Converter {
 
     /// Generate chunked output from document
     fn generate_chunked_output(&self, doc: &docling_rs::DoclingDocument) -> Result<String> {
-        // Create hierarchical chunker
-        let chunker = HierarchicalChunker::new();
-
-        // Collect all chunks
-        let chunks: Vec<_> = chunker.chunk(doc).collect();
+        // Collect chunks based on selected strategy
+        let chunks: Vec<BaseChunk> = match self.args.chunk_strategy {
+            ChunkStrategy::Hierarchical => {
+                let chunker = HierarchicalChunker::new();
+                chunker.chunk(doc).collect()
+            }
+            ChunkStrategy::Hybrid => {
+                let tokenizer = SimpleTokenizer::with_max_tokens(self.args.chunk_max_tokens);
+                let chunker = HybridChunker::builder()
+                    .tokenizer(Box::new(tokenizer))
+                    .max_tokens(self.args.chunk_max_tokens)
+                    .merge_peers(self.args.chunk_merge_peers)
+                    .build()
+                    .context("Failed to create hybrid chunker")?;
+                chunker.chunk(doc).collect()
+            }
+        };
 
         // Format based on output format
+        self.format_chunks(&chunks)
+    }
+
+    /// Format chunks according to output format
+    fn format_chunks(&self, chunks: &[BaseChunk]) -> Result<String> {
         match self.args.output_format {
             OutputFormat::Json => {
                 // Output chunks as JSON array
@@ -365,12 +384,21 @@ impl Converter {
             OutputFormat::Markdown | OutputFormat::Text => {
                 // Output chunks separated by newlines with metadata
                 let mut output = String::new();
+                let strategy_name = match self.args.chunk_strategy {
+                    ChunkStrategy::Hierarchical => "hierarchical",
+                    ChunkStrategy::Hybrid => "hybrid",
+                };
+                output.push_str(&format!(
+                    "# Chunking Results (strategy: {})\n\n",
+                    strategy_name
+                ));
+
                 for (i, chunk) in chunks.iter().enumerate() {
                     if i > 0 {
                         output.push_str("\n---\n\n");
                     }
                     // Add chunk metadata
-                    output.push_str(&format!("# Chunk {} of {}\n", i + 1, chunks.len()));
+                    output.push_str(&format!("## Chunk {} of {}\n", i + 1, chunks.len()));
                     if !chunk.meta.headings.is_empty() {
                         output.push_str(&format!("Context: {}\n", chunk.meta.headings.join(" > ")));
                     }

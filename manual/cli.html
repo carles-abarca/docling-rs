@@ -101,17 +101,35 @@
                         <td>Disabled</td>
                     </tr>
                     <tr>
-                        <td><code>--chunk-size &lt;SIZE&gt;</code></td>
-                        <td>Maximum chunk size in characters</td>
+                        <td><code>--chunk-strategy &lt;STRAT&gt;</code></td>
+                        <td>Chunking strategy: <code>hierarchical</code> or <code>hybrid</code></td>
+                        <td><code>hierarchical</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>--chunk-max-tokens &lt;N&gt;</code></td>
+                        <td>Maximum tokens per chunk (hybrid strategy)</td>
                         <td>512</td>
                     </tr>
                     <tr>
-                        <td><code>--chunk-overlap &lt;SIZE&gt;</code></td>
-                        <td>Overlap between chunks</td>
-                        <td>0</td>
+                        <td><code>--chunk-merge-peers</code></td>
+                        <td>Merge undersized peer chunks (hybrid strategy)</td>
+                        <td>true</td>
                     </tr>
                 </tbody>
             </table>
+
+            <div class="note">
+                <div class="note-title">Chunking Strategies</div>
+                <p>
+                    <strong>Hierarchical</strong>: Preserves document structure, creating chunks
+                    based on document elements (paragraphs, headings, lists). Best for maintaining context.
+                </p>
+                <p>
+                    <strong>Hybrid</strong>: Token-aware chunking that respects token limits.
+                    Automatically splits oversized chunks and merges undersized ones. Ideal for
+                    embedding models with token limits.
+                </p>
+            </div>
 
             <h3>Processing Options</h3>
 
@@ -226,14 +244,17 @@ docling-rs ./documents/ --abort-on-error --to markdown</code></pre>
             <h3>Chunking for RAG</h3>
 
             <div class="code-header">Terminal</div>
-            <pre><code><span class="comment"># Basic chunking</span>
+            <pre><code><span class="comment"># Hierarchical chunking (default) - preserves document structure</span>
 docling-rs document.pdf --chunk --to json
 
-<span class="comment"># Custom chunk size</span>
-docling-rs document.pdf --chunk --chunk-size 1000 --to json
+<span class="comment"># Hybrid chunking - token-aware, ideal for embeddings</span>
+docling-rs document.pdf --chunk --chunk-strategy hybrid --to json
 
-<span class="comment"># Chunking with overlap</span>
-docling-rs document.pdf --chunk --chunk-size 500 --chunk-overlap 50</code></pre>
+<span class="comment"># Hybrid with custom token limit</span>
+docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-max-tokens 256 --to json
+
+<span class="comment"># Hybrid without merging small chunks</span>
+docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-merge-peers false --to json</code></pre>
 
             <h2>Output Structure</h2>
 

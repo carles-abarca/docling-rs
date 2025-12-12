@@ -143,21 +143,60 @@
             <h2>CLI Chunking</h2>
 
             <p>
-                Enable chunking from the command line with the <code>--chunk</code> flag:
+                Enable chunking from the command line with the <code>--chunk</code> flag.
+                Choose between <strong>hierarchical</strong> (structure-based) and
+                <strong>hybrid</strong> (token-aware) strategies:
             </p>
 
             <div class="code-header">Terminal</div>
-            <pre><code><span class="comment"># Basic chunking with default size (512)</span>
+            <pre><code><span class="comment"># Hierarchical chunking (default) - preserves document structure</span>
 docling-rs document.pdf --chunk --to json
 
-<span class="comment"># Custom chunk size</span>
-docling-rs document.pdf --chunk --chunk-size 1000 --to markdown
+<span class="comment"># Hybrid chunking - token-aware, ideal for embeddings</span>
+docling-rs document.pdf --chunk --chunk-strategy hybrid --to json
 
-<span class="comment"># Chunking with overlap</span>
-docling-rs document.pdf --chunk --chunk-size 500 --chunk-overlap 50
+<span class="comment"># Hybrid with custom token limit</span>
+docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-max-tokens 256 --to json
 
-<span class="comment"># Batch chunking</span>
-docling-rs ./documents/ --chunk --chunk-size 512 --to json --output-dir ./chunks</code></pre>
+<span class="comment"># Hybrid without merging small chunks</span>
+docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-merge-peers false --to json
+
+<span class="comment"># Batch chunking with hybrid strategy</span>
+docling-rs ./documents/ --chunk --chunk-strategy hybrid --chunk-max-tokens 512 --to json --output-dir ./chunks</code></pre>
+
+            <h3>Strategy Comparison</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Hierarchical</th>
+                        <th>Hybrid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Best for</td>
+                        <td>Preserving document structure</td>
+                        <td>Embedding models with token limits</td>
+                    </tr>
+                    <tr>
+                        <td>Chunk sizing</td>
+                        <td>Based on document elements</td>
+                        <td>Based on token count</td>
+                    </tr>
+                    <tr>
+                        <td>Large sections</td>
+                        <td>Kept as single chunk</td>
+                        <td>Automatically split</td>
+                    </tr>
+                    <tr>
+                        <td>Small sections</td>
+                        <td>Kept separate</td>
+                        <td>Optionally merged</td>
+                    </tr>
+                </tbody>
+            </table>
 
             <h2>Chunk Output Format</h2>
 
