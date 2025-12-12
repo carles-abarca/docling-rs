@@ -1,6 +1,18 @@
 # docling-rs
 
-Native Rust document processing library for extracting structured text and metadata from common document formats.
+**A native Rust implementation inspired by [IBM's Docling](https://github.com/DS4SD/docling) Python library.**
+
+docling-rs brings document processing capabilities to the Rust ecosystem, offering a high-performance alternative for converting documents into structured, machine-readable formats optimized for RAG (Retrieval-Augmented Generation) and LLM applications.
+
+## Why docling-rs?
+
+The original [Docling](https://github.com/DS4SD/docling) by IBM is an excellent Python library for document processing. This Rust adaptation provides:
+
+- **Native Performance**: No Python runtime required, significantly faster processing
+- **Single Binary Distribution**: Easy deployment with self-contained executables
+- **Memory Safety**: Rust's guarantees for reliable production use
+- **Cross-Platform**: Pre-built binaries for Windows, macOS (Intel & Apple Silicon), and Linux
+- **Batteries Included**: PDF support with bundled PDFium library
 
 ## Features
 
@@ -15,7 +27,7 @@ Native Rust document processing library for extracting structured text and metad
 
 ## Status
 
-**v1.0.0** - Production-ready with 7 format backends
+**v1.0.1** - Production-ready with 7 format backends (all enabled by default)
 
 | Component | Status |
 |-----------|--------|
@@ -35,7 +47,7 @@ Native Rust document processing library for extracting structured text and metad
 
 ### Pre-built Binaries
 
-Download from [Releases](https://github.com/docling-rs/docling-rs/releases):
+Download from [Releases](https://github.com/carles-abarca/docling-rs/releases):
 
 - **Windows**: `docling-rs-x86_64-windows.msi` or `.zip`
 - **macOS Intel**: `docling-rs-x86_64-macos.dmg`
@@ -254,6 +266,10 @@ cargo test -p docling-rs-cli
 cargo clippy --workspace
 cargo fmt --check
 ```
+
+## Acknowledgments
+
+This project is inspired by and pays tribute to [IBM's Docling](https://github.com/DS4SD/docling) project. While docling-rs is an independent Rust implementation and not affiliated with IBM, it aims to provide similar document processing capabilities for the Rust ecosystem.
 
 ## License
 

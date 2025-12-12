@@ -19,7 +19,7 @@ edition = "2021"
 rust-version = "1.75"
 authors = ["Docling-rs Contributors"]
 license = "MIT"
-repository = "https://github.com/your-org/docling-rs"
+repository = "https://github.com/carles-abarca/docling-rs"
 description = "Native Rust document processing library"
 
 [workspace.dependencies]
