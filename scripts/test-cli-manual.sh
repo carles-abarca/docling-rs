@@ -344,50 +344,99 @@ test_json_export() {
     fi
 }
 
-test_chunking() {
+test_chunking_hierarchical() {
     local file="$1"
     local filename="$2"
     local basename="${filename%.*}"
-    # Chunking outputs to regular .md file (overwrites any existing)
-    # Use a separate chunked output directory to avoid conflicts
-    local chunk_output_dir="$OUTPUT_DIR/chunked"
+    local chunk_output_dir="$OUTPUT_DIR/chunked-hierarchical"
     local output_file="$chunk_output_dir/${basename}.md"
 
     echo ""
-    echo "Testing: Chunking (size=500)"
+    echo "Testing: Chunking (hierarchical strategy)"
     local start_time=$(date +%s)
 
-    # Create separate directory for chunked output
     mkdir -p "$chunk_output_dir"
 
-    if "$CLI_BINARY" "$file" --chunk --chunk-size 500 --to markdown --output-dir "$chunk_output_dir" >/dev/null 2>&1; then
+    if "$CLI_BINARY" "$file" --chunk --chunk-strategy hierarchical --to markdown --output-dir "$chunk_output_dir" >/dev/null 2>&1; then
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
 
         if [ -f "$output_file" ]; then
             local file_size=$(wc -c < "$output_file" | tr -d ' ')
-            local chunk_count=$(grep -c "^# Chunk" "$output_file" 2>/dev/null || echo "0")
+            local chunk_count=$(grep -c "^## Chunk" "$output_file" 2>/dev/null || echo "0")
 
             if [ "$file_size" -gt 50 ]; then
-                print_success "Chunking (${duration}s) - ${chunk_count} chunks, ${file_size} bytes"
+                print_success "Hierarchical chunking (${duration}s) - ${chunk_count} chunks, ${file_size} bytes"
 
                 echo "[Output preview]"
-                head -n 20 "$output_file"
+                head -n 15 "$output_file"
                 return 0
             else
-                print_skip "Chunking produced minimal output (${file_size} bytes)"
+                print_skip "Hierarchical chunking produced minimal output (${file_size} bytes)"
                 return 2
             fi
         else
-            print_skip "Chunking - no output file created"
+            print_skip "Hierarchical chunking - no output file created"
             return 2
         fi
     else
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
-        print_skip "Chunking skipped/failed (${duration}s)"
-        return 2  # Skip, not failure
+        print_skip "Hierarchical chunking skipped/failed (${duration}s)"
+        return 2
     fi
+}
+
+test_chunking_hybrid() {
+    local file="$1"
+    local filename="$2"
+    local basename="${filename%.*}"
+    local chunk_output_dir="$OUTPUT_DIR/chunked-hybrid"
+    local output_file="$chunk_output_dir/${basename}.md"
+
+    echo ""
+    echo "Testing: Chunking (hybrid strategy, max-tokens=256)"
+    local start_time=$(date +%s)
+
+    mkdir -p "$chunk_output_dir"
+
+    if "$CLI_BINARY" "$file" --chunk --chunk-strategy hybrid --chunk-max-tokens 256 --to markdown --output-dir "$chunk_output_dir" >/dev/null 2>&1; then
+        local end_time=$(date +%s)
+        local duration=$((end_time - start_time))
+
+        if [ -f "$output_file" ]; then
+            local file_size=$(wc -c < "$output_file" | tr -d ' ')
+            local chunk_count=$(grep -c "^## Chunk" "$output_file" 2>/dev/null || echo "0")
+
+            if [ "$file_size" -gt 50 ]; then
+                print_success "Hybrid chunking (${duration}s) - ${chunk_count} chunks, ${file_size} bytes"
+
+                echo "[Output preview]"
+                head -n 15 "$output_file"
+                return 0
+            else
+                print_skip "Hybrid chunking produced minimal output (${file_size} bytes)"
+                return 2
+            fi
+        else
+            print_skip "Hybrid chunking - no output file created"
+            return 2
+        fi
+    else
+        local end_time=$(date +%s)
+        local duration=$((end_time - start_time))
+        print_skip "Hybrid chunking skipped/failed (${duration}s)"
+        return 2
+    fi
+}
+
+test_chunking() {
+    local file="$1"
+    local filename="$2"
+
+    # Test both chunking strategies
+    test_chunking_hierarchical "$file" "$filename"
+    test_chunking_hybrid "$file" "$filename"
 }
 
 process_file() {
