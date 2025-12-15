@@ -58,20 +58,26 @@ pub struct CliArgs {
     pub chunk: bool,
 
     /// Chunking strategy: hierarchical (structure-based) or hybrid (token-aware)
+    /// Default is hybrid which uses the embedded all-MiniLM-L6-v2 tokenizer
     #[arg(
         long = "chunk-strategy",
         value_name = "STRATEGY",
-        default_value = "hierarchical"
+        default_value = "hybrid"
     )]
     pub chunk_strategy: ChunkStrategy,
 
-    /// Maximum tokens per chunk (for hybrid strategy, default: 512)
-    #[arg(long = "chunk-max-tokens", value_name = "TOKENS", default_value = "512", value_parser = validate_chunk_size)]
+    /// Maximum tokens per chunk (default: 128, optimized for RAG granularity)
+    #[arg(long = "chunk-max-tokens", value_name = "TOKENS", default_value = "128", value_parser = validate_chunk_size)]
     pub chunk_max_tokens: usize,
 
     /// Merge undersized peer chunks (for hybrid strategy)
     #[arg(long = "chunk-merge-peers", default_value = "true")]
     pub chunk_merge_peers: bool,
+
+    /// HuggingFace tokenizer model (default: embedded all-MiniLM-L6-v2)
+    /// Specify a different model if needed, requires tokenizer.json in cache
+    #[arg(long = "tokenizer", value_name = "MODEL")]
+    pub tokenizer_model: Option<String>,
 
     /// Continue processing on error (batch mode)
     #[arg(long = "continue-on-error")]
@@ -154,9 +160,9 @@ pub enum OutputFormat {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum, Default)]
 pub enum ChunkStrategy {
     /// Structure-based chunking (preserves document hierarchy)
-    #[default]
     Hierarchical,
-    /// Token-aware chunking (respects token limits for embeddings)
+    /// Token-aware chunking with embedded all-MiniLM-L6-v2 tokenizer (recommended for RAG)
+    #[default]
     Hybrid,
 }
 

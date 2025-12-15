@@ -168,6 +168,10 @@ impl HybridChunker {
             return chunks;
         }
 
+        // Undersized threshold: 75% of max_tokens
+        // Only merge if the first chunk is undersized (leaving room for content)
+        let undersized_threshold = (self.max_tokens * 3) / 4;
+
         let mut result = Vec::new();
         let mut current: Option<BaseChunk> = None;
 
@@ -177,7 +181,13 @@ impl HybridChunker {
                     current = Some(chunk);
                 }
                 Some(mut prev) => {
-                    let can_merge = prev.meta.headings == chunk.meta.headings
+                    // Check if prev chunk is undersized (candidate for merging)
+                    let prev_contextualized = self.contextualize(&prev);
+                    let prev_tokens = self.tokenizer.count_tokens(&prev_contextualized);
+                    let prev_is_undersized = prev_tokens < undersized_threshold;
+
+                    let can_merge = prev_is_undersized
+                        && prev.meta.headings == chunk.meta.headings
                         && prev.meta.caption == chunk.meta.caption;
 
                     if can_merge {

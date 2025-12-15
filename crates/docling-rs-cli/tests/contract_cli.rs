@@ -192,7 +192,7 @@ fn test_ct010_enrichment_options() {
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
     cmd.arg(&input)
         .arg("--chunk")
-        .arg("--chunk-size")
+        .arg("--chunk-max-tokens")
         .arg("1000")
         .arg("--output-dir")
         .arg(&output_dir)

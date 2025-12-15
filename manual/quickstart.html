@@ -76,14 +76,14 @@ docling-rs ./documents/ --to json --continue-on-error</code></pre>
             <p>Split documents into chunks for embedding:</p>
 
             <div class="code-header">Terminal</div>
-            <pre><code><span class="comment"># Enable chunking with default size (512)</span>
+            <pre><code><span class="comment"># Enable chunking (uses embedded all-MiniLM-L6-v2 tokenizer, 128 max tokens)</span>
 docling-rs document.pdf --chunk --to json
 
-<span class="comment"># Custom chunk size</span>
-docling-rs document.pdf --chunk --chunk-size 1000 --to markdown
+<span class="comment"># Custom max tokens per chunk</span>
+docling-rs document.pdf --chunk --chunk-max-tokens 256 --to markdown
 
-<span class="comment"># Chunk with overlap</span>
-docling-rs document.pdf --chunk --chunk-size 500 --chunk-overlap 50</code></pre>
+<span class="comment"># Use hierarchical strategy instead of hybrid</span>
+docling-rs document.pdf --chunk --chunk-strategy hierarchical --to json</code></pre>
 
             <h2>Rust Library Quick Start</h2>
 

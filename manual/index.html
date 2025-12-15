@@ -103,8 +103,8 @@
             <pre><code><span class="comment"># Convert a PDF to Markdown</span>
 docling-rs document.pdf --to markdown --output-dir ./output
 
-<span class="comment"># Convert with chunking for RAG</span>
-docling-rs document.pdf --to json --chunk --chunk-size 512
+<span class="comment"># Convert with chunking for RAG (uses embedded all-MiniLM-L6-v2 tokenizer)</span>
+docling-rs document.pdf --to json --chunk
 
 <span class="comment"># Batch convert a directory</span>
 docling-rs ./documents/ --to json --output-dir ./converted</code></pre>

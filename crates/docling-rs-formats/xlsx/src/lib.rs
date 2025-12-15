@@ -3,7 +3,7 @@
 use calamine::{open_workbook_auto_from_rs, Reader, Sheets};
 use docling_rs_core::{
     Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
-    InputFormat, NodeType,
+    InputFormat, TableCell, TableData, TableRow,
 };
 use std::io::Cursor;
 
@@ -20,6 +20,27 @@ impl XlsxBackend {
         match input.source() {
             DocumentSource::FilePath(path) => std::fs::read(path).map_err(ConversionError::Io),
             DocumentSource::Bytes { data, .. } => Ok(data.clone()),
+        }
+    }
+
+    fn cell_to_string(cell: &calamine::Data) -> String {
+        match cell {
+            calamine::Data::Empty => String::new(),
+            calamine::Data::String(s) => s.clone(),
+            calamine::Data::Float(f) => {
+                // Format integers without decimal point
+                if f.fract() == 0.0 && *f >= i64::MIN as f64 && *f <= i64::MAX as f64 {
+                    (*f as i64).to_string()
+                } else {
+                    f.to_string()
+                }
+            }
+            calamine::Data::Int(i) => i.to_string(),
+            calamine::Data::Bool(b) => b.to_string(),
+            calamine::Data::Error(e) => format!("#ERROR: {:?}", e),
+            calamine::Data::DateTime(dt) => dt.to_string(),
+            calamine::Data::DateTimeIso(s) => s.clone(),
+            calamine::Data::DurationIso(s) => s.clone(),
         }
     }
 }
@@ -54,37 +75,21 @@ impl Backend for XlsxBackend {
 
         for sheet_name in sheet_names.iter() {
             if let Ok(range) = workbook.worksheet_range(sheet_name) {
-                let sheet_heading =
-                    DocumentNode::new(NodeType::Heading, format!("Sheet: {}", sheet_name));
-                doc.add_node(sheet_heading);
-
                 let (num_rows, _num_cols) = range.get_size();
 
                 if num_rows > 0 {
-                    let mut table_text = String::new();
+                    let mut table_data = TableData::new();
 
                     for row in range.rows() {
-                        let row_text: Vec<String> = row
+                        let cells: Vec<TableCell> = row
                             .iter()
-                            .map(|cell| match cell {
-                                calamine::Data::Empty => String::new(),
-                                calamine::Data::String(s) => s.clone(),
-                                calamine::Data::Float(f) => f.to_string(),
-                                calamine::Data::Int(i) => i.to_string(),
-                                calamine::Data::Bool(b) => b.to_string(),
-                                calamine::Data::Error(e) => format!("#ERROR: {:?}", e),
-                                calamine::Data::DateTime(dt) => dt.to_string(),
-                                calamine::Data::DateTimeIso(s) => s.clone(),
-                                calamine::Data::DurationIso(s) => s.clone(),
-                            })
+                            .map(|cell| TableCell::new(Self::cell_to_string(cell)))
                             .collect();
-
-                        table_text.push_str(&row_text.join("\t"));
-                        table_text.push('\n');
+                        table_data.add_row(TableRow::new(cells));
                     }
 
-                    let table_node = DocumentNode::new(NodeType::Table, table_text);
-                    doc.add_node(table_node);
+                    // Add the table as a single structured node
+                    doc.add_node(DocumentNode::new_table(table_data));
                 }
             }
         }

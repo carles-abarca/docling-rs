@@ -64,19 +64,19 @@ fn test_invalid_output_format() {
 }
 
 #[test]
-fn test_invalid_chunk_size() {
+fn test_invalid_chunk_max_tokens() {
     let temp = TempDir::new().unwrap();
     let input = temp.path().join("test.md");
     fs::write(&input, "# Test").unwrap();
 
     let mut cmd = Command::cargo_bin("docling-rs").unwrap();
     cmd.arg(&input)
-        .arg("--chunk-size")
+        .arg("--chunk-max-tokens")
         .arg("0")
         .assert()
         .failure()
         .code(1)
-        .stderr(predicate::str::contains("invalid").or(predicate::str::contains("must be")));
+        .stderr(predicate::str::contains("invalid").or(predicate::str::contains("must be").or(predicate::str::contains("greater than"))));
 }
 
 #[test]

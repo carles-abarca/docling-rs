@@ -3,7 +3,7 @@
 use csv::ReaderBuilder;
 use docling_rs_core::{
     Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
-    InputFormat, NodeType,
+    InputFormat, TableCell, TableData, TableRow,
 };
 use std::io::Cursor;
 
@@ -44,17 +44,22 @@ impl Backend for CsvBackend {
         let cursor = Cursor::new(content);
         let mut reader = ReaderBuilder::new().has_headers(true).from_reader(cursor);
 
+        let mut table_data = TableData::new();
+
         // Get headers
         if let Ok(headers) = reader.headers() {
-            let header_text = headers.iter().collect::<Vec<_>>().join(" | ");
-            doc.add_node(DocumentNode::new(NodeType::TableRow, header_text));
+            let cells: Vec<TableCell> = headers.iter().map(TableCell::new).collect();
+            table_data.add_row(TableRow::new(cells));
         }
 
-        // Get rows
+        // Get data rows
         for record in reader.records().flatten() {
-            let row_text = record.iter().collect::<Vec<_>>().join(" | ");
-            doc.add_node(DocumentNode::new(NodeType::TableRow, row_text));
+            let cells: Vec<TableCell> = record.iter().map(TableCell::new).collect();
+            table_data.add_row(TableRow::new(cells));
         }
+
+        // Add the table as a single structured node
+        doc.add_node(DocumentNode::new_table(table_data));
 
         Ok(doc)
     }

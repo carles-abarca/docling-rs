@@ -27,7 +27,7 @@ The original [Docling](https://github.com/DS4SD/docling) by IBM is an excellent 
 
 ## Status
 
-**v1.0.1** - Production-ready with 7 format backends (all enabled by default)
+**v1.0.3** - Production-ready with 7 format backends (all enabled by default)
 
 | Component | Status |
 |-----------|--------|
@@ -90,8 +90,8 @@ docling-rs document.pdf --to markdown --output-dir ./output
 # Batch convert a directory
 docling-rs ./documents/ --to json --output-dir ./converted
 
-# Enable chunking for RAG
-docling-rs document.pdf --chunk --chunk-size 512 --to json
+# Enable chunking for RAG (uses embedded all-MiniLM-L6-v2 tokenizer)
+docling-rs document.pdf --chunk --to json
 
 # Filter by input format
 docling-rs ./docs/ --from pdf,docx --to markdown
@@ -148,28 +148,35 @@ let result = converter.convert_bytes(
 
 ## Document Chunking
 
-Intelligent chunking for RAG and embedding applications:
+Intelligent chunking for RAG and embedding applications with **embedded tokenizer** (`sentence-transformers/all-MiniLM-L6-v2`):
 
 ```rust
-use docling_rs::{DocumentConverter, HierarchicalChunker};
+use docling_rs::{DocumentConverter, chunking::{HybridChunker, HuggingFaceTokenizer}};
 
 let converter = DocumentConverter::new();
 let result = converter.convert_file("document.pdf")?;
 let doc = result.document();
 
-// Create hierarchical chunker
-let chunker = HierarchicalChunker::new()
-    .with_max_chunk_size(512)
-    .with_overlap(50);
+// Hybrid chunker with embedded tokenizer (recommended for RAG)
+let tokenizer = HuggingFaceTokenizer::default_embedded()?;
+let chunker = HybridChunker::builder()
+    .tokenizer(Box::new(tokenizer))
+    .max_tokens(128)  // Default: 128, optimized for embeddings
+    .merge_peers(true)
+    .build()?;
 
 // Generate chunks
-let chunks = chunker.chunk(doc)?;
-
-for chunk in &chunks {
-    println!("Chunk: {} chars", chunk.text().len());
-    println!("Context: {:?}", chunk.metadata().headings());
+for chunk in chunker.chunk(&doc) {
+    println!("Chunk: {} chars", chunk.text.len());
 }
 ```
+
+### Chunking Features (v1.0.3)
+
+- **Embedded Tokenizer**: `all-MiniLM-L6-v2` tokenizer bundled in the binary
+- **Hybrid Strategy Default**: Token-aware chunking optimized for RAG
+- **Table Chunking**: CSV/XLSX tables are chunked row-by-row in `key=value` format
+- **Smart Merging**: Undersized chunks are merged while preserving semantic boundaries
 
 ## CLI Options
 
@@ -184,9 +191,10 @@ Options:
   -o, --output-dir <DIR>         Output directory
   -f, --from <FORMATS>           Filter input formats (comma-separated)
       --chunk                    Enable document chunking
-      --chunk-strategy <STRAT>   Chunking strategy: hierarchical, hybrid [default: hierarchical]
-      --chunk-max-tokens <N>     Max tokens per chunk (hybrid) [default: 512]
-      --chunk-merge-peers        Merge undersized peer chunks (hybrid) [default: true]
+      --chunk-strategy <STRAT>   Chunking strategy: hierarchical, hybrid [default: hybrid]
+      --chunk-max-tokens <N>     Max tokens per chunk [default: 128]
+      --chunk-merge-peers        Merge undersized peer chunks [default: true]
+      --tokenizer <MODEL>        HuggingFace tokenizer model [default: embedded all-MiniLM-L6-v2]
       --continue-on-error        Continue on errors (batch mode)
       --abort-on-error           Stop on first error (batch mode)
   -v, --verbose                  Verbose output
@@ -198,14 +206,17 @@ Options:
 ### Chunking Strategies
 
 ```bash
-# Hierarchical chunking (default) - preserves document structure
+# Hybrid chunking (default) - token-aware with embedded tokenizer, ideal for RAG
 docling-rs document.pdf --chunk --to json
 
-# Hybrid chunking - token-aware, ideal for embeddings
-docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-max-tokens 512 --to json
+# Custom max tokens
+docling-rs document.pdf --chunk --chunk-max-tokens 256 --to json
 
-# Hybrid without merging small chunks
-docling-rs document.pdf --chunk --chunk-strategy hybrid --chunk-merge-peers false --to json
+# Hierarchical chunking - preserves document structure
+docling-rs document.pdf --chunk --chunk-strategy hierarchical --to json
+
+# Disable chunk merging for more granular output
+docling-rs document.pdf --chunk --chunk-merge-peers false --to json
 ```
 
 ## Architecture

@@ -1,11 +1,15 @@
 //! Document node types
 
+use super::table::TableData;
 use serde::{Deserialize, Serialize};
 
 /// Document node
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DocumentNode {
     item: NodeItem,
+    /// Optional structured table data for Table nodes
+    #[serde(skip_serializing_if = "Option::is_none")]
+    table_data: Option<TableData>,
 }
 
 impl DocumentNode {
@@ -13,6 +17,15 @@ impl DocumentNode {
     pub fn new(node_type: NodeType, text: impl Into<String>) -> Self {
         Self {
             item: NodeItem::new(node_type, text),
+            table_data: None,
+        }
+    }
+
+    /// Create a new table node with structured data
+    pub fn new_table(table_data: TableData) -> Self {
+        Self {
+            item: NodeItem::new(NodeType::Table, ""),
+            table_data: Some(table_data),
         }
     }
 
@@ -29,6 +42,11 @@ impl DocumentNode {
     /// Get the source position
     pub fn position(&self) -> Option<&SourcePosition> {
         self.item.position()
+    }
+
+    /// Get the structured table data (if this is a table node)
+    pub fn table_data(&self) -> Option<&TableData> {
+        self.table_data.as_ref()
     }
 
     /// Set the source position

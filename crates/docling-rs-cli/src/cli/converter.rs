@@ -4,7 +4,7 @@ use crate::cli::args::{ChunkStrategy, CliArgs, InputFormat, OutputFormat};
 use crate::cli::output;
 use anyhow::{Context, Result};
 use docling_rs::chunking::{
-    BaseChunk, BaseChunker, HierarchicalChunker, HybridChunker, SimpleTokenizer,
+    BaseChunk, BaseChunker, HierarchicalChunker, HuggingFaceTokenizer, HybridChunker, Tokenizer,
 };
 use docling_rs::DocumentConverter;
 use std::fs;
@@ -359,9 +359,29 @@ impl Converter {
                 chunker.chunk(doc).collect()
             }
             ChunkStrategy::Hybrid => {
-                let tokenizer = SimpleTokenizer::with_max_tokens(self.args.chunk_max_tokens);
+                // Create tokenizer: custom model if specified, otherwise embedded all-MiniLM-L6-v2
+                let tokenizer: Box<dyn Tokenizer> =
+                    if let Some(ref model) = self.args.tokenizer_model {
+                        Box::new(
+                            HuggingFaceTokenizer::from_pretrained(model).with_context(|| {
+                                format!(
+                                    "Failed to load HuggingFace tokenizer '{}'. \
+                                    Please download tokenizer.json from https://huggingface.co/{}/tree/main",
+                                    model, model
+                                )
+                            })?,
+                        )
+                    } else {
+                        // Use embedded all-MiniLM-L6-v2 tokenizer (default for RAG)
+                        Box::new(
+                            HuggingFaceTokenizer::default_embedded()
+                                .context("Failed to load embedded tokenizer")?
+                                .with_max_tokens(self.args.chunk_max_tokens),
+                        )
+                    };
+
                 let chunker = HybridChunker::builder()
-                    .tokenizer(Box::new(tokenizer))
+                    .tokenizer(tokenizer)
                     .max_tokens(self.args.chunk_max_tokens)
                     .merge_peers(self.args.chunk_merge_peers)
                     .build()
