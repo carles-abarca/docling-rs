@@ -1,171 +1,119 @@
-//! PPTX backend for docling-rs
-
+//! PPTX extraction follows the presentation relationship order, not ZIP filenames.
 use docling_rs_core::{
-    Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
-    InputFormat, NodeType,
+    office, Backend, ConversionError, DoclingDocument, DocumentNode, InputDocument, InputFormat,
+    NodeType, TableCell, TableData, TableRow,
 };
-use pptx_to_md::{
-    ListElement, ParserConfig, PptxContainer, SlideElement, TableElement, TextElement,
-};
-use std::io::Write;
-use std::path::PathBuf;
-
-/// PPTX backend using pptx-to-md
+use roxmltree::Node;
+const A: &str = "http://schemas.openxmlformats.org/drawingml/2006/main";
+const P: &str = "http://schemas.openxmlformats.org/presentationml/2006/main";
 pub struct PptxBackend;
-
 impl PptxBackend {
-    /// Create a new PPTX backend
     pub fn new() -> Self {
         Self
     }
-
-    fn get_path(input: &InputDocument) -> Result<(PathBuf, bool), ConversionError> {
-        match input.source() {
-            DocumentSource::FilePath(path) => Ok((path.clone(), false)),
-            DocumentSource::Bytes { data, .. } => {
-                let mut temp_file = tempfile::NamedTempFile::new().map_err(ConversionError::Io)?;
-                temp_file.write_all(data).map_err(ConversionError::Io)?;
-                let path = temp_file.into_temp_path().keep().map_err(|e| {
-                    ConversionError::ParseError(format!("Failed to keep temp file: {}", e))
-                })?;
-                Ok((path, true))
-            }
-        }
-    }
-
-    fn extract_text(text_element: &TextElement) -> String {
-        text_element
-            .runs
-            .iter()
-            .map(|run| run.text.clone())
-            .collect::<Vec<_>>()
-            .join("")
-    }
-
-    fn extract_table_text(table: &TableElement) -> String {
-        let mut rows_text: Vec<String> = Vec::new();
-
-        for row in &table.rows {
-            let mut cells_text: Vec<String> = Vec::new();
-            for cell in &row.cells {
-                let cell_text: String = cell
-                    .runs
-                    .iter()
-                    .map(|run| run.text.clone())
-                    .collect::<Vec<_>>()
-                    .join("");
-                cells_text.push(cell_text);
-            }
-            rows_text.push(cells_text.join("\t"));
-        }
-
-        rows_text.join("\n")
-    }
-
-    fn extract_list_text(list: &ListElement) -> String {
-        list.items
-            .iter()
-            .map(|item| {
-                let text: String = item
-                    .runs
-                    .iter()
-                    .map(|run| run.text.clone())
-                    .collect::<Vec<_>>()
-                    .join("");
-                let prefix = if item.is_ordered { "1." } else { "•" };
-                format!("{} {}", prefix, text)
-            })
-            .collect::<Vec<_>>()
-            .join("\n")
-    }
 }
-
 impl Default for PptxBackend {
     fn default() -> Self {
         Self::new()
     }
 }
-
+fn text(n: Node<'_, '_>) -> String {
+    let mut out = String::new();
+    for c in n.descendants() {
+        if c.has_tag_name((A, "t")) {
+            out.push_str(c.text().unwrap_or(""))
+        } else if c.has_tag_name((A, "br")) {
+            out.push('\n')
+        }
+    }
+    out
+}
+fn table(n: Node<'_, '_>) -> TableData {
+    let mut t = TableData::new();
+    for row in n.children().filter(|c| c.has_tag_name((A, "tr"))) {
+        t.add_row(TableRow::new(
+            row.children()
+                .filter(|c| c.has_tag_name((A, "tc")))
+                .map(|c| {
+                    TableCell::new(
+                        c.descendants()
+                            .filter(|p| p.has_tag_name((A, "p")))
+                            .map(text)
+                            .collect::<Vec<_>>()
+                            .join("\n"),
+                    )
+                })
+                .collect(),
+        ))
+    }
+    t
+}
+fn blocks(root: Node<'_, '_>, doc: &mut DoclingDocument) {
+    for n in root.descendants() {
+        if n.has_tag_name((A, "tbl")) {
+            doc.add_node(DocumentNode::new_table(table(n)))
+        } else if n.has_tag_name((A, "p")) && !n.ancestors().any(|a| a.has_tag_name((A, "tbl"))) {
+            let s = text(n);
+            if !s.trim().is_empty() {
+                doc.add_node(DocumentNode::new(NodeType::Paragraph, s));
+            }
+        }
+    }
+}
 impl Backend for PptxBackend {
     fn convert(&self, input: &InputDocument) -> Result<DoclingDocument, ConversionError> {
-        let name = match input.source() {
-            DocumentSource::FilePath(path) => path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("unknown")
-                .to_string(),
-            DocumentSource::Bytes { name, .. } => name.clone(),
-        };
-
-        let (path, is_temp) = Self::get_path(input)?;
-
-        let config = ParserConfig::default();
-        let mut container = PptxContainer::open(&path, config)
-            .map_err(|e| ConversionError::ParseError(format!("PPTX open error: {}", e)))?;
-
-        let mut doc = DoclingDocument::new(name);
-
-        let slides = container
-            .parse_all()
-            .map_err(|e| ConversionError::ParseError(format!("PPTX parse error: {}", e)))?;
-
-        for slide in slides {
-            let slide_heading =
-                DocumentNode::new(NodeType::Heading, format!("Slide {}", slide.slide_number));
-            doc.add_node(slide_heading);
-
-            let mut first_text = true;
-
-            for element in &slide.elements {
-                match element {
-                    SlideElement::Text(text_elem, _pos) => {
-                        let text = Self::extract_text(text_elem);
-                        if text.trim().is_empty() {
+        let parts = office::read_parts(input)?;
+        let presentation = office::parse(office::part(&parts, "ppt/presentation.xml")?)?;
+        let rels = office::relationships(&parts, "ppt/presentation.xml")?;
+        let mut doc = DoclingDocument::new(office::name(input));
+        let mut omitted_visuals = false;
+        for (index, n) in presentation
+            .descendants()
+            .filter(|n| n.has_tag_name((P, "sldId")))
+            .enumerate()
+        {
+            let id = n
+                .attributes()
+                .find(|a| a.name() == "id" && a.namespace().is_some())
+                .ok_or_else(|| office::error("Missing PPTX slide relationship ID"))?
+                .value();
+            let (path, _) = rels
+                .get(id)
+                .ok_or_else(|| office::error("Missing PPTX slide relationship"))?;
+            let slide = office::parse(office::part(&parts, path)?)?;
+            doc.add_node(DocumentNode::new(
+                NodeType::Heading,
+                format!("Slide {}", index + 1),
+            ));
+            blocks(slide.root_element(), &mut doc);
+            omitted_visuals |= slide
+                .descendants()
+                .any(|n| n.has_tag_name((P, "pic")) || n.tag_name().name() == "chart");
+            for (_, (note_path, kind)) in office::relationships(&parts, path)? {
+                if kind.ends_with("/notesSlide") {
+                    let notes = office::parse(office::part(&parts, &note_path)?)?;
+                    for shape in notes.descendants().filter(|n| n.has_tag_name((P, "sp"))) {
+                        let placeholder = shape
+                            .descendants()
+                            .find(|n| n.has_tag_name((P, "ph")))
+                            .and_then(|n| n.attribute("type"));
+                        if matches!(
+                            placeholder,
+                            Some("sldNum" | "dt" | "hdr" | "ftr" | "sldImg")
+                        ) {
                             continue;
                         }
-
-                        let node_type = if first_text {
-                            first_text = false;
-                            NodeType::Heading
-                        } else {
-                            NodeType::Paragraph
-                        };
-
-                        let node = DocumentNode::new(node_type, text);
-                        doc.add_node(node);
-                    }
-                    SlideElement::Table(table_elem, _pos) => {
-                        let text = Self::extract_table_text(table_elem);
-                        if !text.trim().is_empty() {
-                            let node = DocumentNode::new(NodeType::Table, text);
-                            doc.add_node(node);
-                        }
-                    }
-                    SlideElement::List(list_elem, _pos) => {
-                        let text = Self::extract_list_text(list_elem);
-                        if !text.trim().is_empty() {
-                            let node = DocumentNode::new(NodeType::List, text);
-                            doc.add_node(node);
-                        }
-                    }
-                    SlideElement::Image(_img_ref, _pos) => {
-                        // Skip images for now
-                    }
-                    SlideElement::Unknown => {
-                        // Skip unknown elements
+                        blocks(shape, &mut doc);
                     }
                 }
             }
         }
-
-        if is_temp {
-            let _ = std::fs::remove_file(&path);
+        if omitted_visuals {
+            doc=doc.with_metadata("conversion_warnings",serde_json::json!(["Slide images/charts are not rendered or OCR-processed; text extraction may be incomplete."]));
         }
-
         Ok(doc)
     }
-
-    fn supports_format(&self, format: InputFormat) -> bool {
-        format == InputFormat::Pptx
+    fn supports_format(&self, f: InputFormat) -> bool {
+        f == InputFormat::Pptx
     }
 }

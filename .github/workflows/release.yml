@@ -15,12 +15,15 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -52,13 +55,15 @@ jobs:
             target/aarch64-apple-darwin/release/docling-rs \
             -output dist/docling-rs.app/Contents/MacOS/docling-rs
 
-          # Bundle pdfium library for arm64
-          if [ -f pdfium/lib/macos-arm64/libpdfium.dylib ]; then
-            cp pdfium/lib/macos-arm64/libpdfium.dylib dist/docling-rs.app/Contents/Frameworks/
-          fi
+          # Match both architectures of the universal executable.
+          lipo -create pdfium/lib/macos-arm64/libpdfium.dylib \
+            pdfium/lib/macos-x64/libpdfium.dylib \
+            -output dist/docling-rs.app/Contents/Frameworks/libpdfium.dylib
+          lipo dist/docling-rs.app/Contents/Frameworks/libpdfium.dylib -verify_arch arm64 x86_64
+          codesign --force --sign - dist/docling-rs.app/Contents/Frameworks/libpdfium.dylib
 
           # Create Info.plist
-          VERSION="${{ github.ref_name }}"
+          VERSION="${{ env.RELEASE_TAG }}"
           VERSION="${VERSION#v}"  # Remove 'v' prefix
           cat > dist/docling-rs.app/Contents/Info.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -87,9 +92,17 @@ jobs:
           </plist>
           EOF
 
+      - name: Test bundled PDFium on native macOS
+        env:
+          DOCLING_TEST_PDFIUM: ${{ github.workspace }}/dist/docling-rs.app/Contents/Frameworks/libpdfium.dylib
+        run: |
+          cargo test -p docling-rs --test fidelity_regressions_105 -- --include-ignored
+          dist/docling-rs.app/Contents/MacOS/docling-rs crates/docling-rs/tests/fixtures/attachments/text.pdf --to text --output-dir smoke-output
+          grep -q FINAL_DOCUMENTO smoke-output/text.txt
+
       - name: Create DMG
         run: |
-          VERSION="${{ github.ref_name }}"
+          VERSION="${{ env.RELEASE_TAG }}"
           VERSION="${VERSION#v}"
 
           # Create a temporary directory for DMG contents
@@ -127,6 +140,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -152,15 +167,20 @@ jobs:
             Copy-Item pdfium/lib/windows-x64/pdfium.dll dist/
           }
 
-      - name: Install WiX Toolset
-        shell: pwsh
+      - name: Test bundled PDFium on Windows
+        env:
+          DOCLING_TEST_PDFIUM: ${{ github.workspace }}/dist/pdfium.dll
         run: |
-          dotnet tool install --global wix
+          cargo test -p docling-rs --test fidelity_regressions_105 -- --include-ignored
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./dist/docling-rs.exe crates/docling-rs/tests/fixtures/attachments/text.pdf --to text --output-dir smoke-output
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Select-String -Path smoke-output/text.txt -Pattern FINAL_DOCUMENTO -Quiet)) { throw "PDF smoke output missing" }
 
       - name: Create ZIP distribution
         shell: pwsh
         run: |
-          $version = "${{ github.ref_name }}" -replace '^v', ''
+          $version = "${{ env.RELEASE_TAG }}" -replace '^v', ''
           # Include documentation manual
           if (Test-Path manual) {
             Copy-Item -Recurse manual dist/
@@ -179,6 +199,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -203,9 +225,24 @@ jobs:
             cp pdfium/lib/linux-x64/libpdfium.so dist/
           fi
 
+      - name: Install pinned Linux PDFium and test
+        env:
+          DOCLING_TEST_PDFIUM: ${{ github.workspace }}/dist/libpdfium.so
+        run: |
+          curl --fail --location --retry 3 -o pdfium-linux.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/7350/pdfium-linux-x64.tgz
+          echo '5a53c802a970d7d1414c0d2fdd8a0900e239b3e7e4eff7a5ddcbd433322606f2  pdfium-linux.tgz' | sha256sum --check
+          mkdir pdfium-linux
+          tar -xzf pdfium-linux.tgz -C pdfium-linux
+          cp pdfium-linux/lib/libpdfium.so dist/
+          cp -R pdfium-linux/LICENSE* dist/
+          cp -R pdfium-linux/licenses dist/pdfium-licenses
+          cargo test -p docling-rs --test fidelity_regressions_105 -- --include-ignored
+          dist/docling-rs crates/docling-rs/tests/fixtures/attachments/text.pdf --to text --output-dir smoke-output
+          grep -q FINAL_DOCUMENTO smoke-output/text.txt
+
       - name: Create tarball
         run: |
-          VERSION="${{ github.ref_name }}"
+          VERSION="${{ env.RELEASE_TAG }}"
           VERSION="${VERSION#v}"
           # Include documentation manual
           if [ -d manual ]; then
@@ -226,6 +263,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -236,13 +275,14 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           files: |
             macos-dmg/*.dmg
             windows-zip/*.zip
             linux-tarball/*.tar.gz
-          body_path: docs/releases/${{ github.ref_name }}.md
+          body_path: docs/releases/${{ env.RELEASE_TAG }}.md
           generate_release_notes: false
           draft: false
-          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          prerelease: ${{ contains(env.RELEASE_TAG, 'alpha') || contains(env.RELEASE_TAG, 'beta') || contains(env.RELEASE_TAG, 'rc') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

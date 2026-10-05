@@ -259,6 +259,15 @@ impl Converter {
 
         // Get document
         let doc = result.document();
+        if let Some(warnings) = doc
+            .metadata()
+            .get("conversion_warnings")
+            .and_then(|v| v.as_array())
+        {
+            for warning in warnings.iter().filter_map(|v| v.as_str()) {
+                eprintln!("Warning: partial conversion: {warning}");
+            }
+        }
 
         // Apply chunking if enabled
         let output_content = if self.args.chunk {
@@ -360,9 +369,10 @@ impl Converter {
             }
             ChunkStrategy::Hybrid => {
                 // Create tokenizer: custom model if specified, otherwise embedded all-MiniLM-L6-v2
-                let tokenizer: Box<dyn Tokenizer> =
-                    if let Some(ref model) = self.args.tokenizer_model {
-                        Box::new(
+                let tokenizer: Box<dyn Tokenizer> = if let Some(ref model) =
+                    self.args.tokenizer_model
+                {
+                    Box::new(
                             HuggingFaceTokenizer::from_pretrained(model).with_context(|| {
                                 format!(
                                     "Failed to load HuggingFace tokenizer '{}'. \
@@ -371,14 +381,14 @@ impl Converter {
                                 )
                             })?,
                         )
-                    } else {
-                        // Use embedded all-MiniLM-L6-v2 tokenizer (default for RAG)
-                        Box::new(
-                            HuggingFaceTokenizer::default_embedded()
-                                .context("Failed to load embedded tokenizer")?
-                                .with_max_tokens(self.args.chunk_max_tokens),
-                        )
-                    };
+                } else {
+                    // Use embedded all-MiniLM-L6-v2 tokenizer (default for RAG)
+                    Box::new(
+                        HuggingFaceTokenizer::default_embedded()
+                            .context("Failed to load embedded tokenizer")?
+                            .with_max_tokens(self.args.chunk_max_tokens),
+                    )
+                };
 
                 let chunker = HybridChunker::builder()
                     .tokenizer(tokenizer)
@@ -386,7 +396,9 @@ impl Converter {
                     .merge_peers(self.args.chunk_merge_peers)
                     .build()
                     .context("Failed to create hybrid chunker")?;
-                chunker.chunk(doc).collect()
+                chunker
+                    .try_chunk(doc)
+                    .context("Chunk content cannot fit the token budget")?
             }
         };
 

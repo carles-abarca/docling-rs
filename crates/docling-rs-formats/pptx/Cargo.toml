@@ -7,9 +7,9 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-docling-rs-core.workspace = true
-pptx-to-md.workspace = true
-tempfile.workspace = true
+docling-rs-core = { workspace = true, features = ["office"] }
+roxmltree.workspace = true
+serde_json.workspace = true
 
 [lints]
 workspace = true

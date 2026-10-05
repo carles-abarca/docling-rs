@@ -53,3 +53,15 @@ Bundling the PDFium binaries with docling-rs provides:
 2. **Consistent behavior**: Everyone uses the same version of PDFium
 3. **Cross-platform**: Works on macOS (both Intel and Apple Silicon) and Windows without extra setup
 4. **Offline builds**: No internet connection required during compilation
+
+## v1.0.5 distribution changes
+
+The macOS release combines both checked-in libraries with lipo and ad-hoc signs
+the result. Native release regression tests and a packaged-CLI smoke test verify
+loading on the runner. Default lookup now checks beside the executable and its
+app Frameworks directory before the prior working-directory/system fallback.
+
+Linux uses `chromium/7350/pdfium-linux-x64.tgz` from bblanchon/pdfium-binaries,
+SHA-256 `5a53c802a970d7d1414c0d2fdd8a0900e239b3e7e4eff7a5ddcbd433322606f2`,
+and includes its LICENSE and third-party notices. Windows uses the checked-in
+library and must pass the native release PDF tests before publication.

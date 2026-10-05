@@ -49,10 +49,9 @@ The original [Docling](https://github.com/DS4SD/docling) by IBM is an excellent 
 
 Download from [Releases](https://github.com/carles-abarca/docling-rs/releases):
 
-- **Windows**: `docling-rs-x86_64-windows.msi` or `.zip`
-- **macOS Intel**: `docling-rs-x86_64-macos.dmg`
-- **macOS Apple Silicon**: `docling-rs-aarch64-macos.dmg`
-- **Linux**: `docling-rs-x86_64-linux.tar.gz`
+- **Windows**: `docling-rs-<version>-windows-x64.zip`
+- **macOS Intel / Apple Silicon**: `docling-rs-<version>-universal.dmg`
+- **Linux**: `docling-rs-<version>-linux-x64.tar.gz`
 
 ### Rust Library
 
@@ -166,12 +165,12 @@ let chunker = HybridChunker::builder()
     .build()?;
 
 // Generate chunks
-for chunk in chunker.chunk(&doc) {
+for chunk in chunker.try_chunk(doc)? {
     println!("Chunk: {} chars", chunk.text.len());
 }
 ```
 
-### Chunking Features (v1.0.3)
+### Chunking Features
 
 - **Embedded Tokenizer**: `all-MiniLM-L6-v2` tokenizer bundled in the binary
 - **Hybrid Strategy Default**: Token-aware chunking optimized for RAG
@@ -303,3 +302,26 @@ MIT
 ## Contributing
 
 Contributions are welcome! See `CLAUDE.md` for development guidelines.
+
+## Attachment fidelity and limits (1.0.5)
+
+DOCX and PPTX are read through bounded Office XML parsing. The library retains
+DOCX headers/footers and hyperlink text, follows presentation relationship order,
+and preserves PPTX tables and speaker notes in text/chunks. HTML retains direct
+container text and inline word/space boundaries. PDFs with a clear full-page gutter
+can be ordered as two columns; this heuristic is disclosed as partial conversion.
+
+Inspect `ConversionResult::status()` and `document().metadata()["conversion_warnings"]`.
+Images/charts and arbitrary complex layouts are not fully reconstructed; OCR is
+not implemented. Plain TXT still uses the caller's own reader. The CLI prints
+partial-conversion warnings to stderr.
+
+For strict context admission use `HybridChunker::try_chunk()`: it returns an error
+when a Unicode scalar or contextual metadata cannot fit a tiny token budget.
+The legacy infallible `BaseChunker::chunk()` preserves content in that impossible
+case; callers using that API must still validate the resulting token counts.
+
+Office input limits: 256 MiB input, 20,000 ZIP entries, 16 MiB per XML part,
+64 MiB total declared XML size, and depth 128. HTML depth is limited to 256.
+These are parsing guards, not a process memory ceiling or a cancellation API.
+See [v1.0.5 validation](docs/validation-v1.0.5.md) for evidence and remaining limits.

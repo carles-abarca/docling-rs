@@ -20,3 +20,6 @@ pub use datamodel::{
 pub use error::ConversionError;
 pub use format::InputFormat;
 pub use pipeline::{Pipeline, SimplePipeline};
+
+#[cfg(feature = "office")]
+pub mod office;

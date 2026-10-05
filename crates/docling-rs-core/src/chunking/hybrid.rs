@@ -161,6 +161,69 @@ impl HybridChunker {
         }
 
         result
+            .into_iter()
+            .flat_map(|chunk| self.split_without_spaces(chunk))
+            .collect()
+    }
+
+    // Fallback for scripts/identifiers without whitespace. Work on UTF-8 boundaries.
+    fn split_without_spaces(&self, chunk: BaseChunk) -> Vec<BaseChunk> {
+        if self.tokenizer.count_tokens(&self.contextualize(&chunk)) <= self.max_tokens {
+            return vec![chunk];
+        }
+        let mut output = Vec::new();
+        let mut start = 0;
+        while start < chunk.text.len() {
+            let suffix = &chunk.text[start..];
+            let boundaries: Vec<usize> = suffix
+                .char_indices()
+                .skip(1)
+                .map(|(i, _)| i)
+                .chain(std::iter::once(suffix.len()))
+                .collect();
+            let mut low = 0;
+            let mut high = boundaries.len();
+            let mut best = 0;
+            while low < high {
+                let mid = low + (high - low) / 2;
+                let end = boundaries[mid];
+                let mut candidate = chunk.clone();
+                candidate.text = suffix[..end].to_owned();
+                if self.tokenizer.count_tokens(&self.contextualize(&candidate)) <= self.max_tokens {
+                    best = end;
+                    low = mid + 1;
+                } else {
+                    high = mid;
+                }
+            }
+            // A single Unicode scalar or context may exceed an impossibly small budget.
+            // Preserve content here; try_chunk reports this as an explicit error.
+            if best == 0 {
+                best = boundaries[0];
+            }
+            let mut next = chunk.clone();
+            next.text = suffix[..best].to_owned();
+            next.meta.start_offset = chunk.meta.start_offset + start;
+            next.meta.end_offset = next.meta.start_offset + best;
+            next.meta.index += output.len();
+            output.push(next);
+            start += best;
+        }
+        output
+    }
+
+    /// Strict chunking: fails if even one scalar/context cannot fit the configured budget.
+    pub fn try_chunk(&self, doc: &DoclingDocument) -> Result<Vec<BaseChunk>, ChunkingError> {
+        let chunks: Vec<_> = self.chunk(doc).collect();
+        if chunks
+            .iter()
+            .any(|c| self.tokenizer.count_tokens(&self.contextualize(c)) > self.max_tokens)
+        {
+            return Err(ChunkingError::InvalidConfig(
+                "Token budget cannot fit a Unicode scalar or contextual metadata".into(),
+            ));
+        }
+        Ok(chunks)
     }
 
     fn merge_undersized_peers(&self, chunks: Vec<BaseChunk>) -> Vec<BaseChunk> {

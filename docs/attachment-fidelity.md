@@ -1,5 +1,7 @@
 # Attachment fidelity corrections for LiteGate
 
+Historical v1.0.4 report. See [v1.0.5 validation](validation-v1.0.5.md) for the expanded findings and corrections.
+
 Evaluated on macOS 26.5 / Apple Silicon with Rust 1.98.1, against base commit
 `c9ccbcd437c371ec403855968d0a90cda1301624`. Changes are on the local branch
 `codex/litegate-attachment-fidelity`; not published to crates.io.

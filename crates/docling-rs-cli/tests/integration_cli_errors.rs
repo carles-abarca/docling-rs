@@ -76,7 +76,11 @@ fn test_invalid_chunk_max_tokens() {
         .assert()
         .failure()
         .code(1)
-        .stderr(predicate::str::contains("invalid").or(predicate::str::contains("must be").or(predicate::str::contains("greater than"))));
+        .stderr(
+            predicate::str::contains("invalid")
+                .or(predicate::str::contains("must be")
+                    .or(predicate::str::contains("greater than"))),
+        );
 }
 
 #[test]

@@ -64,7 +64,7 @@ impl Tokenizer for SimpleTokenizer {
     fn count_tokens(&self, text: &str) -> usize {
         // Estimate: 1 token ≈ chars_per_token characters
         // This is a rough approximation for English text
-        (text.chars().count() + self.chars_per_token - 1) / self.chars_per_token
+        text.chars().count().div_ceil(self.chars_per_token)
     }
 
     fn max_tokens(&self) -> usize {

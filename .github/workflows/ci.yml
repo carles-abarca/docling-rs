@@ -23,6 +23,16 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
       - uses: Swatinem/rust-cache@v2
+      - name: Locate bundled PDFium for integration tests
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp pdfium/lib/windows-x64/pdfium.dll crates/docling-rs/
+          elif [ "$(uname -m)" = "arm64" ]; then
+            cp pdfium/lib/macos-arm64/libpdfium.dylib crates/docling-rs/
+          else
+            cp pdfium/lib/macos-x64/libpdfium.dylib crates/docling-rs/
+          fi
       - name: Run tests
         run: cargo test --all-features -- --test-threads=1
 
@@ -81,9 +91,8 @@ jobs:
       - name: Generate documentation
         run: cargo doc --no-deps --all-features
 
-      # Package crate for distribution
-      - name: Package crate
-        run: cargo package --allow-dirty
+      # Build artifacts above are the release products; workspace crates are
+      # not published to crates.io, so cargo package cannot resolve their versions.
 
       # Create distribution directory
       - name: Create distribution package
