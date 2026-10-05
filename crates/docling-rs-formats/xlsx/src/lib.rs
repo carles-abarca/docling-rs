@@ -3,7 +3,7 @@
 use calamine::{open_workbook_auto_from_rs, Reader, Sheets};
 use docling_rs_core::{
     Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
-    InputFormat, TableCell, TableData, TableRow,
+    InputFormat, NodeType, TableCell, TableData, TableRow,
 };
 use std::io::Cursor;
 
@@ -73,25 +73,57 @@ impl Backend for XlsxBackend {
 
         let sheet_names: Vec<String> = workbook.sheet_names().to_vec();
 
-        for sheet_name in sheet_names.iter() {
-            if let Ok(range) = workbook.worksheet_range(sheet_name) {
-                let (num_rows, _num_cols) = range.get_size();
-
-                if num_rows > 0 {
-                    let mut table_data = TableData::new();
-
-                    for row in range.rows() {
-                        let cells: Vec<TableCell> = row
-                            .iter()
-                            .map(|cell| TableCell::new(Self::cell_to_string(cell)))
-                            .collect();
-                        table_data.add_row(TableRow::new(cells));
-                    }
-
-                    // Add the table as a single structured node
-                    doc.add_node(DocumentNode::new_table(table_data));
-                }
+        for sheet_name in &sheet_names {
+            let range = workbook
+                .worksheet_range(sheet_name)
+                .map_err(|e| ConversionError::ParseError(format!("Sheet {sheet_name}: {e}")))?;
+            let formulas = workbook.worksheet_formula(sheet_name).map_err(|e| {
+                ConversionError::ParseError(format!("Sheet formulas {sheet_name}: {e}"))
+            })?;
+            doc.add_node(DocumentNode::new(NodeType::Heading, sheet_name));
+            let starts: Vec<_> = [range.start(), formulas.start()]
+                .into_iter()
+                .flatten()
+                .collect();
+            let ends: Vec<_> = [range.end(), formulas.end()]
+                .into_iter()
+                .flatten()
+                .collect();
+            if starts.is_empty() {
+                continue;
             }
+            let start = (
+                starts.iter().map(|p| p.0).min().unwrap(),
+                starts.iter().map(|p| p.1).min().unwrap(),
+            );
+            let end = (
+                ends.iter().map(|p| p.0).max().unwrap(),
+                ends.iter().map(|p| p.1).max().unwrap(),
+            );
+            let mut table = TableData::new();
+            for row in start.0..=end.0 {
+                let cells = (start.1..=end.1)
+                    .map(|col| {
+                        let mut value = range
+                            .get_value((row, col))
+                            .map(Self::cell_to_string)
+                            .unwrap_or_default();
+                        if let Some(formula) =
+                            formulas.get_value((row, col)).filter(|f| !f.is_empty())
+                        {
+                            let formula = format!("={}", formula.trim_start_matches('='));
+                            value = if value.is_empty() {
+                                formula
+                            } else {
+                                format!("{value} [formula: {formula}]")
+                            };
+                        }
+                        TableCell::new(value)
+                    })
+                    .collect();
+                table.add_row(TableRow::new(cells));
+            }
+            doc.add_node(DocumentNode::new_table(table));
         }
 
         Ok(doc)

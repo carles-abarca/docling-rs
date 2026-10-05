@@ -54,7 +54,17 @@ impl Pipeline for SimplePipeline {
         for backend in &self.backends {
             if backend.supports_format(format) {
                 let document = backend.convert(input)?;
-                return Ok(ConversionResult::new(document, ConversionStatus::Success));
+                let status = if document
+                    .metadata()
+                    .get("conversion_warnings")
+                    .and_then(|v| v.as_array())
+                    .is_some_and(|v| !v.is_empty())
+                {
+                    ConversionStatus::PartialSuccess
+                } else {
+                    ConversionStatus::Success
+                };
+                return Ok(ConversionResult::new(document, status));
             }
         }
 

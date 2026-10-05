@@ -2,9 +2,9 @@
 
 use docling_rs_core::{
     Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
-    InputFormat, NodeType,
+    InputFormat, NodeType, TableCell, TableData, TableRow,
 };
-use scraper::{Html, Selector};
+use scraper::{ElementRef, Html, Selector};
 
 /// HTML backend
 pub struct HtmlBackend;
@@ -42,32 +42,49 @@ impl Backend for HtmlBackend {
         let mut doc = DoclingDocument::new(&name);
         let html = Html::parse_document(&content);
 
-        // Extract headings h1-h6
-        for i in 1..=6 {
-            let selector = Selector::parse(&format!("h{}", i)).unwrap();
-            for element in html.select(&selector) {
-                let text: String = element.text().collect::<Vec<_>>().join(" ");
-                if !text.trim().is_empty() {
-                    doc.add_node(DocumentNode::new(NodeType::Heading, text.trim()));
+        let selector = Selector::parse("h1,h2,h3,h4,h5,h6,p,li,table,pre").unwrap();
+        let rows = Selector::parse("tr").unwrap();
+        for element in html.select(&selector) {
+            if element.ancestors().filter_map(ElementRef::wrap).any(|a| {
+                matches!(
+                    a.value().name(),
+                    "table" | "li" | "p" | "pre" | "script" | "style"
+                )
+            }) {
+                continue;
+            }
+            let tag = element.value().name();
+            if tag == "table" {
+                let mut table = TableData::new();
+                for row in element.select(&rows) {
+                    if row
+                        .ancestors()
+                        .filter_map(ElementRef::wrap)
+                        .find(|a| a.value().name() == "table")
+                        .map(|a| a.id())
+                        != Some(element.id())
+                    {
+                        continue;
+                    }
+                    let cells = row
+                        .children()
+                        .filter_map(ElementRef::wrap)
+                        .filter(|c| matches!(c.value().name(), "td" | "th"))
+                        .map(|c| TableCell::new(visible_text(c)))
+                        .collect();
+                    table.add_row(TableRow::new(cells));
                 }
-            }
-        }
-
-        // Extract paragraphs
-        let p_selector = Selector::parse("p").unwrap();
-        for element in html.select(&p_selector) {
-            let text: String = element.text().collect::<Vec<_>>().join(" ");
-            if !text.trim().is_empty() {
-                doc.add_node(DocumentNode::new(NodeType::Paragraph, text.trim()));
-            }
-        }
-
-        // Extract list items
-        let li_selector = Selector::parse("li").unwrap();
-        for element in html.select(&li_selector) {
-            let text: String = element.text().collect::<Vec<_>>().join(" ");
-            if !text.trim().is_empty() {
-                doc.add_node(DocumentNode::new(NodeType::ListItem, text.trim()));
+                doc.add_node(DocumentNode::new_table(table));
+            } else {
+                let text = visible_text(element);
+                if !text.trim().is_empty() {
+                    let kind = match tag {
+                        "li" => NodeType::ListItem,
+                        "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => NodeType::Heading,
+                        _ => NodeType::Paragraph,
+                    };
+                    doc.add_node(DocumentNode::new(kind, text.trim()));
+                }
             }
         }
 
@@ -77,4 +94,18 @@ impl Backend for HtmlBackend {
     fn supports_format(&self, format: InputFormat) -> bool {
         matches!(format, InputFormat::Html)
     }
+}
+
+fn visible_text(element: ElementRef<'_>) -> String {
+    element
+        .descendants()
+        .filter(|node| {
+            !node
+                .ancestors()
+                .filter_map(ElementRef::wrap)
+                .any(|a| matches!(a.value().name(), "script" | "style"))
+        })
+        .filter_map(|node| node.value().as_text().map(|t| t.to_string()))
+        .collect::<Vec<_>>()
+        .join(" ")
 }

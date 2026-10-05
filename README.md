@@ -110,8 +110,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let doc = result.document();
 
     // Export to different formats
-    let markdown = doc.to_markdown();
-    let text = doc.to_text();
+    let markdown = docling_rs::output::to_markdown(doc);
+    let text = docling_rs::output::to_text(doc);
     let json = serde_json::to_string_pretty(&doc)?;
 
     println!("Document: {}", doc.name());

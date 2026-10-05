@@ -2,7 +2,7 @@
 
 use docling_rs_core::{
     Backend, ConversionError, DoclingDocument, DocumentNode, DocumentSource, InputDocument,
-    InputFormat, NodeType,
+    InputFormat, NodeType, TableCell as CoreCell, TableData, TableRow as CoreRow,
 };
 use docx_rs::*;
 use std::io::Read;
@@ -50,6 +50,9 @@ impl Backend for DocxBackend {
             .map_err(|e| ConversionError::ParseError(format!("Failed to parse DOCX: {:?}", e)))?;
 
         for child in docx.document.children {
+            if let DocumentChild::Table(table) = &child {
+                doc.add_node(DocumentNode::new_table(extract_table(table)));
+            }
             if let DocumentChild::Paragraph(para) = child {
                 let text = extract_paragraph_text(&para);
                 if !text.trim().is_empty() {
@@ -76,8 +79,11 @@ fn extract_paragraph_text(para: &Paragraph) -> String {
     for child in &para.children {
         if let ParagraphChild::Run(run) = child {
             for run_child in &run.children {
-                if let RunChild::Text(t) = run_child {
-                    text.push_str(&t.text);
+                match run_child {
+                    RunChild::Text(t) => text.push_str(&t.text),
+                    RunChild::Tab(_) | RunChild::PTab(_) => text.push('\t'),
+                    RunChild::Break(_) | RunChild::CarriageReturn(_) => text.push('\n'),
+                    _ => {}
                 }
             }
         }
@@ -92,4 +98,28 @@ fn is_heading_style(para: &Paragraph) -> bool {
     } else {
         false
     }
+}
+
+fn extract_table(table: &docx_rs::Table) -> TableData {
+    let mut data = TableData::new();
+    for TableChild::TableRow(row) in &table.rows {
+        let cells = row
+            .cells
+            .iter()
+            .map(|TableRowChild::TableCell(cell)| {
+                let parts: Vec<String> = cell
+                    .children
+                    .iter()
+                    .filter_map(|child| match child {
+                        TableCellContent::Paragraph(p) => Some(extract_paragraph_text(p)),
+                        TableCellContent::Table(t) => Some(extract_table(t).to_markdown()),
+                        _ => None,
+                    })
+                    .collect();
+                CoreCell::new(parts.join("\n"))
+            })
+            .collect();
+        data.add_row(CoreRow::new(cells));
+    }
+    data
 }

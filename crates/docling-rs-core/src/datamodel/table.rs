@@ -36,57 +36,40 @@ impl TableData {
         self.rows.push(row);
     }
 
-    /// Get the number of columns (from first row)
+    /// Get the maximum number of columns, including ragged rows
     pub fn num_cols(&self) -> usize {
-        self.rows.first().map(|r| r.cells.len()).unwrap_or(0)
+        self.rows.iter().map(|r| r.cells.len()).max().unwrap_or(0)
     }
 
-    /// Serialize each row for RAG chunking (key=value format, like Python docling)
+    /// Serialize every nonempty row for RAG chunking. The first row is retained;
+    /// subsequent rows use its nonempty cells as column labels.
     /// Returns a vector of row strings suitable for individual chunks
     pub fn rows_as_chunks(&self) -> Vec<String> {
-        if self.rows.is_empty() {
-            return vec![];
-        }
-
-        // Get headers from first row
-        let headers: Vec<&str> = self
-            .rows
-            .first()
-            .map(|r| r.cells.iter().map(|c| c.content.as_str()).collect())
-            .unwrap_or_default();
-
-        // Skip header row, process data rows
+        let headers = self.rows.first().map(|r| r.cells.as_slice()).unwrap_or(&[]);
         self.rows
             .iter()
-            .skip(1)
-            .filter_map(|row| {
-                // Use first cell as the row identifier (like "Name" in Python docling)
-                let row_id = row.cells.first().map(|c| c.content.as_str()).unwrap_or("");
-                if row_id.is_empty() {
-                    return None;
-                }
-
-                // Build "RowId, Header = Value" pairs
-                let pairs: Vec<String> = row
+            .enumerate()
+            .filter_map(|(row_index, row)| {
+                let values: Vec<String> = row
                     .cells
                     .iter()
                     .enumerate()
-                    .skip(1) // Skip the first cell (already used as row_id)
                     .filter_map(|(i, cell)| {
-                        let header = headers.get(i).unwrap_or(&"");
-                        let value = cell.content.as_str();
-                        if !value.is_empty() && !header.is_empty() {
-                            Some(format!("{}, {} = {}", row_id, header, value))
-                        } else {
-                            None
+                        if cell.content.is_empty() {
+                            return None;
                         }
+                        let header = headers.get(i).map(|c| c.content.as_str()).unwrap_or("");
+                        Some(if row_index == 0 || header.is_empty() {
+                            cell.content.clone()
+                        } else {
+                            format!("{} = {}", header, cell.content)
+                        })
                     })
                     .collect();
-
-                if pairs.is_empty() {
+                if values.is_empty() {
                     None
                 } else {
-                    Some(pairs.join(". ") + ".")
+                    Some(values.join(". ") + ".")
                 }
             })
             .collect()
@@ -122,6 +105,10 @@ impl TableData {
             output.push('|');
             for (i, width) in col_widths.iter().enumerate() {
                 let content = row.cells.get(i).map(|c| c.content.as_str()).unwrap_or("");
+                let content = content
+                    .replace('|', "\\|")
+                    .replace("\r\n", "<br>")
+                    .replace(['\n', '\r'], "<br>");
                 output.push_str(&format!(" {:<width$} |", content, width = width));
             }
             output.push('\n');

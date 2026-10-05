@@ -84,6 +84,11 @@ pub mod datamodel {
 /// This function creates a `SimplePipeline` pre-configured with all
 /// backends that are enabled via feature flags.
 pub fn create_pipeline() -> SimplePipeline {
+    create_pipeline_internal(None)
+}
+
+fn create_pipeline_internal(pdfium_path: Option<&std::path::Path>) -> SimplePipeline {
+    let _ = pdfium_path;
     let mut pipeline = SimplePipeline::new();
 
     #[cfg(feature = "markdown")]
@@ -105,7 +110,10 @@ pub fn create_pipeline() -> SimplePipeline {
     pipeline.register_backend(Box::new(PptxBackend::new()));
 
     #[cfg(feature = "pdf")]
-    pipeline.register_backend(Box::new(PdfBackend::new()));
+    pipeline.register_backend(Box::new(match pdfium_path {
+        Some(path) => PdfBackend::with_library_path(path),
+        None => PdfBackend::new(),
+    }));
 
     pipeline
 }

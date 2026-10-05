@@ -35,12 +35,14 @@ impl HuggingFaceTokenizer {
 
     /// Load tokenizer from bytes (e.g., embedded or downloaded)
     pub fn from_bytes(bytes: &[u8], max_tokens: usize) -> Result<Self, ChunkingError> {
-        let mut tokenizer = tokenizers::Tokenizer::from_bytes(bytes)
-            .map_err(|e| ChunkingError::TokenizerLoad(format!("Failed to load tokenizer: {}", e)))?;
+        let mut tokenizer = tokenizers::Tokenizer::from_bytes(bytes).map_err(|e| {
+            ChunkingError::TokenizerLoad(format!("Failed to load tokenizer: {}", e))
+        })?;
 
         // Disable truncation so we can count actual token length
         // (the default tokenizer has truncation enabled at 128 tokens)
         let _ = tokenizer.with_truncation(None);
+        tokenizer.with_padding(None);
 
         Ok(Self {
             tokenizer,
@@ -99,6 +101,7 @@ impl HuggingFaceTokenizer {
 
         // Disable truncation so we can count actual token length
         let _ = tokenizer.with_truncation(None);
+        tokenizer.with_padding(None);
 
         Ok(Self {
             tokenizer,
@@ -107,7 +110,9 @@ impl HuggingFaceTokenizer {
     }
 
     /// Create from existing tokenizer instance
-    pub fn new(tokenizer: tokenizers::Tokenizer, max_tokens: usize) -> Self {
+    pub fn new(mut tokenizer: tokenizers::Tokenizer, max_tokens: usize) -> Self {
+        let _ = tokenizer.with_truncation(None);
+        tokenizer.with_padding(None);
         Self {
             tokenizer,
             max_tokens,

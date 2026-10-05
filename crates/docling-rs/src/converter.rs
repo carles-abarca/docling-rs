@@ -18,6 +18,14 @@ impl DocumentConverter {
         }
     }
 
+    /// Create a converter using an explicit PDFium dynamic library file.
+    #[cfg(feature = "pdf")]
+    pub fn with_pdfium_library(path: impl AsRef<Path>) -> Self {
+        Self {
+            pipeline: crate::create_pipeline_internal(Some(path.as_ref())),
+        }
+    }
+
     /// Convert a document from a file path
     pub fn convert_file<P: AsRef<Path>>(
         &self,

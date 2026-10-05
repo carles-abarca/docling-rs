@@ -11,6 +11,7 @@ default = []
 ocr = ["dep:rusty-tesseract"]
 
 [dependencies]
+serde_json.workspace = true
 docling-rs-core.workspace = true
 pdfium-render.workspace = true
 image.workspace = true

@@ -16,28 +16,34 @@ PDFium is licensed under a BSD-style license. See the [PDFium project](https://p
 - `lib/macos-x64/libpdfium.dylib` - macOS x86_64 (Intel)
 - `lib/windows-x64/pdfium.dll` - Windows x64
 
-## Version
+## Binding compatibility
 
-These binaries are from the latest release as of the time they were downloaded.
+The Rust dependency is pinned to `pdfium-render = 0.8.37` with default features
+ disabled and the `pdfium_7350`, `thread_safe`, and `image` features enabled.
+The default/latest API in 0.8.37 requires symbols absent from the checked-in
+macOS ARM64 library. The API 7350 binding passes the attachment regression
+suite against that existing library (SHA-256
+`1662275f090e1dae9f3289f4e87d160d707861e322731ea6ffa378068a9c8100`).
 
-To update to a newer version:
+This API choice is **not** a claim that the binary's Chromium revision is 7350:
+the original download revision was not recorded. Intel macOS and Windows
+binaries still require runtime validation. Do not update from a moving `latest`
+URL without verifying the binding API and recording release URLs/checksums for
+each platform. Other dependencies can unify Cargo features; the final consumer
+must avoid enabling a different PDFium API through another dependency.
 
-```bash
-# macOS ARM64
-curl -L -o /tmp/pdfium-mac-arm64.tgz https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-mac-arm64.tgz
-tar -xzf /tmp/pdfium-mac-arm64.tgz -C /tmp
-cp /tmp/lib/libpdfium.dylib pdfium/lib/macos-arm64/
+For an embedded app, use an absolute path to its packaged dynamic library:
 
-# macOS x64
-curl -L -o /tmp/pdfium-mac-x64.tgz https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-mac-x64.tgz
-tar -xzf /tmp/pdfium-mac-x64.tgz -C /tmp
-cp /tmp/lib/libpdfium.dylib pdfium/lib/macos-x64/
-
-# Windows x64
-curl -L -o /tmp/pdfium-win-x64.tgz https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-x64.tgz
-tar -xzf /tmp/pdfium-win-x64.tgz -C /tmp
-cp /tmp/bin/pdfium.dll pdfium/lib/windows-x64/
+```rust,no_run
+let converter = docling_rs::DocumentConverter::with_pdfium_library(
+    "/absolute/app/resource/path/libpdfium.dylib",
+);
 ```
+
+An explicit path fails on an invalid/incompatible library rather than silently
+loading a different library. `DocumentConverter::new()` retains its existing
+current-directory/system-library lookup behavior. These files are not
+implicitly installed or located by the Rust library.
 
 ## Why Bundle Binaries?
 

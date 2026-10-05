@@ -1,0 +1,465 @@
+{
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "machine": "arm64",
+  "source_commit": "c9ccbcd437c371ec403855968d0a90cda1301624 + local attachment fidelity fixes",
+  "pdfium_sha256": "1662275f090e1dae9f3289f4e87d160d707861e322731ea6ffa378068a9c8100",
+  "cases": [
+    {
+      "chunk_ms": 6.9342500000000005,
+      "chunks": 1,
+      "conversion_ms": [
+        0.038833
+      ],
+      "markdown_bytes": 195,
+      "max_chunk_tokens": 66,
+      "metadata": {},
+      "nodes": 10,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 195,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "notes.md",
+      "exit_code": 0,
+      "wall_ms": 13.98,
+      "peak_rss_mib": 16.94,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 6.309541,
+      "chunks": 1,
+      "conversion_ms": [
+        0.10175000000000001
+      ],
+      "markdown_bytes": 187,
+      "max_chunk_tokens": 46,
+      "metadata": {},
+      "nodes": 3,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 187,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "page.html",
+      "exit_code": 0,
+      "wall_ms": 13.3,
+      "peak_rss_mib": 16.88,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 6.246333,
+      "chunks": 1,
+      "conversion_ms": [
+        0.066333
+      ],
+      "markdown_bytes": 191,
+      "max_chunk_tokens": 50,
+      "metadata": {},
+      "nodes": 1,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 191,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "rows.csv",
+      "exit_code": 0,
+      "wall_ms": 13.63,
+      "peak_rss_mib": 16.5,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 6.409667,
+      "chunks": 1,
+      "conversion_ms": [
+        4.532625
+      ],
+      "markdown_bytes": 181,
+      "max_chunk_tokens": 52,
+      "metadata": {},
+      "nodes": 3,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 181,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "report.docx",
+      "exit_code": 0,
+      "wall_ms": 17.35,
+      "peak_rss_mib": 18.11,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 6.715541,
+      "chunks": 1,
+      "conversion_ms": [
+        0.172583
+      ],
+      "markdown_bytes": 205,
+      "max_chunk_tokens": 57,
+      "metadata": {},
+      "nodes": 4,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 205,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "book.xlsx",
+      "exit_code": 0,
+      "wall_ms": 13.39,
+      "peak_rss_mib": 17.28,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 6.782417,
+      "chunks": 1,
+      "conversion_ms": [
+        0.221125
+      ],
+      "markdown_bytes": 88,
+      "max_chunk_tokens": 16,
+      "metadata": {},
+      "nodes": 6,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 88,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "slides.pptx",
+      "exit_code": 0,
+      "wall_ms": 13.58,
+      "peak_rss_mib": 16.83,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 6.2594579999999995,
+      "chunks": 1,
+      "conversion_ms": [
+        18.821084
+      ],
+      "markdown_bytes": 127,
+      "max_chunk_tokens": 32,
+      "metadata": {},
+      "nodes": 7,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 127,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "text.pdf",
+      "exit_code": 0,
+      "wall_ms": 32.06,
+      "peak_rss_mib": 27.89,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 14.772959,
+      "chunks": 10,
+      "conversion_ms": [
+        13.121167,
+        8.50075,
+        8.147084000000001,
+        7.981375000000001,
+        8.033,
+        7.922749999999999,
+        7.569542,
+        7.749,
+        7.6497910000000005,
+        7.6326670000000005,
+        7.68575,
+        7.621292,
+        7.681666,
+        7.684459,
+        7.520207999999999,
+        7.4904589999999995,
+        7.493208,
+        7.585667,
+        7.455458,
+        7.4263330000000005
+      ],
+      "markdown_bytes": 3942,
+      "max_chunk_tokens": 105,
+      "metadata": {},
+      "nodes": 120,
+      "ok": true,
+      "repeat": 20,
+      "status": "Success",
+      "text_bytes": 3942,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "long.pdf",
+      "exit_code": 0,
+      "wall_ms": 181.83,
+      "peak_rss_mib": 28.5,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 5.727041000000001,
+      "chunks": 1,
+      "conversion_ms": [
+        11.649041
+      ],
+      "markdown_bytes": 11,
+      "max_chunk_tokens": 2,
+      "metadata": {
+        "conversion_warnings": [
+          "Some pages have no extractable text; they may be blank or require OCR. OCR was not performed."
+        ],
+        "textless_pages": [
+          1
+        ]
+      },
+      "nodes": 1,
+      "ok": true,
+      "repeat": 1,
+      "status": "PartialSuccess",
+      "text_bytes": 11,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "no_text.pdf",
+      "exit_code": 0,
+      "wall_ms": 24.07,
+      "peak_rss_mib": 27.19,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 650.432958,
+      "chunks": 721,
+      "conversion_ms": [
+        1.4202080000000001,
+        1.278375,
+        1.27275,
+        1.294,
+        1.28875,
+        1.300667,
+        1.2953750000000002,
+        1.311666,
+        1.31575,
+        1.352334,
+        1.313917,
+        1.3110000000000002,
+        1.327417,
+        1.3339999999999999,
+        1.341209,
+        1.3178750000000001,
+        1.33125,
+        1.304625,
+        1.306875,
+        1.318875
+      ],
+      "markdown_bytes": 278590,
+      "max_chunk_tokens": 105,
+      "metadata": {},
+      "nodes": 7500,
+      "ok": true,
+      "repeat": 20,
+      "status": "Success",
+      "text_bytes": 278590,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "large.md",
+      "exit_code": 0,
+      "wall_ms": 686.17,
+      "peak_rss_mib": 21.22,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "elapsed_ms": 1.818958,
+      "error": "Parse error: Failed to load PDF: PdfiumLibraryInternalError(\n    FormatError,\n)",
+      "ok": false,
+      "file": "broken.pdf",
+      "exit_code": 0,
+      "wall_ms": 7.74,
+      "peak_rss_mib": 15.77,
+      "missing": [],
+      "unwanted": [],
+      "passes_expected": true
+    },
+    {
+      "elapsed_ms": 0.060583,
+      "error": "Parse error: Failed to parse DOCX: ZipError(InvalidArchive(\"Could not find EOCD\"))",
+      "ok": false,
+      "file": "broken.docx",
+      "exit_code": 0,
+      "wall_ms": 5.05,
+      "peak_rss_mib": 7.44,
+      "missing": [],
+      "unwanted": [],
+      "passes_expected": true
+    },
+    {
+      "elapsed_ms": 0.046542,
+      "error": "Parse error: XLSX parse error: Cannot detect file format",
+      "ok": false,
+      "file": "broken.xlsx",
+      "exit_code": 0,
+      "wall_ms": 4.74,
+      "peak_rss_mib": 7.27,
+      "missing": [],
+      "unwanted": [],
+      "passes_expected": true
+    },
+    {
+      "elapsed_ms": 0.039541,
+      "error": "Parse error: PPTX open error: Zip error: invalid Zip archive: Could not find EOCD",
+      "ok": false,
+      "file": "broken.pptx",
+      "exit_code": 0,
+      "wall_ms": 4.67,
+      "peak_rss_mib": 7.2,
+      "missing": [],
+      "unwanted": [],
+      "passes_expected": true
+    },
+    {
+      "chunk_ms": 5.966583,
+      "chunks": 0,
+      "conversion_ms": [
+        0.023375
+      ],
+      "markdown_bytes": 0,
+      "max_chunk_tokens": 0,
+      "metadata": {},
+      "nodes": 0,
+      "ok": true,
+      "repeat": 1,
+      "status": "Success",
+      "text_bytes": 0,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "empty.md",
+      "exit_code": 0,
+      "wall_ms": 11.24,
+      "peak_rss_mib": 15.66,
+      "missing": [],
+      "unwanted": [],
+      "chunk_missing": [],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": true
+    },
+    {
+      "elapsed_ms": 0.008666,
+      "error": "Unsupported format: txt",
+      "ok": false,
+      "file": "plain.txt",
+      "exit_code": 0,
+      "wall_ms": 5.02,
+      "peak_rss_mib": 7.03,
+      "missing": [
+        "España",
+        "José"
+      ],
+      "unwanted": [],
+      "passes_expected": false
+    },
+    {
+      "chunk_ms": 6.006584,
+      "chunks": 1,
+      "conversion_ms": [
+        1.8994579999999999
+      ],
+      "markdown_bytes": 11,
+      "max_chunk_tokens": 2,
+      "metadata": {
+        "conversion_warnings": [
+          "Some pages have no extractable text; they may be blank or require OCR. OCR was not performed."
+        ],
+        "textless_pages": [
+          1
+        ]
+      },
+      "nodes": 1,
+      "ok": true,
+      "repeat": 1,
+      "status": "PartialSuccess",
+      "text_bytes": 11,
+      "token_count_probe": {
+        "empty": 0,
+        "hello": 1
+      },
+      "file": "scan.pdf",
+      "exit_code": 0,
+      "wall_ms": 13.62,
+      "peak_rss_mib": 24.91,
+      "missing": [
+        "OCR_SENTINEL",
+        "5678"
+      ],
+      "unwanted": [],
+      "chunk_missing": [
+        "OCR_SENTINEL",
+        "5678"
+      ],
+      "reported_chunk_budget_ok": true,
+      "passes_expected": false
+    }
+  ]
+}
